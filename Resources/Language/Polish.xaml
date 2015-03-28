@@ -130,10 +130,10 @@
     <system:String x:Key="Unknown">Nieznany</system:String>
     <system:String x:Key="UpdateStatus">Status</system:String>
 
-    <system:String x:Key="LoaderUpdateFailed">Nie można pobrać aktualizacji, proszę zrób to manualnie. Error:</system:String>
+    <system:String x:Key="LoaderUpdateFailed">Nie można pobrać aktualizacji, proszę zrób to ręcznie. Błąd:</system:String>
     <system:String x:Key="LeagueNotFound">Nie można zlokalizować "League of Legends.exe", spróbuj uruchomić grę niestandardową.</system:String>
-    <system:String x:Key="UpdateSuccess">LeagueSharp zostało pomyślnie zaktualizowane do wersji zainstalowanego League of Legends.</system:String>
-    <system:String x:Key="UpdateUnknown">Nie można określić, czy LeagueSharp jest aktualizowany dla zainstalowanej wersji League Of Legends, oznacza to zazwyczaj, że serwer www.joduska.me jest niedostępny.</system:String>
-    <system:String x:Key="NotUpdateNeeded">LeagueSharp jest już zaktualizowane do zainstalowanej wersji League Of Legends.</system:String>
+    <system:String x:Key="UpdateSuccess">LeagueSharp został pomyślnie zaktualizowany do wersji zainstalowanego League of Legends.</system:String>
+    <system:String x:Key="UpdateUnknown">Nie można określić, czy LeagueSharp jest zaktualizowany dla zainstalowanej wersji League Of Legends, oznacza to zazwyczaj, że serwer www.joduska.me jest niedostępny.</system:String>
+    <system:String x:Key="NotUpdateNeeded">LeagueSharp jest już zaktualizowany do zainstalowanej wersji League Of Legends.</system:String>
     <system:String x:Key="RandomizationFailed">Nie udało się nadać losowych nazw plikom .dll</system:String>
 </ResourceDictionary>

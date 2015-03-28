@@ -66,33 +66,33 @@
     <system:String x:Key="Anti-AFK">Chống-AFK</system:String>
     <system:String x:Key="Debug Console">Gỡ lỗi điều khiển</system:String>
     <system:String x:Key="Display Enemy Tower Range">Hiển thị phạm vi trụ</system:String>
-    <system:String x:Key="Extended Zoom">Mở rộng zoom</system:String>
-    <system:String x:Key="UpdateOnStart">Cập nhật assemblies khi khởi động L#</system:String>
+    <system:String x:Key="Extended Zoom">Mở rộng giới hạn Zoom</system:String>
+    <system:String x:Key="UpdateOnStart">Cập nhật Assemblies khi khởi động L#</system:String>
     <system:String x:Key="Inject">Inject</system:String>
     <system:String x:Key="Logout">Thoát</system:String>
     <system:String x:Key="DefaultHotkeys">Khôi phục</system:String>
     <system:String x:Key="Language">Ngôn ngữ</system:String>
-    <system:String x:Key="Color">Color</system:String>
+    <system:String x:Key="Color">Màu sắc</system:String>
 
     <!-- Settings Hotkeys -->
     <system:String x:Key="Hotkeys">Phím nóng</system:String>
     <system:String x:Key="Hotkey">Phím nóng</system:String>
-    <system:String x:Key="Reload the assemblies">Chạy lại assemblies</system:String>
-    <system:String x:Key="Recompile and reload the assemblies">Biên dịch và chạy lại assemblies</system:String>
-    <system:String x:Key="Shows the menu (Press)">Hiện menu (Giữ nút)</system:String>
-    <system:String x:Key="Shows the menu (Toggle)">Hiện menu (luôn hiện)</system:String>
+    <system:String x:Key="Reload the assemblies">Chạy lại Assemblies</system:String>
+    <system:String x:Key="Recompile and reload the assemblies">Biên dịch và chạy lại Assemblies</system:String>
+    <system:String x:Key="Shows the menu (Press)">Hiện Menu (Giữ nút)</system:String>
+    <system:String x:Key="Shows the menu (Toggle)">Hiện Menu (Luôn hiện)</system:String>
 
     <!-- Settings Log -->
-    <system:String x:Key="Log">Log</system:String>
-    <system:String x:Key="Status">Trạng thái</system:String>
+    <system:String x:Key="Log">Nhật Ký</system:String>
+    <system:String x:Key="Status">Trạng Thái</system:String>
     <system:String x:Key="Source">Nguồn</system:String>
-    <system:String x:Key="Content">Nội dung</system:String>
-    <system:String x:Key="OpenFolder">Mở thư mục</system:String>
+    <system:String x:Key="Content">Nội Dung</system:String>
+    <system:String x:Key="OpenFolder">Mở Thư Mục</system:String>
 
     <!-- UpdateWindow -->
     <system:String x:Key="UpdatingLeagueSharp">Cập nhật Lsharp</system:String>
     <system:String x:Key="Updating">Cập nhật...</system:String>
-    <system:String x:Key="UpdateWaiting">Waiting...</system:String>
+    <system:String x:Key="UpdateWaiting">Xin chờ...</system:String>
     <system:String x:Key="UpdateText">Tải {0} KB / {1} KB.</system:String>
 
     <!-- Errors and other strings -->
@@ -104,10 +104,10 @@
     <system:String x:Key="FailedToLogin">Đăng nhập thất bại: {0}</system:String>
     <system:String x:Key="Login">Đăng Nhập</system:String>
     <system:String x:Key="LoginError">Lỗi đăng nhập{0}: {1}</system:String>
-    <system:String x:Key="Uninstall">Xóa assemblies</system:String>
+    <system:String x:Key="Uninstall">Xóa Assemblies</system:String>
     <system:String x:Key="UninstallConfirm">Bạn có chắc muốn xóa những assemblies này ?</system:String>
     <system:String x:Key="ConfigWriteError">Không thể ghi dữ liệu đến file config.xml</system:String>
-    <system:String x:Key="ShareText">Địa chỉ assembly đã được coppy</system:String>
+    <system:String x:Key="ShareText">Địa chỉ Assembly đã được copy</system:String>
     <system:String x:Key="LogNotFound">Không tìm thấy file log</system:String>
     <system:String x:Key="NewProfile2">Hồ sơ mới</system:String>
     <system:String x:Key="Rename">Đổi tên</system:String>
@@ -121,12 +121,12 @@
     <system:String x:Key="Developer">Developer</system:String>
     <system:String x:Key="New">Mới</system:String>
     <system:String x:Key="Edit">Sửa</system:String>
-    <system:String x:Key="Clone">Của tui</system:String>
+    <system:String x:Key="Clone">Tạo bản sao (Clone)</system:String>
 
     <system:String x:Key="Checking">Kiểm tra...</system:String>
     <system:String x:Key="Updated">Cập nhật</system:String>
     <system:String x:Key="OUTDATED">Lỗi thời</system:String>
-    <system:String x:Key="Unknown">Không biết</system:String>
+    <system:String x:Key="Unknown">Không rõ</system:String>
     <system:String x:Key="UpdateStatus">Trạng thái</system:String>
 
     <system:String x:Key="LoaderUpdateFailed">Không thể tải bản cập nhật, vui lòng cập nhật bằng tay.</system:String>
@@ -134,5 +134,5 @@
     <system:String x:Key="UpdateSuccess">LeagueSharp đã cập nhật thành công cho phiên bản của bạn</system:String>
     <system:String x:Key="UpdateUnknown">Không thể cập nhật L# cho phiên bản League of legends của bạn</system:String>
     <system:String x:Key="NotUpdateNeeded">LeagueSharp đã cập nhật cho League of legends của bạn</system:String>
-    <system:String x:Key="RandomizationFailed">Could not randomize the dll names.</system:String>
+    <system:String x:Key="RandomizationFailed">Không thể tạo tên ngẫu nhiên cho tập tin dll.</system:String>
 </ResourceDictionary>

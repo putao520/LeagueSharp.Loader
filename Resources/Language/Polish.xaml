@@ -34,8 +34,8 @@
     <system:String x:Key="DeleteProfile">Usuń profil</system:String>
 	
     <!-- MainWindow Buttons -->
-    <system:String x:Key="AcceptTosButton">I Accept</system:String>
-    <system:String x:Key="DeclineTosButton">I Decline</system:String>
+    <system:String x:Key="AcceptTosButton">Akceptuję</system:String>
+    <system:String x:Key="DeclineTosButton">Odmawiam</system:String>
     <system:String x:Key="UpdateAll">Aktualizuj wszystko</system:String>
     <system:String x:Key="CompileAll">Skompiluj wszystko</system:String>
     <system:String x:Key="InstallNewAssembly">Zainstaluj nowe skrypty</system:String>
@@ -72,15 +72,15 @@
     <system:String x:Key="Logout">Wyloguj</system:String>
     <system:String x:Key="DefaultHotkeys">Przywróć</system:String>
 	<system:String x:Key="Language">Język</system:String>
-    <system:String x:Key="Color">Color</system:String>
+    <system:String x:Key="Color">Kolor</system:String>
 	
     <!-- Settings Hotkeys -->
     <system:String x:Key="Hotkeys">Klawisze</system:String>
     <system:String x:Key="Hotkey">Klawisz</system:String>
     <system:String x:Key="Reload the assemblies">Przeładuj skrypty</system:String>
     <system:String x:Key="Recompile and reload the assemblies">Rekompiluj i przeładuj skrypty</system:String>
-    <system:String x:Key="Shows the menu (Press)">Pokaż menu (Press)</system:String>
-    <system:String x:Key="Shows the menu (Toggle)">Pokaż menu (Toggle)</system:String>
+    <system:String x:Key="Shows the menu (Press)">Pokaż menu (Naciśnij)</system:String>
+    <system:String x:Key="Shows the menu (Toggle)">Pokaż menu (Przytrzymaj)</system:String>
 
     <!-- Settings Log -->
     <system:String x:Key="Log">Log</system:String>
@@ -92,7 +92,7 @@
     <!-- UpdateWindow -->
     <system:String x:Key="UpdatingLeagueSharp">Aktualizacja LeagueSharp'a</system:String>
     <system:String x:Key="Updating">Aktualizacja...</system:String>
-    <system:String x:Key="UpdateWaiting">Waiting...</system:String>
+    <system:String x:Key="UpdateWaiting">Czekaj...</system:String>
     <system:String x:Key="UpdateText">Pobieranie {0} KB z {1} KB.</system:String>
 
     <!-- Errors and other strings -->
@@ -117,23 +117,23 @@
     <system:String x:Key="SuccessfullyInstalled">Wybrane skrypty zostały pomyślnie zainstalowane.</system:String>
     <system:String x:Key="ErrorInstalling">Wystąpił błąd podczas próby zainstalowania niektórych skryptów lub bibliotek, sprawdź logi by dowiedzieć się więcej.</system:String>
 
-    <system:String x:Key="EnableDeveloper">Enable developer options</system:String>
-    <system:String x:Key="Developer">Developer</system:String>
-    <system:String x:Key="New">New</system:String>
-    <system:String x:Key="Edit">Edit</system:String>
-    <system:String x:Key="Clone">Clone</system:String>
+    <system:String x:Key="EnableDeveloper">Włącz opcje deweloperskie</system:String>
+    <system:String x:Key="Developer">Deweloper</system:String>
+    <system:String x:Key="New">Nowy</system:String>
+    <system:String x:Key="Edit">Edytuj</system:String>
+    <system:String x:Key="Clone">Sklonuj</system:String>
 
 
-    <system:String x:Key="Checking">Checking...</system:String>
-    <system:String x:Key="Updated">Updated</system:String>
-    <system:String x:Key="OUTDATED">OUTDATED</system:String>
-    <system:String x:Key="Unknown">Unknown</system:String>
+    <system:String x:Key="Checking">Sprawdzam...</system:String>
+    <system:String x:Key="Updated">Zaktualizowany</system:String>
+    <system:String x:Key="OUTDATED">Niezaktualizowany</system:String>
+    <system:String x:Key="Unknown">Nieznany</system:String>
     <system:String x:Key="UpdateStatus">Status</system:String>
 
-    <system:String x:Key="LoaderUpdateFailed">Could not download the update, please update manually. Error:</system:String>
-    <system:String x:Key="LeagueNotFound">Could not resolve "League of Legends.exe" location, try starting a custom game.</system:String>
-    <system:String x:Key="UpdateSuccess">LeagueSharp has successfully updated for the installed league of legends version</system:String>
-    <system:String x:Key="UpdateUnknown">Couldn't determine if LeagueSharp is updated for the local League Of Legends version, this usually means that www.joduska.me is inaccessible.</system:String>
-    <system:String x:Key="NotUpdateNeeded">LeagueSharp is updated for the installed league of legends version.</system:String>
-    <system:String x:Key="RandomizationFailed">Could not randomize the dll names.</system:String>
+    <system:String x:Key="LoaderUpdateFailed">Nie można pobrać aktualizacji, proszę zrób to manualnie. Error:</system:String>
+    <system:String x:Key="LeagueNotFound">Nie można zlokalizować "League of Legends.exe", spróbuj uruchomić grę niestandardową.</system:String>
+    <system:String x:Key="UpdateSuccess">LeagueSharp zostało pomyślnie zaktualizowane do wersji zainstalowanego League of Legends.</system:String>
+    <system:String x:Key="UpdateUnknown">Nie można określić, czy LeagueSharp jest aktualizowany dla zainstalowanej wersji League Of Legends, oznacza to zazwyczaj, że serwer www.joduska.me jest niedostępny.</system:String>
+    <system:String x:Key="NotUpdateNeeded">LeagueSharp jest już zaktualizowane do zainstalowanej wersji League Of Legends.</system:String>
+    <system:String x:Key="RandomizationFailed">Nie udało się nadać losowych nazw plikom .dll</system:String>
 </ResourceDictionary>

@@ -25,7 +25,7 @@
     <system:String x:Key="MenuRemove">Excluir</system:String>
     <system:String x:Key="MenuGithub">Github</system:String>
     <system:String x:Key="MenuGithubAssemblies">GitHub Assemblies</system:String>
-    <system:String x:Key="MenuShare">Compartilhar</system:String> // Can be change to "Copiar" too
+    <system:String x:Key="MenuShare">Compartilhar</system:String>
     <system:String x:Key="MenuViewLog">Exibir o Log</system:String>
 
 	<!-- MainWindow Profiles Menu -->

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -56,6 +57,12 @@ namespace LeagueSharp.Loader.Class
                 var byteArray = File.ReadAllBytes(Path.Combine(Directories.CoreDirectory, "LeagueSharp.dll"));
                 byteArray = Utility.ReplaceFilling(byteArray, Encoding.ASCII.GetBytes("LeagueSharp.Core.dll"), Encoding.ASCII.GetBytes(LeagueSharpCoreDllName));
                 File.WriteAllBytes(LeagueSharpDllPath, byteArray);
+
+                var startInfo = new ProcessStartInfo();
+                startInfo.WorkingDirectory = Directories.CoreDirectory;
+                startInfo.FileName = Path.Combine(Directories.CoreDirectory, "sn.exe");
+                startInfo.Arguments = string.Format("-Ra \"{0}\" key.snk", LeagueSharpDllPath);
+                Process.Start(startInfo);
 
                 return result;
             }

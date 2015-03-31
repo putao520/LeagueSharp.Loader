@@ -126,10 +126,10 @@
     <system:String x:Key="Unknown">不明</system:String>
     <system:String x:Key="UpdateStatus">狀態</system:String>
 
-    <system:String x:Key="LoaderUpdateFailed">下載更新失敗, 請手動更新. Error:</system:String>
+    <system:String x:Key="LoaderUpdateFailed">下載更新失敗, 請手動更新 Error:</system:String>
     <system:String x:Key="LeagueNotFound">找不到 "League of Legends.exe" 位置, 請嘗試開啟自訂對戰.</system:String>
     <system:String x:Key="UpdateSuccess">LeagueSharp已因應目前版本的英雄聯盟更新</system:String>
     <system:String x:Key="UpdateUnknown">不確定 LeagueSharp 是否已因應目前的英雄聯盟版本進行更新, 這通常是因為無法存取 www.joduska.me.</system:String>
     <system:String x:Key="NotUpdateNeeded">LeagueSharp 在目前版本的英雄聯盟已經是最新</system:String>
-    <system:String x:Key="RandomizationFailed">Could not randomize the dll names.</system:String>
+    <system:String x:Key="RandomizationFailed">DLL檔案名稱隨機化失敗</system:String>
 </ResourceDictionary>

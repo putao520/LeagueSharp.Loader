@@ -57,9 +57,6 @@ namespace LeagueSharp.Loader.Class
                 byteArray = Utility.ReplaceFilling(byteArray, Encoding.ASCII.GetBytes("LeagueSharp.Core.dll"), Encoding.ASCII.GetBytes(LeagueSharpCoreDllName));
                 File.WriteAllBytes(LeagueSharpDllPath, byteArray);
 
-                Brutal.Dev.StrongNameSigner.SigningHelper.SignAssembly(
-                    LeagueSharpDllPath, Directories.CoreDirectory + "key.snk", LeagueSharpDllPath);
-
                 return result;
             }
             catch (Exception ex)

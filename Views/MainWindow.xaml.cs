@@ -153,16 +153,6 @@ namespace LeagueSharp.Loader.Views
                     }
                 });
 
-            //Try to login with the saved credentials.
-            if (!Auth.Login(Config.Instance.Username, Config.Instance.Password).Item1)
-            {
-                ShowLoginDialog();
-            }
-            else
-            {
-                OnLogin(Config.Instance.Username);
-            }
-
             Config.Instance.FirstRun = false;
 
             
@@ -170,6 +160,7 @@ namespace LeagueSharp.Loader.Views
             {
                 gameSetting.PropertyChanged += GameSettingOnPropertyChanged;
             }
+
             NewsTabItem.Visibility = Visibility.Hidden;
             AssembliesTabItem.Visibility = Visibility.Hidden;
             SettingsTabItem.Visibility = Visibility.Hidden;
@@ -729,6 +720,16 @@ namespace LeagueSharp.Loader.Views
             if (FirstTimeActivated)
             {
                 FirstTimeActivated = false;
+
+                //Try to login with the saved credentials.
+                if (!Auth.Login(Config.Instance.Username, Config.Instance.Password).Item1)
+                {
+                    ShowLoginDialog();
+                }
+                else
+                {
+                    OnLogin(Config.Instance.Username);
+                }
 
                 var allAssemblies = new List<LeagueSharpAssembly>();
                 foreach (var profile in Config.Instance.Profiles)

@@ -58,12 +58,50 @@ namespace LeagueSharp.Loader.Class
                 byteArray = Utility.ReplaceFilling(byteArray, Encoding.ASCII.GetBytes("LeagueSharp.Core.dll"), Encoding.ASCII.GetBytes(LeagueSharpCoreDllName));
                 File.WriteAllBytes(LeagueSharpDllPath, byteArray);
 
-                var startInfo = new ProcessStartInfo();
-                startInfo.WorkingDirectory = Directories.CoreDirectory;
-                startInfo.FileName = Path.Combine(Directories.CoreDirectory, "sn.exe");
-                startInfo.Arguments = string.Format("-Ra \"{0}\" key.snk", LeagueSharpDllPath);
-                Process.Start(startInfo);
 
+                if (!File.Exists(Path.Combine(Directories.CoreDirectory, "sn.exe")))
+                {
+                    MessageBox.Show("sn.exe not found");
+                    Environment.Exit(0);
+                }
+
+                var p = new Process
+                {
+                    StartInfo = new ProcessStartInfo
+                    {
+                        UseShellExecute = true,
+                        WorkingDirectory = Directories.CoreDirectory,
+                        FileName = Path.Combine(Directories.CoreDirectory, "sn.exe"),
+                        Arguments = string.Format("-Ra \"{0}\" key.snk", LeagueSharpDllPath),
+                        WindowStyle = ProcessWindowStyle.Hidden
+                    }
+                };
+                p.Start();
+                p.WaitForExit();
+
+                if (p.ExitCode != 0)
+                {
+                    p = new Process
+                    {
+                        StartInfo = new ProcessStartInfo
+                        {
+                            UseShellExecute = false,
+                            RedirectStandardOutput = true,
+                            WorkingDirectory = Directories.CoreDirectory,
+                            FileName = Path.Combine(Directories.CoreDirectory, "sn.exe"),
+                            Arguments = string.Format("-Ra \"{0}\" key.snk", LeagueSharpDllPath)
+                        }
+                    };
+
+                    p.Start();
+                    var output = p.StandardOutput.ReadToEnd();
+                    p.WaitForExit();
+                    if (p.ExitCode != 0)
+                    {
+                        MessageBox.Show(string.Format("Could not Sign LeagueSharp.dll, Output:\r\n {0}", output));
+                    }
+                }
+                
                 return result;
             }
             catch (Exception ex)

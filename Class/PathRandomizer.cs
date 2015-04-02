@@ -59,6 +59,7 @@ namespace LeagueSharp.Loader.Class
                 File.WriteAllBytes(LeagueSharpDllPath, byteArray);
 
                 var startInfo = new ProcessStartInfo();
+                startInfo.WindowStyle = ProcessWindowStyle.Hidden;
                 startInfo.WorkingDirectory = Directories.CoreDirectory;
                 startInfo.FileName = Path.Combine(Directories.CoreDirectory, "sn.exe");
                 startInfo.Arguments = string.Format("-Ra \"{0}\" key.snk", LeagueSharpDllPath);

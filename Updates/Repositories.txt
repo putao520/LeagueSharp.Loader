@@ -40,6 +40,7 @@ Contributors
 <repo>https://github.com/OneKeyToWin/LeagueRepo</repo>
 <repo>https://github.com/SephLeague/LeagueSharp</repo>
 <repo>https://github.com/SKOx0/LeagueSharp</repo>
+<repo>https://github.com/Soresu/LeagueSharp</repo>
 <repo>https://github.com/TheSaltyWaffle/LeagueSharp</repo>
 <repo>https://github.com/yol0swag/LeagueSharp</repo>
 

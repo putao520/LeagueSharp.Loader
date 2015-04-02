@@ -58,7 +58,6 @@ namespace LeagueSharp.Loader.Class
                 byteArray = Utility.ReplaceFilling(byteArray, Encoding.ASCII.GetBytes("LeagueSharp.Core.dll"), Encoding.ASCII.GetBytes(LeagueSharpCoreDllName));
                 File.WriteAllBytes(LeagueSharpDllPath, byteArray);
 
-
                 if (!File.Exists(Path.Combine(Directories.CoreDirectory, "sn.exe")))
                 {
                     MessageBox.Show("sn.exe not found");

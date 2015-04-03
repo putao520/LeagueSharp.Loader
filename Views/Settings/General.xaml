@@ -40,5 +40,6 @@
         <ComboBox Margin="70,0,0,72" VerticalAlignment="Bottom" Height="26" Loaded="Color_Loaded" SelectionChanged="Color_SelectionChanged" HorizontalAlignment="Left" Width="135" />
         <Label Content="{DynamicResource Color}" HorizontalAlignment="Left" Margin="0,0,0,72" Height="26" VerticalAlignment="Bottom" Width="65"/>
         <Button Content="{DynamicResource Logout}" HorizontalAlignment="Right" Margin="0,0,0,0" VerticalAlignment="Bottom" Width="75" Click="Logout_OnClick"/>
+        <Button Content="AppData" HorizontalAlignment="Right" Margin="0,0,0,30" VerticalAlignment="Bottom" Width="75" Click="AppData_OnClick"/>
     </Grid>
 </UserControl>

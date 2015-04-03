@@ -139,5 +139,10 @@ namespace LeagueSharp.Loader.Views.Settings
                 Config.Instance.SelectedColor = color;
             }
         }
+
+        private void AppData_OnClick(object sender, RoutedEventArgs e)
+        {
+            Process.Start(Directories.AppDataDirectory);
+        }
     }
 }

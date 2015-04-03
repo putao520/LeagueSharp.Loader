@@ -16,7 +16,7 @@ namespace LeagueSharp.Sandbox.Shared
             catch (Exception e)
             {
                 throw new Exception(
-                    "Failed to connect to assembly pipe for communication. The targetted assembly may not be loaded yet. Desired interface: " +
+                    "Failed to connect to pipe for communication. The targetted pipe may not be loaded yet. Desired interface: " +
                     typeof (TInterfaceType).Name, e);
             }
         }

@@ -213,3 +213,5 @@ pip-log.txt
 packages/*
 #Mr Developer
 .mr.developer.cfg
+
+**/*.sln.ide

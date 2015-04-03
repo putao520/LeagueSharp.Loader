@@ -62,7 +62,6 @@ namespace LeagueSharp.Loader.Views
         public Config Config
         {
             get { return Config.Instance; }
-            set { Config.Instance = value; }
         }
 
         public string StatusString
@@ -341,13 +340,6 @@ namespace LeagueSharp.Loader.Views
             {
 
             }
-
-            Injection.OnInject += hwnd => Task.Factory.StartNew(
-                () =>
-                {
-                    Injection.SendLoginCredentials(hwnd, Config.Instance.Username, Config.Instance.Password);
-                    Injection.SendConfig(hwnd);
-                });
 
             InjectThread = new Thread(
                 () =>

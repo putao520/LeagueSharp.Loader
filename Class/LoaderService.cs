@@ -6,7 +6,7 @@ using LeagueSharp.Sandbox.Shared;
 
 namespace LeagueSharp.Loader.Class
 {
-    public class LoaderService : ILoaderService, ILoaderLogService
+    public class LoaderService : ILoaderService
     {
         public List<LSharpAssembly> GetAssemblyList(int pid)
         {
@@ -79,46 +79,6 @@ namespace LeagueSharp.Loader.Class
                     assembly.Compile();
                 }
             }
-        }
-
-        public void Debug(string s)
-        {
-        }
-
-        public void DebugFormat(string s, params object[] param)
-        {
-        }
-
-        public void Info(string s)
-        {
-        }
-
-        public void InfoFormat(string s, params object[] param)
-        {
-        }
-
-        public void Warn(string s)
-        {
-        }
-
-        public void WarnFormat(string s, params object[] param)
-        {
-        }
-
-        public void Error(string s)
-        {
-        }
-
-        public void ErrorFormat(string s, params object[] param)
-        {
-        }
-
-        public void Fatal(string s)
-        {
-        }
-
-        public void FatalFormat(string s, params object[] param)
-        {
         }
     }
 }

@@ -71,7 +71,7 @@ namespace LeagueSharp.Loader.Class
                         UseShellExecute = true,
                         WorkingDirectory = Directories.CoreDirectory,
                         FileName = Path.Combine(Directories.CoreDirectory, "sn.exe"),
-                        Arguments = string.Format("-Ra \"{0}\" key.snk", LeagueSharpDllPath),
+                        Arguments = string.Format("-q -Ra \"{0}\" key.snk", LeagueSharpDllPath),
                         WindowStyle = ProcessWindowStyle.Hidden
                     }
                 };
@@ -88,7 +88,7 @@ namespace LeagueSharp.Loader.Class
                             RedirectStandardOutput = true,
                             WorkingDirectory = Directories.CoreDirectory,
                             FileName = Path.Combine(Directories.CoreDirectory, "sn.exe"),
-                            Arguments = string.Format("-Ra \"{0}\" key.snk", LeagueSharpDllPath)
+                            Arguments = string.Format("-q -Ra \"{0}\" key.snk", LeagueSharpDllPath)
                         }
                     };
 

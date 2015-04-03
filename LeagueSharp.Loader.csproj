@@ -116,7 +116,6 @@
     <Compile Include="Class\LoaderService.cs" />
     <Compile Include="Class\Remoting.cs" />
     <Compile Include="Class\Shared\Configuration.cs" />
-    <Compile Include="Class\Shared\ILoaderLogService.cs" />
     <Compile Include="Class\Shared\ILoaderService.cs" />
     <Compile Include="Class\Shared\LoginCredentials.cs" />
     <Compile Include="Class\Shared\LSharpAssembly.cs" />

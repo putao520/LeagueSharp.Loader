@@ -146,15 +146,7 @@ namespace LeagueSharp.Loader.Data
 
         public string Username { get; set; }
 
-        [XmlIgnore]
         public string Password { get; set; }
-
-        [XmlElement(ElementName = "Password")]
-        public string PasswordEncrypted
-        {
-            get { return Crypto.XOR.Encode(Password, Utility.Md5Hash(Environment.MachineName)); }
-            set { Password = Crypto.XOR.Decode(value, Utility.Md5Hash(Environment.MachineName)); }
-        }
 
         public ConfigSettings Settings
         {

@@ -24,10 +24,10 @@ namespace LeagueSharp.Loader.Class
 
     using System;
     using System.Net;
-    using System.Net.Security;
-    using System.Net.Sockets;
-    using System.Security.Authentication;
     using System.Text;
+    using System.IO;
+    using System.Text.RegularExpressions;
+    using LeagueSharp.Loader.Data;
 
     #endregion
 
@@ -54,12 +54,13 @@ namespace LeagueSharp.Loader.Class
                 wr.Method = "POST";
                 wr.ContentType = "application/x-www-form-urlencoded";
 
+                WebResponse response = null;
                 try
                 {
                     var dataStream = wr.GetRequestStream();
                     dataStream.Write(dataBytes, 0, dataBytes.Length);
                     dataStream.Close();
-                    wr.GetResponse();
+                    response = wr.GetResponse();
                 }
                 catch (WebException ex)
                 {
@@ -68,7 +69,21 @@ namespace LeagueSharp.Loader.Class
                         return new Tuple<bool, string>(false, string.Format(Utility.GetMultiLanguageText("WrongAuth"), "www.joduska.me"));
                     }
                 }
-                
+                if (response != null && response.GetResponseStream() != null)
+                {
+                    try
+                    {
+                        var passwordHash = new StreamReader(response.GetResponseStream()).ReadToEnd();
+                        if (Regex.IsMatch(passwordHash, "^[a-f0-9]{32}$"))
+                        {
+                            Config.Instance.Password = passwordHash;
+                        }
+                    }
+                    catch
+                    {
+                        //
+                    }
+                }
                 return new Tuple<bool, string>(true, "Success");
             }
             catch (Exception)

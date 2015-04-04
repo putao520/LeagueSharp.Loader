@@ -21,12 +21,14 @@ namespace LeagueSharp.Loader.Class
 
         public Configuration GetConfiguration(int pid)
         {
-            var reload = 0;
-            var recompile = 0;
+            var reload = 0x74;
+            var recompile = 0x77;
             var antiAfk = false;
             var console = false;
             var towerRange = false;
             var extendedZoom = false;
+            var menuToggle = 0x78;
+            var menuPress = 0x10;
 
             try
             {
@@ -36,6 +38,8 @@ namespace LeagueSharp.Loader.Class
                 console = Config.Instance.Settings.GameSettings.First(s => s.Name == "Debug Console").SelectedValue == "True";
                 towerRange = Config.Instance.Settings.GameSettings.First(s => s.Name == "Display Enemy Tower Range").SelectedValue == "True";
                 extendedZoom = Config.Instance.Settings.GameSettings.First(s => s.Name == "Extended Zoom").SelectedValue == "True";
+                menuToggle = KeyInterop.VirtualKeyFromKey(Config.Instance.Hotkeys.SelectedHotkeys.First(h => h.Name == "ShowMenuToggle").Hotkey);
+                menuPress = KeyInterop.VirtualKeyFromKey(Config.Instance.Hotkeys.SelectedHotkeys.First(h => h.Name == "ShowMenuPress").Hotkey);
             }
             catch
             {
@@ -49,6 +53,8 @@ namespace LeagueSharp.Loader.Class
                 LibrariesDirectory = Directories.CoreDirectory,
                 ReloadKey = reload,
                 ReloadAndRecompileKey = recompile,
+                MenuToggleKey = menuToggle,
+                MenuKey = menuPress,
                 UnloadKey = 0x75,
                 AntiAfk = antiAfk,
                 Console = console,

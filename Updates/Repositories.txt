@@ -30,7 +30,7 @@ Developers
 
 Contributors
 ------------
-<repo>https://github.com/brian0305/MasterSeries</repo>
+<repo>https://github.com/brian0305/LeagueSharp</repo>
 <repo>https://github.com/FlapperDoodlez/LeagueSharp</repo>
 <repo>https://github.com/fueledbyflux/LeagueSharp-Public</repo>
 <repo>https://github.com/imsosharp/leaguesharp</repo>

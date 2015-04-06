@@ -153,8 +153,14 @@ namespace LeagueSharp.Loader.Class
                                     {
                                         foreach (var entry in archive.Entries)
                                         {
-                                            entry.ExtractToFile(
-                                                Path.Combine(Directories.CoreDirectory, entry.FullName), true);
+                                            try
+                                            {
+                                                entry.ExtractToFile(Path.Combine(Directories.CoreDirectory, entry.FullName), true);
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                return new Tuple<bool, bool?, string>(false, false, ex.ToString());
+                                            }
                                         }
                                     }
                                 }

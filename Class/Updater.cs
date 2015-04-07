@@ -155,10 +155,12 @@ namespace LeagueSharp.Loader.Class
                                         {
                                             try
                                             {
+                                                File.Delete(Path.Combine(Directories.CoreDirectory, entry.FullName));
                                                 entry.ExtractToFile(Path.Combine(Directories.CoreDirectory, entry.FullName), true);
                                             }
                                             catch (Exception ex)
                                             {
+                                                File.WriteAllText(Directories.CoreFilePath, "-"); // force an update
                                                 return new Tuple<bool, bool?, string>(false, false, ex.ToString());
                                             }
                                         }

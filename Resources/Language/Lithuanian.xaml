@@ -31,7 +31,7 @@
 	<!-- MainWindow Profiles Menu -->
     <system:String x:Key="NewProfile">Naujas</system:String>
     <system:String x:Key="ChangeName">Keisti pavadinimą</system:String>
-    <system:String x:Key="DeleteProfile"Ištrinti</system:String>
+    <system:String x:Key="DeleteProfile">Ištrinti</system:String>
 	
     <!-- MainWindow Buttons -->
     <system:String x:Key="AcceptTosButton">Sutinku</system:String>

@@ -67,7 +67,7 @@
     <system:String x:Key="Debug Console">Debug konsolė</system:String>
     <system:String x:Key="Display Enemy Tower Range">Rodyti priešų bokštų ribas</system:String>
     <system:String x:Key="Extended Zoom">Kameros vaizdo atitolinimas</system:String>
-    <system:String x:Key="UpdateOnStart">Atnaujinti skriptus kaskart paleidus</system:String>
+    <system:String x:Key="UpdateOnStart">Atnaujinti asamblėjas kaskart paleidus</system:String>
     <system:String x:Key="Inject">Įkrauti L#</system:String>
     <system:String x:Key="Logout">Atsijungti</system:String>
     <system:String x:Key="DefaultHotkeys">Atstatyti</system:String>

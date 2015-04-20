@@ -35,7 +35,6 @@ Contributors
 <repo>https://github.com/fueledbyflux/LeagueSharp-Public</repo>
 <repo>https://github.com/imsosharp/leaguesharp</repo>
 <repo>https://github.com/InjectionDev/LeagueSharp</repo>
-<repo>https://github.com/JackisSharp/leaguesharp</repo>
 <repo>https://github.com/metaphorce/leaguesharp</repo>
 <repo>https://github.com/OneKeyToWin/LeagueRepo</repo>
 <repo>https://github.com/SephLeague/LeagueSharp</repo>

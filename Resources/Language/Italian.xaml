@@ -11,7 +11,7 @@
     <system:String x:Key="Assemblies">Assemblies</system:String>
 
     <!-- MainWindow Profile selector -->
-    <system:String x:Key="DefaultProfile">Contumacia</system:String>
+    <system:String x:Key="DefaultProfile">Predefinito</system:String>
 
     <!-- MainWindow Assemblies datagrid columns -->
     <system:String x:Key="ColumnName">Nome</system:String>
@@ -64,7 +64,7 @@
     <system:String x:Key="General">Generale</system:String>
     <system:String x:Key="GameSettings">Impostazioni Gioco</system:String>
     <system:String x:Key="Anti-AFK">Anti-AFK</system:String>
-    <system:String x:Key="Debug Console">Spidocchiare  Console</system:String>
+    <system:String x:Key="Debug Console">Console di debug</system:String>
     <system:String x:Key="Display Enemy Tower Range">Mostra Range torri nemiche</system:String>
     <system:String x:Key="Extended Zoom">Zoom Esteso</system:String>
     <system:String x:Key="UpdateOnStart">Aggiorna assemblies all'avvio</system:String>
@@ -79,7 +79,7 @@
     <system:String x:Key="Hotkey">Hotkey</system:String>
     <system:String x:Key="Reload the assemblies">Ricarica le assemblies</system:String>
     <system:String x:Key="Recompile and reload the assemblies">Ricompila e ricarica le assemblies</system:String>
-    <system:String x:Key="Shows the menu (Press)">Mostra il menu(premuto)</system:String>
+    <system:String x:Key="Shows the menu (Press)">Mostra il menu(Premuto)</system:String>
     <system:String x:Key="Shows the menu (Toggle)">Mostra il menu(Toggle)</system:String>
 
     <!-- Settings Log -->
@@ -92,7 +92,7 @@
     <!-- UpdateWindow -->
     <system:String x:Key="UpdatingLeagueSharp">Aggiornando LeagueSharp</system:String>
     <system:String x:Key="Updating">Aggiornando...</system:String>
-    <system:String x:Key="UpdateWaiting">Waiting...</system:String>
+    <system:String x:Key="UpdateWaiting">Aspettando...</system:String>
     <system:String x:Key="UpdateText">Scaricati {0} KB di {1} KB.</system:String>
 
     <!-- Errors and other strings -->
@@ -117,22 +117,22 @@
     <system:String x:Key="SuccessfullyInstalled">Assemblies selezionate installate correttamente.</system:String>
     <system:String x:Key="ErrorInstalling">Si e' verificato un errore durante l'installazione di alcune assemblies, controlla i log per maggiori informazioni.</system:String>
 
-    <system:String x:Key="EnableDeveloper">Enable developer options</system:String>
-    <system:String x:Key="Developer">Developer</system:String>
-    <system:String x:Key="New">New</system:String>
-    <system:String x:Key="Edit">Edit</system:String>
-    <system:String x:Key="Clone">Clone</system:String>
+    <system:String x:Key="EnableDeveloper">Abilita opzioni sviluppatore</system:String>
+    <system:String x:Key="Developer">Sviluppatore</system:String>
+    <system:String x:Key="New">Nuovo</system:String>
+    <system:String x:Key="Edit">Modifica</system:String>
+    <system:String x:Key="Clone">Clona</system:String>
 
-    <system:String x:Key="Checking">Checking...</system:String>
-    <system:String x:Key="Updated">Updated</system:String>
+    <system:String x:Key="Checking">Controllo...</system:String>
+    <system:String x:Key="Updated">Aggiornato</system:String>
     <system:String x:Key="OUTDATED">OUTDATED</system:String>
-    <system:String x:Key="Unknown">Unknown</system:String>
-    <system:String x:Key="UpdateStatus">Status</system:String>
+    <system:String x:Key="Unknown">Sconosciuto</system:String>
+    <system:String x:Key="UpdateStatus">Stato</system:String>
 
-    <system:String x:Key="LoaderUpdateFailed">Could not download the update, please update manually. Error:</system:String>
-    <system:String x:Key="LeagueNotFound">Could not resolve "League of Legends.exe" location, try starting a custom game.</system:String>
+    <system:String x:Key="LoaderUpdateFailed">Impossibile scaricare l'aggiornamento, per favore aggiorna manualmente. Errore:</system:String>
+    <system:String x:Key="LeagueNotFound">Impossibile trovare il percorso di "League of Legends.exe", prova a lanciare una custom game.</system:String>
     <system:String x:Key="UpdateSuccess">LeagueSharp has successfully updated for the installed league of legends version</system:String>
-    <system:String x:Key="UpdateUnknown">Couldn't determine if LeagueSharp is updated for the local League Of Legends version, this usually means that www.joduska.me is inaccessible.</system:String>
-    <system:String x:Key="NotUpdateNeeded">LeagueSharp is updated for the installed league of legends version.</system:String>
-    <system:String x:Key="RandomizationFailed">Could not randomize the dll names.</system:String>
+    <system:String x:Key="UpdateUnknown">Impossibile determinare se LeagueSharp e' aggiornato per la versione locale di League Of Legends, di solito significa che joduska.me e' inaccessibile</system:String>
+    <system:String x:Key="NotUpdateNeeded">LeagueSharp e' aggiornato per la versione di League Of Legends installata.</system:String>
+    <system:String x:Key="RandomizationFailed">Impossibile randomizzare i nomi delle DLL</system:String>
 </ResourceDictionary>

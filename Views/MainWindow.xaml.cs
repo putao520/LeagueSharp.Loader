@@ -18,6 +18,8 @@
 
 #endregion
 
+using System.Windows.Controls.Primitives;
+using System.Windows.Media;
 using LeagueSharp.Sandbox.Shared;
 
 namespace LeagueSharp.Loader.Views
@@ -48,6 +50,9 @@ namespace LeagueSharp.Loader.Views
 
     public partial class MainWindow : INotifyPropertyChanged
     {
+        public delegate Point GetPosition(IInputElement element);
+
+        private int rowIndex = -1;
         public BackgroundWorker AssembliesWorker = new BackgroundWorker();
         public BackgroundWorker UpdaterWorker = new BackgroundWorker();
         public bool AssembliesWorkerCancelled;
@@ -163,6 +168,63 @@ namespace LeagueSharp.Loader.Views
             NewsTabItem.Visibility = Visibility.Hidden;
             AssembliesTabItem.Visibility = Visibility.Hidden;
             SettingsTabItem.Visibility = Visibility.Hidden;
+        }
+
+        void InstalledAssembliesDataGrid_Drop(object sender, DragEventArgs e)
+        {
+            if (rowIndex < 0)
+                return;
+            int index = GetCurrentRowIndex(e.GetPosition);
+            if (index < 0)
+                return;
+            if (index == rowIndex)
+                return;
+            LeagueSharpAssembly changedAssembly = Config.SelectedProfile.InstalledAssemblies[rowIndex];
+            Config.SelectedProfile.InstalledAssemblies.RemoveAt(rowIndex);
+            Config.SelectedProfile.InstalledAssemblies.Insert(index, changedAssembly);
+        }
+        void InstalledAssembliesDataGrid_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            rowIndex = GetCurrentRowIndex(e.GetPosition);
+            if (rowIndex < 0)
+                return;
+            InstalledAssembliesDataGrid.SelectedIndex = rowIndex;
+            LeagueSharpAssembly selectedEmp = InstalledAssembliesDataGrid.Items[rowIndex] as LeagueSharpAssembly;
+            if (selectedEmp == null)
+                return;
+            if (DragDrop.DoDragDrop(InstalledAssembliesDataGrid, selectedEmp, DragDropEffects.Move)
+                                != DragDropEffects.None)
+            {
+                InstalledAssembliesDataGrid.SelectedItem = selectedEmp;
+            }
+        }
+        private bool GetMouseTargetRow(Visual theTarget, GetPosition position)
+        {
+            Rect rect = VisualTreeHelper.GetDescendantBounds(theTarget);
+            Point point = position((IInputElement)theTarget);
+            return rect.Contains(point);
+        }
+        private DataGridRow GetRowItem(int index)
+        {
+            if (InstalledAssembliesDataGrid.ItemContainerGenerator.Status
+                    != GeneratorStatus.ContainersGenerated)
+                return null;
+            return InstalledAssembliesDataGrid.ItemContainerGenerator.ContainerFromIndex(index)
+                                                            as DataGridRow;
+        }
+        private int GetCurrentRowIndex(GetPosition pos)
+        {
+            int curIndex = -1;
+            for (int i = 0; i < InstalledAssembliesDataGrid.Items.Count; i++)
+            {
+                DataGridRow itm = GetRowItem(i);
+                if (GetMouseTargetRow(itm, pos))
+                {
+                    curIndex = i;
+                    break;
+                }
+            }
+            return curIndex;
         }
 
         private void CheckForUpdates(bool loader, bool core, bool showDialogOnFinish)

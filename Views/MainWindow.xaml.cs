@@ -19,8 +19,10 @@
 #endregion
 
 using System.Windows.Controls.Primitives;
+using System.Windows.Documents;
 using System.Windows.Media;
 using LeagueSharp.Sandbox.Shared;
+using MahApps.Metro.Controls;
 
 namespace LeagueSharp.Loader.Views
 {
@@ -159,7 +161,6 @@ namespace LeagueSharp.Loader.Views
 
             Config.Instance.FirstRun = false;
 
-            
             foreach (var gameSetting in Config.Instance.Settings.GameSettings)
             {
                 gameSetting.PropertyChanged += GameSettingOnPropertyChanged;
@@ -168,63 +169,6 @@ namespace LeagueSharp.Loader.Views
             NewsTabItem.Visibility = Visibility.Hidden;
             AssembliesTabItem.Visibility = Visibility.Hidden;
             SettingsTabItem.Visibility = Visibility.Hidden;
-        }
-
-        void InstalledAssembliesDataGrid_Drop(object sender, DragEventArgs e)
-        {
-            if (rowIndex < 0)
-                return;
-            int index = GetCurrentRowIndex(e.GetPosition);
-            if (index < 0)
-                return;
-            if (index == rowIndex)
-                return;
-            LeagueSharpAssembly changedAssembly = Config.SelectedProfile.InstalledAssemblies[rowIndex];
-            Config.SelectedProfile.InstalledAssemblies.RemoveAt(rowIndex);
-            Config.SelectedProfile.InstalledAssemblies.Insert(index, changedAssembly);
-        }
-        void InstalledAssembliesDataGrid_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            rowIndex = GetCurrentRowIndex(e.GetPosition);
-            if (rowIndex < 0)
-                return;
-            InstalledAssembliesDataGrid.SelectedIndex = rowIndex;
-            LeagueSharpAssembly selectedEmp = InstalledAssembliesDataGrid.Items[rowIndex] as LeagueSharpAssembly;
-            if (selectedEmp == null)
-                return;
-            if (DragDrop.DoDragDrop(InstalledAssembliesDataGrid, selectedEmp, DragDropEffects.Move)
-                                != DragDropEffects.None)
-            {
-                InstalledAssembliesDataGrid.SelectedItem = selectedEmp;
-            }
-        }
-        private bool GetMouseTargetRow(Visual theTarget, GetPosition position)
-        {
-            Rect rect = VisualTreeHelper.GetDescendantBounds(theTarget);
-            Point point = position((IInputElement)theTarget);
-            return rect.Contains(point);
-        }
-        private DataGridRow GetRowItem(int index)
-        {
-            if (InstalledAssembliesDataGrid.ItemContainerGenerator.Status
-                    != GeneratorStatus.ContainersGenerated)
-                return null;
-            return InstalledAssembliesDataGrid.ItemContainerGenerator.ContainerFromIndex(index)
-                                                            as DataGridRow;
-        }
-        private int GetCurrentRowIndex(GetPosition pos)
-        {
-            int curIndex = -1;
-            for (int i = 0; i < InstalledAssembliesDataGrid.Items.Count; i++)
-            {
-                DataGridRow itm = GetRowItem(i);
-                if (GetMouseTargetRow(itm, pos))
-                {
-                    curIndex = i;
-                    break;
-                }
-            }
-            return curIndex;
         }
 
         private void CheckForUpdates(bool loader, bool core, bool showDialogOnFinish)
@@ -398,10 +342,7 @@ namespace LeagueSharp.Loader.Views
                 MessageBox.Show(Utility.GetMultiLanguageText("ConfigWriteError"));
             }
 
-            if (!PathRandomizer.CopyFiles())
-            {
-
-            }
+            if (!PathRandomizer.CopyFiles()) {}
 
             InjectThread = new Thread(
                 () =>
@@ -448,7 +389,7 @@ namespace LeagueSharp.Loader.Views
             {
                 InjectThread.Abort();
             }
-            
+
             var allAssemblies = new List<LeagueSharpAssembly>();
             foreach (var profile in Config.Instance.Profiles)
             {
@@ -462,7 +403,7 @@ namespace LeagueSharp.Loader.Views
 
         private void InstalledAssembliesDataGrid_OnContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
-            var dataGrid = (DataGrid)sender;
+            var dataGrid = (DataGrid) sender;
             if (dataGrid != null)
             {
                 if (dataGrid.SelectedItems.Count == 0)
@@ -486,7 +427,10 @@ namespace LeagueSharp.Loader.Views
             PrepareAssemblies(InstalledAssembliesDataGrid.SelectedItems.Cast<LeagueSharpAssembly>(), true, true);
         }
 
-        public void PrepareAssemblies(IEnumerable<LeagueSharpAssembly> assemblies, bool update, bool compile, bool updateCommonLibOnly = false)
+        public void PrepareAssemblies(IEnumerable<LeagueSharpAssembly> assemblies,
+            bool update,
+            bool compile,
+            bool updateCommonLibOnly = false)
         {
             if (Working)
             {
@@ -505,7 +449,9 @@ namespace LeagueSharp.Loader.Views
                     var updateList = leagueSharpAssemblies.GroupBy(a => a.SvnUrl).Select(g => g.First());
 
                     Parallel.ForEach(
-                        updateList.Where(a => !updateCommonLibOnly || a.SvnUrl == "https://github.com/LeagueSharp/LeagueSharpCommon" ), new ParallelOptions { MaxDegreeOfParallelism = 5 }, (assembly, state) =>
+                        updateList.Where(
+                            a => !updateCommonLibOnly || a.SvnUrl == "https://github.com/LeagueSharp/LeagueSharpCommon"),
+                        new ParallelOptions { MaxDegreeOfParallelism = 5 }, (assembly, state) =>
                         {
                             assembly.Update();
                             if (AssembliesWorker.CancellationPending)
@@ -579,7 +525,7 @@ namespace LeagueSharp.Loader.Views
             {
                 return;
             }
-            var selectedAssembly = (LeagueSharpAssembly)InstalledAssembliesDataGrid.SelectedItems[0];
+            var selectedAssembly = (LeagueSharpAssembly) InstalledAssembliesDataGrid.SelectedItems[0];
             if (selectedAssembly.SvnUrl != "")
             {
                 Process.Start(selectedAssembly.SvnUrl);
@@ -601,7 +547,8 @@ namespace LeagueSharp.Loader.Views
             var count = 0;
             foreach (var selectedAssembly in InstalledAssembliesDataGrid.SelectedItems.Cast<LeagueSharpAssembly>())
             {
-                if (selectedAssembly.SvnUrl.StartsWith("https://github.com", StringComparison.InvariantCultureIgnoreCase))
+                if (selectedAssembly.SvnUrl.StartsWith(
+                    "https://github.com", StringComparison.InvariantCultureIgnoreCase))
                 {
                     var user = selectedAssembly.SvnUrl.Remove(0, 19);
                     stringToAppend += string.Format("{0}/{1}/", user, selectedAssembly.Name);
@@ -624,7 +571,7 @@ namespace LeagueSharp.Loader.Views
                 return;
             }
 
-            var selectedAssembly = (LeagueSharpAssembly)InstalledAssembliesDataGrid.SelectedItems[0];
+            var selectedAssembly = (LeagueSharpAssembly) InstalledAssembliesDataGrid.SelectedItems[0];
             var logFile = Path.Combine(
                 Directories.LogsDir, "Error - " + Path.GetFileName(selectedAssembly.Name + ".txt"));
             if (File.Exists(logFile))
@@ -669,7 +616,7 @@ namespace LeagueSharp.Loader.Views
                 return;
             }
 
-            var selectedAssembly = (LeagueSharpAssembly)InstalledAssembliesDataGrid.SelectedItems[0];
+            var selectedAssembly = (LeagueSharpAssembly) InstalledAssembliesDataGrid.SelectedItems[0];
             if (File.Exists(selectedAssembly.PathToProjectFile))
             {
                 Process.Start(selectedAssembly.PathToProjectFile);
@@ -682,7 +629,7 @@ namespace LeagueSharp.Loader.Views
             {
                 return;
             }
-            var selectedAssembly = (LeagueSharpAssembly)InstalledAssembliesDataGrid.SelectedItems[0];
+            var selectedAssembly = (LeagueSharpAssembly) InstalledAssembliesDataGrid.SelectedItems[0];
             try
             {
                 var source = Path.GetDirectoryName(selectedAssembly.PathToProjectFile);
@@ -876,7 +823,7 @@ namespace LeagueSharp.Loader.Views
 
         private void TreeView_OnSelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            var name = ((TreeViewItem)((TreeView)sender).SelectedItem).Uid;
+            var name = ((TreeViewItem) ((TreeView) sender).SelectedItem).Uid;
             SettingsFrame.Content = Activator.CreateInstance(null, "LeagueSharp.Loader.Views.Settings." + name).Unwrap();
         }
 
@@ -916,7 +863,7 @@ namespace LeagueSharp.Loader.Views
             {
                 return;
             }
-            var selectedAssembly = (LeagueSharpAssembly)InstalledAssembliesDataGrid.SelectedItems[0];
+            var selectedAssembly = (LeagueSharpAssembly) InstalledAssembliesDataGrid.SelectedItems[0];
             if (selectedAssembly.SvnUrl != "")
             {
                 var window = new InstallerWindow { Owner = this };
@@ -937,6 +884,97 @@ namespace LeagueSharp.Loader.Views
         {
             MainWindow_OnClosing(null, null);
             Environment.Exit(0);
+        }
+
+        private void InstalledAssembliesDataGrid_Drop(object sender, DragEventArgs e)
+        {
+            if (rowIndex < 0)
+            {
+                return;
+            }
+            int index = GetCurrentRowIndex(e.GetPosition);
+            if (index < 0)
+            {
+                return;
+            }
+            if (index == rowIndex)
+            {
+                return;
+            }
+            LeagueSharpAssembly changedAssembly = Config.SelectedProfile.InstalledAssemblies[rowIndex];
+            Config.SelectedProfile.InstalledAssemblies.RemoveAt(rowIndex);
+            Config.SelectedProfile.InstalledAssemblies.Insert(index, changedAssembly);
+        }
+
+        private void InstalledAssembliesDataGrid_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            rowIndex = GetCurrentRowIndex(e.GetPosition);
+            if (rowIndex < 0)
+            {
+                return;
+            }
+            InstalledAssembliesDataGrid.SelectedIndex = rowIndex;
+            LeagueSharpAssembly selectedAssembly = InstalledAssembliesDataGrid.Items[rowIndex] as LeagueSharpAssembly;
+            if (selectedAssembly == null)
+            {
+                return;
+            }
+            if (DragDrop.DoDragDrop(InstalledAssembliesDataGrid, selectedAssembly, DragDropEffects.Move) !=
+                DragDropEffects.None)
+            {
+                //InstalledAssembliesDataGrid.SelectedItem = selectedAssembly;
+            }
+        }
+
+        private bool GetMouseTargetRow(Visual theTarget, GetPosition position)
+        {
+            Rect rect = VisualTreeHelper.GetDescendantBounds(theTarget);
+            Point point = position((IInputElement) theTarget);
+            return rect.Contains(point);
+        }
+
+        private DataGridCell GetCell(DataGridRow row, int columnIndex = 0)
+        {
+            if (row == null) return null;
+
+            var presenterE = row.FindChildren<DataGridCellsPresenter>(true);
+            if (presenterE == null) return null;
+
+            var presenter = presenterE.ToList()[0];
+            var cell = (DataGridCell)presenter.ItemContainerGenerator.ContainerFromIndex(columnIndex);
+            if (cell != null) return cell;
+
+            // alternative way - now try to bring into view and retreive the cell
+            InstalledAssembliesDataGrid.ScrollIntoView(row, InstalledAssembliesDataGrid.Columns[columnIndex]);
+            cell = (DataGridCell)presenter.ItemContainerGenerator.ContainerFromIndex(columnIndex);
+
+            return cell;
+        }
+
+        private DataGridRow GetRowItem(int index)
+        {
+            if (InstalledAssembliesDataGrid.ItemContainerGenerator.Status != GeneratorStatus.ContainersGenerated)
+            {
+                return null;
+            }
+            return InstalledAssembliesDataGrid.ItemContainerGenerator.ContainerFromIndex(index) as DataGridRow;
+        }
+
+        private int GetCurrentRowIndex(GetPosition pos)
+        {
+            int curIndex = -1;
+            for (int i = 0; i < InstalledAssembliesDataGrid.Items.Count; i++)
+            {
+                DataGridRow row = GetRowItem(i);
+                DataGridCell cell = GetCell(row);
+                if (row != null && cell != null && 
+                    GetMouseTargetRow(row, pos) && !GetMouseTargetRow(cell, pos))
+                {
+                    curIndex = i;
+                    break;
+                }
+            }
+            return curIndex;
         }
     }
 }

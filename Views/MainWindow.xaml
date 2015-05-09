@@ -5,7 +5,7 @@
                       xmlns:tb="http://www.hardcodet.net/taskbar"
                       Title="LeagueSharp" 
                       Height="384" 
-                      Width="605"
+                      Width="660"
                       MinHeight="240"
                       MinWidth="400"
                       WindowStartupLocation="CenterScreen" 
@@ -286,10 +286,10 @@
                                                     ElementStyle="{DynamicResource MetroDataGridCheckBox}"
                                                     Width="20"
                                                     />
-                            <DataGridTextColumn Header="{DynamicResource ColumnName}" Width="170" Binding="{Binding DisplayName, UpdateSourceTrigger=PropertyChanged}"/>
-                            <DataGridTextColumn Header="{DynamicResource ColumnType}" Width="75" Binding="{Binding Type}" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="{DynamicResource ColumnName}" Width="150" Binding="{Binding DisplayName, UpdateSourceTrigger=PropertyChanged}"/>
+                            <DataGridTextColumn Header="{DynamicResource ColumnType}" Width="70" Binding="{Binding Type}" IsReadOnly="True"/>
                             <DataGridTextColumn Header="{DynamicResource ColumnVersion}" Width="90" Binding="{Binding Version}" IsReadOnly="True"/>
-                            <DataGridTextColumn Header="{DynamicResource ColumnLocation}" Width="200" Binding="{Binding Location}" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="{DynamicResource ColumnLocation}" Width="180" Binding="{Binding Location}" IsReadOnly="True"/>
                             <DataGridTextColumn Header="{DynamicResource ColumnDescription}" Width="*" Binding="{Binding Description, UpdateSourceTrigger=PropertyChanged}"/>
                         </DataGrid.Columns>
                     </DataGrid>

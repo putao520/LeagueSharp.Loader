@@ -211,17 +211,21 @@ namespace LeagueSharp.Loader.Class
             wb.DownloadStringCompleted += delegate(object sender, DownloadStringCompletedEventArgs args)
             {
                 var result = new List<string>();
-                var matches = Regex.Matches(args.Result, "<repo>(.*)</repo>");
-                foreach (Match match in matches)
+                try
                 {
-                    result.Add(match.Groups[1].ToString());
+                    var matches = Regex.Matches(args.Result, "<repo>(.*)</repo>");
+                    foreach (Match match in matches)
+                    {
+                        result.Add(match.Groups[1].ToString());
+                    }
                 }
-                del(result);
+               catch (Exception) { }
+               del(result);
             };
 
             wb.DownloadStringAsync(
                 new Uri(
-                    "https://raw.githubusercontent.com/LeagueSharp/LeagueSharpLoader/master/Updates/Repositories.txt"));
+                    "https://loader.joduska.me/repositories.txt"));
         }
     }
 }

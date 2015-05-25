@@ -92,8 +92,8 @@
     <!-- UpdateWindow -->
     <system:String x:Key="UpdatingLeagueSharp">升级LeagueSharp</system:String>
     <system:String x:Key="Updating">升级中...</system:String>
-    <system:String x:Key="UpdateWaiting">Waiting...</system:String>
-    <system:String x:Key="UpdateText">تم تحميل {0}/{1} كيلوبايت已下载{0}KB，总共{1}KB.</system:String>
+    <system:String x:Key="UpdateWaiting">等待中...</system:String>
+    <system:String x:Key="UpdateText">已下载 {0}/{1} KB.</system:String>
 
     <!-- Errors and other strings -->
     <system:String x:Key="WrongAuth">错误账户或密码，请注册 {0}</system:String>
@@ -117,7 +117,7 @@
     <system:String x:Key="SuccessfullyInstalled">选定脚本安装成功</system:String>
     <system:String x:Key="ErrorInstalling">在安装某个脚本时发生了一个错误，请检查日志，获取更多信息</system:String>
 
-    <system:String x:Key="EnableDeveloper">启用开发者选项</system:String>
+   <system:String x:Key="EnableDeveloper">启用开发者选项</system:String>
     <system:String x:Key="Developer">开发者</system:String>
     <system:String x:Key="New">新</system:String>
     <system:String x:Key="Edit">修改</system:String>
@@ -131,9 +131,9 @@
     <system:String x:Key="UpdateStatus">状态</system:String>
 
     <system:String x:Key="LoaderUpdateFailed">无法下载最新版，请自己亲自更新</system:String>
-    <system:String x:Key="LeagueNotFound">无法确认LeagueOfLegends.exe的位置, 请尝试进入自定游戏</system:String>
+    <system:String x:Key="LeagueNotFound">无法确认LeagueOfLenends.exe的位置, 请尝试进入自定游戏</system:String>
     <system:String x:Key="UpdateSuccess">L#已为当前的LeagueOfLegends版成功更新</system:String>
-    <system:String x:Key="UpdateUnknown">无法确认L#是否为当前的LeagueOfLegends版更新了, 通常这是因为你无法连接 www.joduska.me </system:String>
+    <system:String x:Key="UpdateUnknown">无法确认L#是否为当前的LeagueOfLegends版更新了, 通常这是因为你无法连接 www.joduska.me 
     <system:String x:Key="NotUpdateNeeded">L#已为当前的LeagueOfLegends版更新了</system:String>
     <system:String x:Key="RandomizationFailed">无法随机化DLL名字</system:String>
 

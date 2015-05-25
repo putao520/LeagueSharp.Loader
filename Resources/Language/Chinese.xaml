@@ -131,7 +131,7 @@
     <system:String x:Key="UpdateStatus">状态</system:String>
 
     <system:String x:Key="LoaderUpdateFailed">无法下载最新版，请自己亲自更新</system:String>
-    <system:String x:Key="LeagueNotFound">无法确认LeagueOfLenends.exe的位置, 请尝试进入自定游戏</system:String>
+    <system:String x:Key="LeagueNotFound">无法确认LeagueOfLegends.exe的位置, 请尝试进入自定游戏</system:String>
     <system:String x:Key="UpdateSuccess">L#已为当前的LeagueOfLegends版成功更新</system:String>
     <system:String x:Key="UpdateUnknown">无法确认L#是否为当前的LeagueOfLegends版更新了, 通常这是因为你无法连接 www.joduska.me 
     <system:String x:Key="NotUpdateNeeded">L#已为当前的LeagueOfLegends版更新了</system:String>

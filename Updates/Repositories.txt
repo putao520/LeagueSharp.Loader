@@ -29,6 +29,7 @@ Developers
 <repo>https://github.com/xSalice/LSharp</repo>
 <repo>https://github.com/yol0swag/LeagueSharp</repo>
 <repo>https://github.com/AlterEgojQuery/ElBundle</repo>
+<repo>https://github.com/PastelComCoca/LeagueSharp</repo>
 
 Contributors
 ------------

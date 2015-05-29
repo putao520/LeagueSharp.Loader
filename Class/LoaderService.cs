@@ -29,7 +29,7 @@ namespace LeagueSharp.Loader.Class
             var extendedZoom = false;
             var menuToggle = 0x78;
             var menuPress = 0x10;
-
+            var selectedLanguage = "";
             try
             {
                 reload = KeyInterop.VirtualKeyFromKey(Config.Instance.Hotkeys.SelectedHotkeys.First(h => h.Name == "Reload").Hotkey);
@@ -40,6 +40,7 @@ namespace LeagueSharp.Loader.Class
                 extendedZoom = Config.Instance.Settings.GameSettings.First(s => s.Name == "Extended Zoom").SelectedValue == "True";
                 menuToggle = KeyInterop.VirtualKeyFromKey(Config.Instance.Hotkeys.SelectedHotkeys.First(h => h.Name == "ShowMenuToggle").Hotkey);
                 menuPress = KeyInterop.VirtualKeyFromKey(Config.Instance.Hotkeys.SelectedHotkeys.First(h => h.Name == "ShowMenuPress").Hotkey);
+                selectedLanguage = Config.Instance.SelectedLanguage;
             }
             catch
             {
@@ -59,6 +60,7 @@ namespace LeagueSharp.Loader.Class
                 AntiAfk = antiAfk,
                 Console = console,
                 TowerRange = towerRange,
+                SelectedLanguage = selectedLanguage,
                 ExtendedZoom = false,
                 Permissions = null
             };

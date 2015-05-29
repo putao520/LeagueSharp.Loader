@@ -40,6 +40,9 @@ namespace LeagueSharp.Sandbox.Shared
         public int ReloadKey { get; set; }
 
         [DataMember]
+        public string SelectedLanguage { get; set; }
+
+        [DataMember]
         public bool TowerRange { get; set; }
 
         [DataMember]
@@ -58,7 +61,8 @@ namespace LeagueSharp.Sandbox.Shared
                                  "TowerRange:{8}\n" +
                                  "ReloadKey:{9}\n" +
                                  "ReloadAndRecompileKey:{10}\n" +
-                                 "ReloadAndRecompileKey:{11}\n",
+                                 "SelectedLanguage:{11}\n" +
+                                 "UnloadKey:{12}\n",
                 DataDirectory,
                 LeagueSharpDllPath,
                 LibrariesDirectory,
@@ -70,6 +74,7 @@ namespace LeagueSharp.Sandbox.Shared
                 TowerRange,
                 ReloadKey,
                 ReloadAndRecompileKey,
+                SelectedLanguage,
                 UnloadKey);
         }
     }

@@ -706,8 +706,9 @@ namespace LeagueSharp.Loader.Views
                     var nameMatch = Regex.Match(assembly.Name, searchText, RegexOptions.IgnoreCase);
                     var displayNameMatch = Regex.Match(assembly.DisplayName, searchText, RegexOptions.IgnoreCase);
                     var svnNameMatch = Regex.Match(assembly.SvnUrl, searchText, RegexOptions.IgnoreCase);
+                    var descNameMatch = Regex.Match(assembly.Description, searchText, RegexOptions.IgnoreCase);
 
-                    return displayNameMatch.Success || nameMatch.Success || svnNameMatch.Success;
+                    return displayNameMatch.Success || nameMatch.Success || svnNameMatch.Success || descNameMatch.Success;
                 }
                 catch (Exception)
                 {

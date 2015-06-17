@@ -22,7 +22,7 @@ Developers
 <repo>https://github.com/Hellsing/LeagueSharp</repo>
 <repo>https://github.com/Screeder/SAwareness</repo>
 <repo>https://github.com/shalzuth/LeagueSharp</repo>
-<repo>https://github.com/trees-software/leaguesharp</repo>
+<repo>https://github.com/tr33s/LeagueSharp</repo>
 <repo>https://github.com/WorstPing/LeagueSharp</repo>
 <repo>https://github.com/xKurisu/KurisuSolutions</repo>
 <repo>https://github.com/xQxCPMxQx/LeagueSharp2</repo>

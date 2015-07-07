@@ -37,6 +37,7 @@ Source: "..\bin\Release\System\SharpDX.Direct3D9.dll"; DestDir: "{app}\System\";
 Source: "..\bin\Release\System\SharpDX.dll"; DestDir: "{app}\System\"; Flags: ignoreversion
 Source: "..\bin\Release\System\SharpDX.XInput.dll"; DestDir: "{app}\System\"; Flags: ignoreversion
 Source: "..\bin\Release\System\BehaviorSharp.dll"; DestDir: "{app}\System\"; Flags: ignoreversion
+Source: "..\bin\Release\System\Newtonsoft.Json.dll"; DestDir: "{app}\System\"; Flags: ignoreversion
 Source: "..\bin\Release\System\clipper_library.dll"; DestDir: "{app}\System\"; Flags: ignoreversion
 Source: "..\tools\sn.exe"; DestDir: "{app}\System\"; Flags: ignoreversion
 Source: "..\Resources\key.snk"; DestDir: "{app}\System\"; Flags: ignoreversion

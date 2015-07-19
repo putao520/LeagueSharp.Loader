@@ -281,6 +281,12 @@ namespace LeagueSharp.Loader.Class
         {
             try
             {
+                //CN
+                if (lastKnownPath.EndsWith("Game\\League of Legends.exe"))
+                {
+                    return lastKnownPath;
+                }
+
                 var dir = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(lastKnownPath), "..\\..\\"));
                 if (Directory.Exists(dir))
                 {

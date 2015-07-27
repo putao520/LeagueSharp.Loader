@@ -68,6 +68,14 @@
         </PosibleValues>
         <SelectedValue>False</SelectedValue>
       </GameSettings>
+      <GameSettings>
+        <Name>Disable all Drawings</Name>
+        <PosibleValues>
+          <string>True</string>
+          <string>False</string>
+        </PosibleValues>
+        <SelectedValue>False</SelectedValue>
+      </GameSettings>
     </GameSettings>
   </Settings>
   <SelectedProfile>

@@ -25,7 +25,9 @@ namespace LeagueSharp.Loader
     #region
 
     using System;
+    using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Runtime.InteropServices;
     using System.Threading;
     using System.Windows;
@@ -116,6 +118,21 @@ namespace LeagueSharp.Loader
                     Environment.Exit(0);
                 }
             }
+
+            #region Add GameSetting DisableDrawings
+
+            if (Config.Instance.Settings.GameSettings.All(x => x.Name != "Disable all Drawings"))
+            {
+                // Disable all Drawings
+                Config.Instance.Settings.GameSettings.Add(new GameSettings
+                    {
+                        Name = "Disable all Drawings",
+                        PosibleValues = new List<string> { "True", "False" }, 
+                        SelectedValue = "False"
+                    });
+            }
+
+            #endregion
 
             #region Remove the old loader
 

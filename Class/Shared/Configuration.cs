@@ -48,6 +48,9 @@ namespace LeagueSharp.Sandbox.Shared
         [DataMember]
         public int UnloadKey { get; set; }
 
+        [DataMember]
+        public bool DisableDrawing { get; set; }
+
         public override string ToString()
         {
             return string.Format("DataDirectory:{0}\n" +

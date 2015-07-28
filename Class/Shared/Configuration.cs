@@ -49,7 +49,10 @@ namespace LeagueSharp.Sandbox.Shared
         public int UnloadKey { get; set; }
 
         [DataMember]
-        public bool DisableDrawing { get; set; }
+        public bool ShowPing { get; set; }
+
+        [DataMember]
+        public bool ShowDrawing { get; set; }
 
         public override string ToString()
         {

@@ -65,6 +65,8 @@
     <system:String x:Key="GameSettings">Game Settings</system:String>
     <system:String x:Key="Anti-AFK">Anti-AFK</system:String>
     <system:String x:Key="Debug Console">Debug Console</system:String>
+    <system:String x:Key="Show Ping">Show Ping</system:String>
+    <system:String x:Key="Show Drawings">Show Drawings</system:String>
     <system:String x:Key="Display Enemy Tower Range">Display enemy tower range</system:String>
     <system:String x:Key="Extended Zoom">Extended Zoom</system:String>
     <system:String x:Key="UpdateOnStart">Update assemblies on start</system:String>

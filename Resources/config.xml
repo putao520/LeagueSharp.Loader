@@ -69,12 +69,20 @@
         <SelectedValue>False</SelectedValue>
       </GameSettings>
       <GameSettings>
-        <Name>Disable all Drawings</Name>
+        <Name>Show Ping</Name>
         <PosibleValues>
           <string>True</string>
           <string>False</string>
         </PosibleValues>
-        <SelectedValue>False</SelectedValue>
+        <SelectedValue>True</SelectedValue>
+      </GameSettings>
+      <GameSettings>
+        <Name>Show Drawings</Name>
+        <PosibleValues>
+          <string>True</string>
+          <string>False</string>
+        </PosibleValues>
+        <SelectedValue>True</SelectedValue>
       </GameSettings>
     </GameSettings>
   </Settings>

@@ -121,15 +121,24 @@ namespace LeagueSharp.Loader
 
             #region Add GameSetting DisableDrawings
 
-            if (Config.Instance.Settings.GameSettings.All(x => x.Name != "Disable all Drawings"))
+            if (Config.Instance.Settings.GameSettings.All(x => x.Name != "Show Drawings"))
             {
-                // Disable all Drawings
                 Config.Instance.Settings.GameSettings.Add(new GameSettings
-                    {
-                        Name = "Disable all Drawings",
-                        PosibleValues = new List<string> { "True", "False" }, 
-                        SelectedValue = "False"
-                    });
+                {
+                    Name = "Show Drawings",
+                    PosibleValues = new List<string> { "True", "False" },
+                    SelectedValue = "True"
+                });
+            }
+
+            if (Config.Instance.Settings.GameSettings.All(x => x.Name != "Show Ping"))
+            {
+                Config.Instance.Settings.GameSettings.Add(new GameSettings
+                {
+                    Name = "Show Ping",
+                    PosibleValues = new List<string> { "True", "False" },
+                    SelectedValue = "True"
+                });
             }
 
             #endregion

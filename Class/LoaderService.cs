@@ -27,7 +27,8 @@ namespace LeagueSharp.Loader.Class
             var console = false;
             var towerRange = false;
             var extendedZoom = false;
-            var drawings = false;
+            var drawings = true;
+            var ping = true;
             var menuToggle = 0x78;
             var menuPress = 0x10;
             var selectedLanguage = "";
@@ -39,7 +40,8 @@ namespace LeagueSharp.Loader.Class
                 console = Config.Instance.Settings.GameSettings.First(s => s.Name == "Debug Console").SelectedValue == "True";
                 towerRange = Config.Instance.Settings.GameSettings.First(s => s.Name == "Display Enemy Tower Range").SelectedValue == "True";
                 extendedZoom = Config.Instance.Settings.GameSettings.First(s => s.Name == "Extended Zoom").SelectedValue == "True";
-                drawings = Config.Instance.Settings.GameSettings.First(s => s.Name == "Disable all Drawings").SelectedValue == "True";
+                drawings = Config.Instance.Settings.GameSettings.First(s => s.Name == "Show Drawings").SelectedValue == "True";
+                ping = Config.Instance.Settings.GameSettings.First(s => s.Name == "Show Ping").SelectedValue == "True";
                 menuToggle = KeyInterop.VirtualKeyFromKey(Config.Instance.Hotkeys.SelectedHotkeys.First(h => h.Name == "ShowMenuToggle").Hotkey);
                 menuPress = KeyInterop.VirtualKeyFromKey(Config.Instance.Hotkeys.SelectedHotkeys.First(h => h.Name == "ShowMenuPress").Hotkey);
                 selectedLanguage = Config.Instance.SelectedLanguage;
@@ -64,7 +66,8 @@ namespace LeagueSharp.Loader.Class
                 TowerRange = towerRange,
                 SelectedLanguage = selectedLanguage,
                 ExtendedZoom = extendedZoom,
-                DisableDrawing = drawings,
+                ShowPing = ping,
+                ShowDrawing = drawings,
                 Permissions = null
             };
         }

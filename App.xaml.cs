@@ -141,6 +141,16 @@ namespace LeagueSharp.Loader
                 });
             }
 
+            if (Config.Instance.Settings.GameSettings.All(x => x.Name != "Send Anonymous Assembly Statistics"))
+            {
+                Config.Instance.Settings.GameSettings.Add(new GameSettings
+                {
+                    Name = "Send Anonymous Assembly Statistics",
+                    PosibleValues = new List<string> { "True", "False" },
+                    SelectedValue = "True"
+                });
+            }
+
             #endregion
 
             #region Remove the old loader

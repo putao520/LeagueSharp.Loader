@@ -54,6 +54,9 @@ namespace LeagueSharp.Sandbox.Shared
         [DataMember]
         public bool ShowDrawing { get; set; }
 
+        [DataMember]
+        public bool SendStatistics { get; set; }
+
         public override string ToString()
         {
             return string.Format("DataDirectory:{0}\n" +

@@ -32,6 +32,8 @@ namespace LeagueSharp.Loader.Class
             var menuToggle = 0x78;
             var menuPress = 0x10;
             var selectedLanguage = "";
+            var statistics = true;
+
             try
             {
                 reload = KeyInterop.VirtualKeyFromKey(Config.Instance.Hotkeys.SelectedHotkeys.First(h => h.Name == "Reload").Hotkey);
@@ -42,6 +44,7 @@ namespace LeagueSharp.Loader.Class
                 extendedZoom = Config.Instance.Settings.GameSettings.First(s => s.Name == "Extended Zoom").SelectedValue == "True";
                 drawings = Config.Instance.Settings.GameSettings.First(s => s.Name == "Show Drawings").SelectedValue == "True";
                 ping = Config.Instance.Settings.GameSettings.First(s => s.Name == "Show Ping").SelectedValue == "True";
+                statistics = Config.Instance.Settings.GameSettings.First(s => s.Name == "Send Anonymous Assembly Statistics").SelectedValue == "True";
                 menuToggle = KeyInterop.VirtualKeyFromKey(Config.Instance.Hotkeys.SelectedHotkeys.First(h => h.Name == "ShowMenuToggle").Hotkey);
                 menuPress = KeyInterop.VirtualKeyFromKey(Config.Instance.Hotkeys.SelectedHotkeys.First(h => h.Name == "ShowMenuPress").Hotkey);
                 selectedLanguage = Config.Instance.SelectedLanguage;
@@ -68,6 +71,7 @@ namespace LeagueSharp.Loader.Class
                 ExtendedZoom = extendedZoom,
                 ShowPing = ping,
                 ShowDrawing = drawings,
+                SendStatistics = statistics,
                 Permissions = null
             };
         }

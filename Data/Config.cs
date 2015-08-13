@@ -54,6 +54,62 @@ namespace LeagueSharp.Loader.Data
         private string _appDirectory;
         private string _selectedColor;
 
+        private double _columnCheckWidth = 20;
+        private double _columnNameWidth = 150;
+        private double _columnTypeWidth = 75;
+        private double _columnVersionWidth = 90;
+        private double _columnLocationWidth = 180;
+
+        public double ColumnCheckWidth
+        {
+            get { return _columnCheckWidth; }
+            set
+            {
+                _columnCheckWidth = value;
+                OnPropertyChanged("ColumnCheckWidth");
+            }
+        }
+
+        public double ColumnNameWidth
+        {
+            get { return _columnNameWidth; }
+            set
+            {
+                _columnNameWidth = value;
+                OnPropertyChanged("ColumnNameWidth");
+            }
+        }
+
+        public double ColumnTypeWidth
+        {
+            get { return _columnTypeWidth; }
+            set
+            {
+                _columnTypeWidth = value;
+                OnPropertyChanged("ColumnTypeWidth");
+            }
+        }
+
+        public double ColumnVersionWidth
+        {
+            get { return _columnVersionWidth; }
+            set
+            {
+                _columnVersionWidth = value;
+                OnPropertyChanged("ColumnVersionWidth");
+            }
+        }
+
+        public double ColumnLocationWidth
+        {
+            get { return _columnLocationWidth; }
+            set
+            {
+                _columnLocationWidth = value;
+                OnPropertyChanged("ColumnLocationWidth");
+            }
+        }
+
         public string SelectedColor
         {
             get { return _selectedColor; }

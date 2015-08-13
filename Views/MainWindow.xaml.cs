@@ -53,6 +53,7 @@ namespace LeagueSharp.Loader.Views
     public partial class MainWindow : INotifyPropertyChanged
     {
         public delegate Point GetPosition(IInputElement element);
+        private bool _columnWidthChanging;
 
         private int rowIndex = -1;
         public BackgroundWorker AssembliesWorker = new BackgroundWorker();
@@ -108,7 +109,6 @@ namespace LeagueSharp.Loader.Views
         {
             Browser.Visibility = Visibility.Hidden;
             TosBrowser.Visibility = Visibility.Hidden;
-            DataContext = this;
             GeneralSettingsItem.IsSelected = true;
 
             #region ContextMenu.DevMenu
@@ -166,9 +166,28 @@ namespace LeagueSharp.Loader.Views
                 gameSetting.PropertyChanged += GameSettingOnPropertyChanged;
             }
 
+            #region ColumnWidth
+
+            PropertyDescriptor pd = DependencyPropertyDescriptor.FromProperty(DataGridColumn.ActualWidthProperty, typeof(DataGridColumn));
+
+            foreach (DataGridColumn column in InstalledAssembliesDataGrid.Columns)
+            {
+                //Add a listener for this column's width
+                pd.AddValueChanged(column, new EventHandler(ColumnWidthPropertyChanged));
+            }
+
+            ColumnCheck.Width = Config.Instance.ColumnCheckWidth;
+            ColumnName.Width = Config.Instance.ColumnNameWidth;
+            ColumnType.Width = Config.Instance.ColumnTypeWidth;
+            ColumnVersion.Width = Config.Instance.ColumnVersionWidth;
+            ColumnLocation.Width = Config.Instance.ColumnLocationWidth;
+
+            #endregion
+
             NewsTabItem.Visibility = Visibility.Hidden;
             AssembliesTabItem.Visibility = Visibility.Hidden;
             SettingsTabItem.Visibility = Visibility.Hidden;
+            DataContext = this;
         }
 
         private void CheckForUpdates(bool loader, bool core, bool showDialogOnFinish)
@@ -976,6 +995,28 @@ namespace LeagueSharp.Loader.Views
                 }
             }
             return curIndex;
+        }
+
+        private void ColumnWidthPropertyChanged(object sender, EventArgs e)
+        {
+            // listen for when the mouse is released
+            _columnWidthChanging = true;
+            if (sender != null)
+                Mouse.AddPreviewMouseUpHandler(this, BaseDataGrid_MouseLeftButtonUp);
+        }
+
+        void BaseDataGrid_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (_columnWidthChanging)
+            {
+                _columnWidthChanging = false;
+
+                Config.Instance.ColumnCheckWidth = ColumnCheck.Width.DesiredValue;
+                Config.Instance.ColumnNameWidth = ColumnName.Width.DesiredValue;
+                Config.Instance.ColumnTypeWidth = ColumnType.Width.DesiredValue;
+                Config.Instance.ColumnVersionWidth = ColumnVersion.Width.DesiredValue;
+                Config.Instance.ColumnLocationWidth = ColumnLocation.Width.DesiredValue;
+            }
         }
     }
 }

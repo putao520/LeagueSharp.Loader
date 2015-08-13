@@ -281,16 +281,16 @@
                             </ContextMenu>
                         </DataGrid.ContextMenu>
                         <DataGrid.Columns>
-                            <DataGridCheckBoxColumn Binding="{Binding InjectChecked, UpdateSourceTrigger=PropertyChanged}"
+                            <DataGridCheckBoxColumn x:Name="ColumnCheck" Binding="{Binding InjectChecked, UpdateSourceTrigger=PropertyChanged}"
                                                     EditingElementStyle="{DynamicResource MetroDataGridCheckBox}"
                                                     ElementStyle="{DynamicResource MetroDataGridCheckBox}"
-                                                    Width="20"
+                                                    Width="{Binding ColumnCheckWidth, UpdateSourceTrigger=PropertyChanged}"
                                                     />
-                            <DataGridTextColumn Header="{DynamicResource ColumnName}" Width="150" Binding="{Binding DisplayName, UpdateSourceTrigger=PropertyChanged}"/>
-                            <DataGridTextColumn Header="{DynamicResource ColumnType}" Width="70" Binding="{Binding Type}" IsReadOnly="True"/>
-                            <DataGridTextColumn Header="{DynamicResource ColumnVersion}" Width="90" Binding="{Binding Version}" IsReadOnly="True"/>
-                            <DataGridTextColumn Header="{DynamicResource ColumnLocation}" Width="180" Binding="{Binding Location}" IsReadOnly="True"/>
-                            <DataGridTextColumn Header="{DynamicResource ColumnDescription}" Width="*" Binding="{Binding Description, UpdateSourceTrigger=PropertyChanged}"/>
+                            <DataGridTextColumn x:Name="ColumnName" Header="{DynamicResource ColumnName}" Width="{Binding ColumnnameWidth, UpdateSourceTrigger=PropertyChanged}" Binding="{Binding DisplayName, UpdateSourceTrigger=PropertyChanged}"/>
+                            <DataGridTextColumn x:Name="ColumnType" Header="{DynamicResource ColumnType}" Width="{Binding ColumnTypeWidth, UpdateSourceTrigger=PropertyChanged}" Binding="{Binding Type}" IsReadOnly="True"/>
+                            <DataGridTextColumn x:Name="ColumnVersion" Header="{DynamicResource ColumnVersion}" Width="{Binding ColumnVersionWidth, UpdateSourceTrigger=PropertyChanged}" Binding="{Binding Version}" IsReadOnly="True"/>
+                            <DataGridTextColumn x:Name="ColumnLocation" Header="{DynamicResource ColumnLocation}" Width="{Binding ColumnLocationWidth, UpdateSourceTrigger=PropertyChanged}" Binding="{Binding Location}" IsReadOnly="True"/>
+                            <DataGridTextColumn x:Name="ColumnDescription" Header="{DynamicResource ColumnDescription}" Width="*" Binding="{Binding Description, UpdateSourceTrigger=PropertyChanged}"/>
                         </DataGrid.Columns>
                     </DataGrid>
                     <Controls:SplitButton

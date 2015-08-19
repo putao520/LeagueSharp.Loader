@@ -64,15 +64,19 @@
     <system:String x:Key="General">常规</system:String>
     <system:String x:Key="GameSettings">热键</system:String>
     <system:String x:Key="Anti-AFK">防挂机</system:String>
-    <system:String x:Key="Debug Console">Debug模式</system:String>
+    <system:String x:Key="Debug Console">调试模式</system:String>
     <system:String x:Key="Display Enemy Tower Range">显示敌方防御塔范围</system:String>
     <system:String x:Key="Extended Zoom">无限视距</system:String>
+    <system:String x:Key="Show Ping">读取界面显示Ping值</system:String>
+    <system:String x:Key="Show Drawings">屏蔽画面</system:String>
+    <system:String x:Key="Send Anonymous Assembly Statistics">上传脚本使用统计(匿名)</system:String>
     <system:String x:Key="UpdateOnStart">开启前升级脚本</system:String>
+    <system:String x:Key="AppData">缓存目录</system:String>
     <system:String x:Key="Inject">注入</system:String>
     <system:String x:Key="Logout">退出</system:String>
     <system:String x:Key="DefaultHotkeys">恢复</system:String>
     <system:String x:Key="Language">语言</system:String>
-    <system:String x:Key="Color">Color</system:String>
+    <system:String x:Key="Color">界面颜色</system:String>
 	
     <!-- Settings Hotkeys -->
     <system:String x:Key="Hotkeys">热键</system:String>
@@ -80,7 +84,7 @@
     <system:String x:Key="Reload the assemblies">重载脚本</system:String>
     <system:String x:Key="Recompile and reload the assemblies">重新编译加载脚本</system:String>
     <system:String x:Key="Shows the menu (Press)">显示菜单(按键)</system:String>
-    <system:String x:Key="Shows the menu (Toggle)">显示菜单(开关)</system:String>
+    <system:String x:Key="Shows the menu (Toggle)">显示菜单(固定)</system:String>
 
     <!-- Settings Log -->
     <system:String x:Key="Log">日志</system:String>
@@ -130,11 +134,11 @@
     <system:String x:Key="Unknown">未知状态</system:String>
     <system:String x:Key="UpdateStatus">状态</system:String>
 
-    <system:String x:Key="LoaderUpdateFailed">无法下载最新版，请自己亲自更新</system:String>
-    <system:String x:Key="LeagueNotFound">无法确认LeagueOfLegends.exe的位置, 请尝试进入自定游戏</system:String>
-    <system:String x:Key="UpdateSuccess">L#已为当前的LeagueOfLegends版成功更新</system:String>
-    <system:String x:Key="UpdateUnknown">无法确认L#是否为当前的LeagueOfLegends版更新了, 通常这是因为你无法连接 www.joduska.me</system:String>
-    <system:String x:Key="NotUpdateNeeded">L#已为当前的LeagueOfLegends版更新了</system:String>
+    <system:String x:Key="LoaderUpdateFailed">无法下载最新版，请自己亲自登录官网更新</system:String>
+    <system:String x:Key="LeagueNotFound">无法确认LeagueOfLegends.exe的位置, 请尝试进入自定义游戏获取位置</system:String>
+    <system:String x:Key="UpdateSuccess">L#已为当前的LOL版本成功更新文件</system:String>
+    <system:String x:Key="UpdateUnknown">无法确认L#是否为当前的LeagueOfLegends版更新了, 通常这是因为你无法连接官网造成的 官网:Http://www.joduska.me</system:String>
+    <system:String x:Key="NotUpdateNeeded">L#已为当前的LOL版本更新了文件</system:String>
     <system:String x:Key="RandomizationFailed">无法随机化DLL名字</system:String>
 
 </ResourceDictionary>

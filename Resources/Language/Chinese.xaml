@@ -68,7 +68,7 @@
     <system:String x:Key="Display Enemy Tower Range">显示敌方防御塔范围</system:String>
     <system:String x:Key="Extended Zoom">无限视距</system:String>
     <system:String x:Key="Show Ping">读取界面显示Ping值</system:String>
-    <system:String x:Key="Show Drawings">屏蔽画面</system:String>
+    <system:String x:Key="Show Drawings">显示线圈及菜单</system:String>
     <system:String x:Key="Send Anonymous Assembly Statistics">上传脚本使用统计(匿名)</system:String>
     <system:String x:Key="UpdateOnStart">开启前升级脚本</system:String>
     <system:String x:Key="AppData">缓存目录</system:String>

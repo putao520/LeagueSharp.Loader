@@ -151,6 +151,31 @@ namespace LeagueSharp.Loader
                 });
             }
 
+            try
+            {
+                if (Config.Instance.Profiles.First().InstalledAssemblies.All(a => a.Name != "LeagueSharp.SDK"))
+                {
+                    var sdk = new LeagueSharpAssembly
+                    {
+                        Name = "LeagueSharp.SDK",
+                        DisplayName = "LeagueSharp.SDK",
+                        SvnUrl = "https://github.com/LeagueSharp/LeagueSharp.SDK",
+                        InjectChecked = true,
+                        InstallChecked = true,
+                        PathToProjectFile = Path.Combine(Directories.RepositoryDir, "8443D874", "trunk", "LeagueSharp.SDK.csproj")
+                    };
+
+                    sdk.Update();
+                    sdk.Compile();
+
+                    Config.Instance.Profiles.First().InstalledAssemblies.Add(sdk);
+                }
+            }
+            catch
+            {
+                // wtf
+            }
+
             #endregion
 
             #region Remove the old loader

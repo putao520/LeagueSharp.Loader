@@ -100,6 +100,14 @@ namespace LeagueSharp.Loader.Views
                 {
                     var updatedDir = GitUpdater.Update(location, Logs.MainLog, Directories.RepositoryDir);
                     FoundAssemblies = LeagueSharpAssemblies.GetAssemblies(updatedDir, location);
+
+                    foreach (var assembly in FoundAssemblies.ToArray())
+                    {
+                        List<LeagueSharpAssembly> assemblies = Config.Instance.SelectedProfile.InstalledAssemblies.Where(
+                            y => y.Name == assembly.Name && y.SvnUrl == assembly.SvnUrl).ToList();
+                        assemblies.ForEach(a => FoundAssemblies.Remove(a));
+                    }
+
                     foreach (var assembly in FoundAssemblies)
                     {
                         if (autoInstallName != null && assembly.Name.ToLower() == autoInstallName.ToLower())
@@ -133,7 +141,7 @@ namespace LeagueSharp.Loader.Views
         {
             var amount = FoundAssemblies.Count(a => a.InstallChecked);
 
-            foreach (var assembly in FoundAssemblies)
+            foreach (var assembly in FoundAssemblies.ToArray())
             {
                 if (assembly.InstallChecked)
                 {
@@ -144,11 +152,14 @@ namespace LeagueSharp.Loader.Views
                                 a => a.Name != assembly.Name || a.SvnUrl != assembly.SvnUrl))
                         {
                             Config.Instance.SelectedProfile.InstalledAssemblies.Add(assembly);
+                            FoundAssemblies.Remove(assembly);
                         }
                         amount--;
                     }
                 }
             }
+
+            FoundAssemblies.ForEach(x => GitUpdater.ClearUnusedRepoFolder(x.PathToProjectFile, Logs.MainLog));
 
             if (amount == 0)
             {

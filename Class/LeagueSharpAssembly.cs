@@ -305,6 +305,16 @@ namespace LeagueSharp.Loader.Class
             return null;
         }
 
+        /// <summary>
+        /// Returns the relative path to the Project after the trunk folder.
+        /// </summary>
+        /// <returns></returns>
+        public String GetProjectPathRelative()
+        {
+            var dir = PathToProjectFile.Remove(PathToProjectFile.LastIndexOf("\\"));
+            return dir.Remove(0, dir.LastIndexOf("trunk\\") + "trunk\\".Length);
+        }
+
         public void Update()
         {
             if (Status == AssemblyStatus.Updating || SvnUrl == "")
@@ -316,7 +326,7 @@ namespace LeagueSharp.Loader.Class
             OnPropertyChanged("Version");
             try
             {
-                GitUpdater.Update(SvnUrl, Logs.MainLog, Directories.RepositoryDir);
+                GitUpdater.Update(SvnUrl, Logs.MainLog, Directories.RepositoryDir, GetProjectPathRelative());
             }
             catch (Exception e)
             {

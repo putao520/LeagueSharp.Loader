@@ -18,6 +18,8 @@
 
 #endregion
 
+using System.Linq;
+
 namespace LeagueSharp.Loader.Class
 {
     #region
@@ -32,7 +34,7 @@ namespace LeagueSharp.Loader.Class
 
     internal class GitUpdater
     {
-        public static string Update(string url, Log log, string directory)
+        public static string Update(string url, Log log, string directory, string repoDirectory = null)
         {
             if (string.IsNullOrWhiteSpace(url))
             {
@@ -51,7 +53,14 @@ namespace LeagueSharp.Loader.Class
                             repo.Config.Set("user.name", Config.Instance.Username);
                             repo.Config.Set("user.email", Config.Instance.Username + "@joduska.me");
                             repo.Fetch("origin");
-                            repo.Checkout("origin/master", new CheckoutOptions { CheckoutModifiers = CheckoutModifiers.Force });
+                            if (repoDirectory != null)
+                            {
+                                repo.CheckoutPaths("origin/master", new List<String>() { repoDirectory }, new CheckoutOptions { CheckoutModifiers = CheckoutModifiers.Force });
+                            }
+                            else
+                            {
+                                repo.Checkout("origin/master", new CheckoutOptions { CheckoutModifiers = CheckoutModifiers.Force });
+                            }
                         }
 
                     }
@@ -81,6 +90,34 @@ namespace LeagueSharp.Loader.Class
             }
 
             return string.Empty;
+        }
+
+        /// <summary>
+        /// Clearing unused folders to reduce file space usage.
+        /// </summary>
+        /// <param name="repoDirectory">Path to unused folder</param>
+        /// <param name="log">Log</param>
+
+        public static void ClearUnusedRepoFolder(string repoDirectory, Log log)
+        {
+            try
+            {
+                var dir = repoDirectory.Remove(repoDirectory.LastIndexOf("\\"));
+                if (dir.EndsWith("trunk"))
+                {
+                    return;
+                }
+                if (Directory.Exists(dir))
+                {
+                    Directory.Delete(dir, true);
+                }
+                dir = repoDirectory.Remove(dir.LastIndexOf("\\"));
+                Directory.GetFiles(dir).ToList().ForEach(File.Delete);
+            }
+            catch (Exception ex)
+            {
+                Utility.Log(LogStatus.Error, "Updater", string.Format("{0} - {1}", ex.Message, repoDirectory), log);
+            }
         }
 
         public static void ClearUnusedRepos(List<LeagueSharpAssembly> assemblyList)

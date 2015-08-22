@@ -22,14 +22,13 @@ PrivilegesRequired=admin
 
 [Files]
 ;Loader
-Source: "..\bin\Release\LeagueSharp.Loader.exe"; DestName: "loader.exe"; Excludes: *.vshost.exe; DestDir: {app}; Flags: ignoreversion
-Source: "..\bin\Release\LeagueSharp.Loader.exe.config"; DestName: "loader.exe.config"; Excludes: *.vshost.exe.config;  DestDir: {app}; Flags: ignoreversion
+Source: "..\bin\Release\loader.exe"; DestName: "loader.exe"; Excludes: *.vshost.exe; DestDir: {app}; Flags: ignoreversion
+Source: "..\bin\Release\loader.exe.config"; DestName: "loader.exe.config"; Excludes: *.vshost.exe.config;  DestDir: {app}; Flags: ignoreversion
 Source: "..\bin\Release\*.dll"; DestDir: "{app}\bin\"; Flags: ignoreversion
 Source: "..\bin\Release\NativeBinaries\x86\*.dll"; DestDir: "{app}\bin\"; Flags: ignoreversion
 
 ;System
 Source: "..\bin\Release\System\*.dll"; DestDir: "{app}\System\"; Flags: ignoreversion
-
 Source: "..\tools\sn.exe"; DestDir: "{app}\System\"; Flags: ignoreversion
 Source: "..\Resources\key.snk"; DestDir: "{app}\System\"; Flags: ignoreversion
 Source: "..\translations\*.xml"; DestDir: "{app}\translations\"; Flags: ignoreversion
@@ -38,6 +37,7 @@ Source: "..\translations\*.xml"; DestDir: "{app}\translations\"; Flags: ignoreve
 Name: "en"; MessagesFile: "compiler:Default.isl"
 Name: "de"; MessagesFile: "compiler:Languages\German.isl"
 
+;Dependencies
 #include "Scripts\products.iss"
 #include "Scripts\products\stringversion.iss"
 #include "Scripts\products\winversion.iss"

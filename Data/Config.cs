@@ -60,6 +60,8 @@ namespace LeagueSharp.Loader.Data
         private double _columnVersionWidth = 90;
         private double _columnLocationWidth = 180;
 
+        public string RandomName { get; set; }
+
         public double ColumnCheckWidth
         {
             get { return _columnCheckWidth; }

@@ -28,6 +28,7 @@ namespace LeagueSharp.Loader
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Reflection;
     using System.Runtime.InteropServices;
     using System.Threading;
     using System.Windows;
@@ -308,6 +309,42 @@ namespace LeagueSharp.Loader
             }
 
             Resources.MergedDictionaries.Add(dict);
+
+
+            #region Executable Randomization
+
+            if (Assembly.GetExecutingAssembly().Location.EndsWith("loader.exe"))
+            {
+                try
+                {
+                    if (Config.Instance.RandomName != null)
+                    {
+                        var oldFile = Path.Combine(Directories.CurrentDirectory, Config.Instance.RandomName);
+
+                        if (File.Exists(oldFile))
+                        {
+                            File.SetAttributes(oldFile, FileAttributes.Normal);
+                            File.Delete(oldFile);
+                        }
+                    }
+
+                    Config.Instance.RandomName = Utility.GetUniqueKey(6) + ".exe";
+                    var filePath = Path.Combine(Directories.CurrentDirectory, "loader.exe");
+                    var rndPath = Path.Combine(Directories.CurrentDirectory, Config.Instance.RandomName);
+                    Utility.MapClassToXmlFile(typeof(Config), Config.Instance, Directories.ConfigFilePath);
+
+                    File.Copy(filePath, rndPath);
+                    Process.Start(rndPath);
+                    Environment.Exit(0);
+                }
+                catch (Exception)
+                {
+                    // restart
+                }
+            }
+
+            #endregion
+
             base.OnStartup(e);
         }
 
@@ -318,6 +355,18 @@ namespace LeagueSharp.Loader
                 _mutex.ReleaseMutex();
             }
             base.OnExit(e);
+
+            if (!Assembly.GetExecutingAssembly().Location.EndsWith("loader.exe"))
+            {
+                var info = new ProcessStartInfo
+                    {
+                        Arguments = "/C choice /C Y /N /D Y /T 3 & Del " + Assembly.GetExecutingAssembly().Location,
+                        WindowStyle = ProcessWindowStyle.Hidden,
+                        CreateNoWindow = true,
+                        FileName = "cmd.exe"
+                    };
+                Process.Start(info);
+            }
         }
     }
 }

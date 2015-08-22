@@ -159,7 +159,7 @@ namespace LeagueSharp.Loader.Views
                 }
             }
 
-            FoundAssemblies.ForEach(x => GitUpdater.ClearUnusedRepoFolder(x.PathToProjectFile, Logs.MainLog));
+            FoundAssemblies.Where(a => !string.IsNullOrEmpty(a.SvnUrl)).ToList().ForEach(x => GitUpdater.ClearUnusedRepoFolder(x.PathToProjectFile, Logs.MainLog));
 
             if (amount == 0)
             {

@@ -125,7 +125,7 @@ namespace LeagueSharp.Loader.Class
             try
             {
                 var usedRepos = new List<string>();
-                foreach (var assembly in assemblyList)
+                foreach (var assembly in assemblyList.Where(a => !string.IsNullOrEmpty(a.SvnUrl)))
                 {
                     usedRepos.Add(assembly.SvnUrl.GetHashCode().ToString("X"));
                 }

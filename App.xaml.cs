@@ -26,6 +26,7 @@ namespace LeagueSharp.Loader
 
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.IO;
     using System.Linq;
     using System.Reflection;
@@ -56,23 +57,7 @@ namespace LeagueSharp.Loader
             }
 
             bool createdNew;
-            _mutex = new Mutex(true, Utility.Md5Hash(Utility.Md5Checksum(Directories.LoaderFilePath) + Utility.Md5Hash(Environment.UserName)), out createdNew);
-            if (!createdNew)
-            {
-                if (e.Args.Length > 0)
-                {
-                    var wnd = Win32Imports.FindWindow(IntPtr.Zero, "LeagueSharp");
-                    if (wnd != IntPtr.Zero)
-                    {
-                        Clipboard.SetText(e.Args[0]);
-                        ShowWindow(wnd, 5);
-                        SetForegroundWindow(wnd);
-                    }
-                }
-
-                _mutex = null;
-                Environment.Exit(0);
-            }
+            _mutex = new Mutex(true, Utility.Md5Hash(Environment.UserName), out createdNew);
 
             Utility.CreateFileFromResource(Directories.ConfigFilePath, "LeagueSharp.Loader.Resources.config.xml");
 
@@ -310,28 +295,50 @@ namespace LeagueSharp.Loader
 
             Resources.MergedDictionaries.Add(dict);
 
-
             #region Executable Randomization
 
-            if (Assembly.GetExecutingAssembly().Location.EndsWith("loader.exe"))
+            if (Assembly.GetExecutingAssembly().Location.EndsWith("loader.exe") || Assembly.GetExecutingAssembly().Location.EndsWith("Loader.exe"))
             {
                 try
                 {
                     if (Config.Instance.RandomName != null)
                     {
-                        var oldFile = Path.Combine(Directories.CurrentDirectory, Config.Instance.RandomName);
-                        var oldConfigFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Config.Instance.RandomName + ".config");
-
-                        if (File.Exists(oldFile))
+                        try
                         {
-                            File.SetAttributes(oldFile, FileAttributes.Normal);
-                            File.Delete(oldFile);
+                            var oldFile = Path.Combine(Directories.CurrentDirectory, Config.Instance.RandomName);
+                            var oldConfigFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Config.Instance.RandomName + ".config");
+
+                            if (File.Exists(oldFile))
+                            {
+                                File.SetAttributes(oldFile, FileAttributes.Normal);
+                                File.Delete(oldFile);
+                            }
+
+                            if (File.Exists(oldConfigFile))
+                            {
+                                File.SetAttributes(oldConfigFile, FileAttributes.Normal);
+                                File.Delete(oldConfigFile);
+                            }
+                        }
+                        catch
+                        {
                         }
 
-                        if (File.Exists(oldConfigFile))
+                        if (!createdNew)
                         {
-                            File.SetAttributes(oldConfigFile, FileAttributes.Normal);
-                            File.Delete(oldConfigFile);
+                            if (e.Args.Length > 0)
+                            {
+                                var loader = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(Config.Instance.RandomName)).FirstOrDefault();
+                                if (loader != null && loader.MainWindowHandle != IntPtr.Zero)
+                                {
+                                    Clipboard.SetText(e.Args[0]);
+                                    ShowWindow(loader.MainWindowHandle, 5);
+                                    SetForegroundWindow(loader.MainWindowHandle);
+                                }
+                            }
+
+                            _mutex = null;
+                            Environment.Exit(0);
                         }
                     }
 
@@ -351,32 +358,41 @@ namespace LeagueSharp.Loader
                 }
             }
 
+            AppDomain.CurrentDomain.ProcessExit += (sender, args) =>
+                {
+                    try
+                    {
+                        if (_mutex != null && createdNew)
+                        {
+                            _mutex.ReleaseMutex();
+                        }
+                    }
+                    catch
+                    {
+                    }
+
+                    if (!Assembly.GetExecutingAssembly().Location.EndsWith("loader.exe"))
+                    {
+                        var oldConfigFile = Path.Combine(
+                            AppDomain.CurrentDomain.BaseDirectory,
+                            Config.Instance.RandomName + ".config");
+
+                        var info = new ProcessStartInfo
+                            {
+                                Arguments =
+                                    "/C choice /C Y /N /D Y /T 1 & Del " + Assembly.GetExecutingAssembly().Location + " "
+                                    + oldConfigFile,
+                                WindowStyle = ProcessWindowStyle.Hidden,
+                                CreateNoWindow = true,
+                                FileName = "cmd.exe"
+                            };
+                        Process.Start(info);
+                    }
+                };
+
             #endregion
 
             base.OnStartup(e);
-        }
-
-        protected override void OnExit(ExitEventArgs e)
-        {
-            if (_mutex != null)
-            {
-                _mutex.ReleaseMutex();
-            }
-            base.OnExit(e);
-
-            if (!Assembly.GetExecutingAssembly().Location.EndsWith("loader.exe"))
-            {
-                var oldConfigFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Config.Instance.RandomName + ".config");
-
-                var info = new ProcessStartInfo
-                    {
-                        Arguments = "/C choice /C Y /N /D Y /T 3 & Del " + Assembly.GetExecutingAssembly().Location + " " + oldConfigFile,
-                        WindowStyle = ProcessWindowStyle.Hidden,
-                        CreateNoWindow = true,
-                        FileName = "cmd.exe"
-                    };
-                Process.Start(info);
-            }
         }
     }
 }

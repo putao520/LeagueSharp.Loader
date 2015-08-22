@@ -27,6 +27,8 @@ namespace LeagueSharp.Loader.Data
     using System.Collections.ObjectModel;
     using System.ComponentModel;
     using System.IO;
+    using System.Runtime.CompilerServices;
+    using System.Windows;
     using System.Windows.Input;
     using System.Xml.Serialization;
     using LeagueSharp.Loader.Class;
@@ -60,6 +62,16 @@ namespace LeagueSharp.Loader.Data
         private double _columnVersionWidth = 90;
         private double _columnLocationWidth = 180;
 
+        private double windowTop = 150;
+
+        private double windowLeft = 150;
+
+        private double windowWidth = 800;
+
+        private double windowHeight = 450;
+
+        private WindowState windowState;
+
         public string RandomName { get; set; }
 
         public double ColumnCheckWidth
@@ -68,7 +80,7 @@ namespace LeagueSharp.Loader.Data
             set
             {
                 _columnCheckWidth = value;
-                OnPropertyChanged("ColumnCheckWidth");
+                OnPropertyChanged();
             }
         }
 
@@ -78,7 +90,7 @@ namespace LeagueSharp.Loader.Data
             set
             {
                 _columnNameWidth = value;
-                OnPropertyChanged("ColumnNameWidth");
+                OnPropertyChanged();
             }
         }
 
@@ -88,7 +100,7 @@ namespace LeagueSharp.Loader.Data
             set
             {
                 _columnTypeWidth = value;
-                OnPropertyChanged("ColumnTypeWidth");
+                OnPropertyChanged();
             }
         }
 
@@ -98,7 +110,7 @@ namespace LeagueSharp.Loader.Data
             set
             {
                 _columnVersionWidth = value;
-                OnPropertyChanged("ColumnVersionWidth");
+                OnPropertyChanged();
             }
         }
 
@@ -108,7 +120,7 @@ namespace LeagueSharp.Loader.Data
             set
             {
                 _columnLocationWidth = value;
-                OnPropertyChanged("ColumnLocationWidth");
+                OnPropertyChanged();
             }
         }
 
@@ -118,7 +130,7 @@ namespace LeagueSharp.Loader.Data
             set
             {
                 _selectedColor = value;
-                OnPropertyChanged("SelectedColor");
+                OnPropertyChanged();
             }
         }
 
@@ -128,7 +140,7 @@ namespace LeagueSharp.Loader.Data
             set
             {
                 _appDirectory = value;
-                OnPropertyChanged("AppDirectory");
+                OnPropertyChanged();
             }
         }
 
@@ -138,7 +150,7 @@ namespace LeagueSharp.Loader.Data
             set
             {
                 _tosAccepted = value;
-                OnPropertyChanged("TosAccepted");
+                OnPropertyChanged();
             }
         }
 
@@ -148,7 +160,7 @@ namespace LeagueSharp.Loader.Data
             set
             {
                 _selectedLanguage = value;
-                OnPropertyChanged("SelectedLanguage");
+                OnPropertyChanged();
             }
         }
 
@@ -158,7 +170,7 @@ namespace LeagueSharp.Loader.Data
             set
             {
                 _leagueOfLegendsExePath = value;
-                OnPropertyChanged("LeagueOfLegendsExePath");
+                OnPropertyChanged();
             }
         }
 
@@ -168,7 +180,7 @@ namespace LeagueSharp.Loader.Data
             set
             {
                 _firstRun = value;
-                OnPropertyChanged("FirstRun");
+                OnPropertyChanged();
             }
         }
 
@@ -178,7 +190,7 @@ namespace LeagueSharp.Loader.Data
             set
             {
                 _showDevOptions = value;
-                OnPropertyChanged("ShowDevOptions");
+                OnPropertyChanged();
             }
         }
 
@@ -188,7 +200,7 @@ namespace LeagueSharp.Loader.Data
             set
             {
                 _install = value;
-                OnPropertyChanged("Install");
+                OnPropertyChanged();
             }
         }
 
@@ -198,7 +210,7 @@ namespace LeagueSharp.Loader.Data
             set
             {
                 _updateOnLoad = value;
-                OnPropertyChanged("UpdateOnLoad");
+                OnPropertyChanged();
             }
         }
 
@@ -212,7 +224,7 @@ namespace LeagueSharp.Loader.Data
             set
             {
                 _settings = value;
-                OnPropertyChanged("Settings");
+                OnPropertyChanged();
             }
         }
 
@@ -222,7 +234,7 @@ namespace LeagueSharp.Loader.Data
             set
             {
                 _hotkeys = value;
-                OnPropertyChanged("Hotkeys");
+                OnPropertyChanged();
             }
         }
 
@@ -232,7 +244,7 @@ namespace LeagueSharp.Loader.Data
             set
             {
                 _selectedProfile = value;
-                OnPropertyChanged("SelectedProfile");
+                OnPropertyChanged();
             }
         }
 
@@ -243,7 +255,7 @@ namespace LeagueSharp.Loader.Data
             set
             {
                 _profiles = value;
-                OnPropertyChanged("Profiles");
+                OnPropertyChanged();
             }
         }
 
@@ -254,13 +266,78 @@ namespace LeagueSharp.Loader.Data
             set
             {
                 _knownRepositories = value;
-                OnPropertyChanged("KnownRepositories");
+                OnPropertyChanged();
+            }
+        }
+
+        public double WindowTop
+        {
+            get
+            {
+                return this.windowTop;
+            }
+            set
+            {
+                this.windowTop = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public double WindowLeft
+        {
+            get
+            {
+                return this.windowLeft;
+            }
+            set
+            {
+                this.windowLeft = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public double WindowWidth
+        {
+            get
+            {
+                return this.windowWidth;
+            }
+            set
+            {
+                this.windowWidth = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public double WindowHeight
+        {
+            get
+            {
+                return this.windowHeight;
+            }
+            set
+            {
+                this.windowHeight = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public WindowState WindowState
+        {
+            get
+            {
+                return this.windowState;
+            }
+            set
+            {
+                this.windowState = value;
+                OnPropertyChanged();
             }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private void OnPropertyChanged(string propertyName)
+        private void OnPropertyChanged([CallerMemberName]string propertyName = null)
         {
             if (PropertyChanged != null)
             {

@@ -3,11 +3,14 @@
                       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                       xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
                       xmlns:tb="http://www.hardcodet.net/taskbar"
-                      Height="384" 
-                      Width="660"
+                      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                      xmlns:views="clr-namespace:LeagueSharp.Loader.Views"
+                      mc:Ignorable="d"
+                      d:DataContext="{d:DesignInstance Type=views:MainWindow, IsDesignTimeCreatable=True}"
                       MinHeight="240"
                       MinWidth="400"
-                      WindowStartupLocation="CenterScreen" 
+                      WindowStartupLocation="CenterScreen"
                       Loaded="MainWindow_OnLoaded" 
                       Activated="MainWindow_OnActivated"
                       Closing="MainWindow_OnClosing"
@@ -15,7 +18,10 @@
                       ShowIconOnTitleBar="False"
                       BorderThickness="0.5"
                       GlowBrush="{DynamicResource AccentColorBrush}"
-                      SaveWindowPosition="True">
+                      Top="{Binding Config.WindowTop, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                      Left="{Binding Config.WindowLeft, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                      Width="{Binding Config.WindowWidth, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                      Height="{Binding Config.WindowHeight, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
     <Controls:MetroWindow.RightWindowCommands>
         <Controls:WindowCommands>
             <Button Cursor="Hand" x:Name="NewsButton" Click="NewsButton_OnClick">
@@ -285,10 +291,10 @@
                                                     ElementStyle="{DynamicResource MetroDataGridCheckBox}"
                                                     Width="{Binding ColumnCheckWidth, UpdateSourceTrigger=PropertyChanged}"
                                                     />
-                            <DataGridTextColumn x:Name="ColumnName" Header="{DynamicResource ColumnName}" Width="{Binding ColumnnameWidth, UpdateSourceTrigger=PropertyChanged}" Binding="{Binding DisplayName, UpdateSourceTrigger=PropertyChanged}"/>
-                            <DataGridTextColumn x:Name="ColumnType" Header="{DynamicResource ColumnType}" Width="{Binding ColumnTypeWidth, UpdateSourceTrigger=PropertyChanged}" Binding="{Binding Type}" IsReadOnly="True"/>
-                            <DataGridTextColumn x:Name="ColumnVersion" Header="{DynamicResource ColumnVersion}" Width="{Binding ColumnVersionWidth, UpdateSourceTrigger=PropertyChanged}" Binding="{Binding Version}" IsReadOnly="True"/>
-                            <DataGridTextColumn x:Name="ColumnLocation" Header="{DynamicResource ColumnLocation}" Width="{Binding ColumnLocationWidth, UpdateSourceTrigger=PropertyChanged}" Binding="{Binding Location}" IsReadOnly="True"/>
+                            <DataGridTextColumn x:Name="ColumnName" Header="{DynamicResource ColumnName}" Width="{Binding Config.ColumnNameWidth, UpdateSourceTrigger=PropertyChanged}" Binding="{Binding DisplayName, UpdateSourceTrigger=PropertyChanged}"/>
+                            <DataGridTextColumn x:Name="ColumnType" Header="{DynamicResource ColumnType}" Width="{Binding Config.ColumnTypeWidth, UpdateSourceTrigger=PropertyChanged}" Binding="{Binding Type}" IsReadOnly="True"/>
+                            <DataGridTextColumn x:Name="ColumnVersion" Header="{DynamicResource ColumnVersion}" Width="{Binding Config.ColumnVersionWidth, UpdateSourceTrigger=PropertyChanged}" Binding="{Binding Version}" IsReadOnly="True"/>
+                            <DataGridTextColumn x:Name="ColumnLocation" Header="{DynamicResource ColumnLocation}" Width="{Binding Config.ColumnLocationWidth, UpdateSourceTrigger=PropertyChanged}" Binding="{Binding Location}" IsReadOnly="True"/>
                             <DataGridTextColumn x:Name="ColumnDescription" Header="{DynamicResource ColumnDescription}" Width="*" Binding="{Binding Description, UpdateSourceTrigger=PropertyChanged}"/>
                         </DataGrid.Columns>
                     </DataGrid>

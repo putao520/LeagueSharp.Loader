@@ -320,21 +320,29 @@ namespace LeagueSharp.Loader
                     if (Config.Instance.RandomName != null)
                     {
                         var oldFile = Path.Combine(Directories.CurrentDirectory, Config.Instance.RandomName);
+                        var oldConfigFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Config.Instance.RandomName + ".config");
 
                         if (File.Exists(oldFile))
                         {
                             File.SetAttributes(oldFile, FileAttributes.Normal);
                             File.Delete(oldFile);
                         }
+
+                        if (File.Exists(oldConfigFile))
+                        {
+                            File.SetAttributes(oldConfigFile, FileAttributes.Normal);
+                            File.Delete(oldConfigFile);
+                        }
                     }
 
                     Config.Instance.RandomName = Utility.GetUniqueKey(6) + ".exe";
                     var filePath = Path.Combine(Directories.CurrentDirectory, "loader.exe");
-                    var rndPath = Path.Combine(Directories.CurrentDirectory, Config.Instance.RandomName);
+                    var rndExePath = Path.Combine(Directories.CurrentDirectory, Config.Instance.RandomName);
                     Utility.MapClassToXmlFile(typeof(Config), Config.Instance, Directories.ConfigFilePath);
 
-                    File.Copy(filePath, rndPath);
-                    Process.Start(rndPath);
+                    File.Copy(filePath, rndExePath);
+                    File.Copy(filePath + ".config", rndExePath + ".config");
+                    Process.Start(rndExePath);
                     Environment.Exit(0);
                 }
                 catch (Exception)
@@ -358,9 +366,11 @@ namespace LeagueSharp.Loader
 
             if (!Assembly.GetExecutingAssembly().Location.EndsWith("loader.exe"))
             {
+                var oldConfigFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Config.Instance.RandomName + ".config");
+
                 var info = new ProcessStartInfo
                     {
-                        Arguments = "/C choice /C Y /N /D Y /T 3 & Del " + Assembly.GetExecutingAssembly().Location,
+                        Arguments = "/C choice /C Y /N /D Y /T 3 & Del " + Assembly.GetExecutingAssembly().Location + " " + oldConfigFile,
                         WindowStyle = ProcessWindowStyle.Hidden,
                         CreateNoWindow = true,
                         FileName = "cmd.exe"

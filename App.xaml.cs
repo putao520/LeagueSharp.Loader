@@ -137,6 +137,16 @@ namespace LeagueSharp.Loader
                 });
             }
 
+            if (Config.Instance.Settings.GameSettings.All(x => x.Name != "Always Inject Default Profile"))
+            {
+                Config.Instance.Settings.GameSettings.Add(new GameSettings
+                {
+                    Name = "Always Inject Default Profile",
+                    PosibleValues = new List<string> { "True", "False" },
+                    SelectedValue = "False"
+                });
+            }
+
             try
             {
                 if (Config.Instance.Profiles.First().InstalledAssemblies.All(a => a.Name != "LeagueSharp.SDK"))

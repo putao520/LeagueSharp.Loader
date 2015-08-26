@@ -10,13 +10,29 @@ namespace LeagueSharp.Loader.Class
     {
         public List<LSharpAssembly> GetAssemblyList(int pid)
         {
-            return Config.Instance.SelectedProfile.InstalledAssemblies
+            List<LSharpAssembly> assemblies = new List<LSharpAssembly>();
+
+            if (Config.Instance.Settings.GameSettings.First(s => s.Name == "Always Inject Default Profile")
+                    .SelectedValue == "True" && Config.Instance.SelectedProfile != Config.Instance.Profiles[0] &&
+                    Config.Instance.Profiles.Count > 0)
+            {
+                assemblies.AddRange(Config.Instance.Profiles[0].InstalledAssemblies
+                    .Where(a => a.InjectChecked && a.Type != AssemblyType.Library)
+                    .Select(assembly => new LSharpAssembly
+                    {
+                        Name = assembly.Name,
+                        PathToBinary = assembly.PathToBinary
+                    }).ToList());
+            }
+
+            assemblies.AddRange(Config.Instance.SelectedProfile.InstalledAssemblies
                 .Where(a => a.InjectChecked && a.Type != AssemblyType.Library)
                 .Select(assembly => new LSharpAssembly
-            {
-                Name = assembly.Name,
-                PathToBinary = assembly.PathToBinary
-            }).ToList();
+                {
+                    Name = assembly.Name,
+                    PathToBinary = assembly.PathToBinary
+                }).ToList());
+            return assemblies;
         }
 
         public Configuration GetConfiguration(int pid)

@@ -63,7 +63,7 @@
     <!-- Settings General -->
     <system:String x:Key="General">Genel</system:String>
     <system:String x:Key="GameSettings">Oyun Ayarları</system:String>
-    <system:String x:Key="Anti-AFK">LeaverBuster engelleyici</system:String>
+    <system:String x:Key="Anti-AFK">Oyundan atılma engelleyicisi</system:String>
     <system:String x:Key="Debug Console">Hata ayıklama konsolu</system:String>
     <system:String x:Key="Display Enemy Tower Range">Düşman kule menzilini göster</system:String>
     <system:String x:Key="Extended Zoom">Genişletilmiş kamera</system:String>

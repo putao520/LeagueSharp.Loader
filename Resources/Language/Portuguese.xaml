@@ -69,7 +69,7 @@
     <system:String x:Key="Extended Zoom">Zoom Extendido</system:String>
     <system:String x:Key="UpdateOnStart">Atualizar os assemblies ao iniciar o programa</system:String>
     <system:String x:Key="Inject">Injetar</system:String>
-    <system:String x:Key="Logout">Terminar sessão</system:String>
+    <system:String x:Key="Logout">Sair</system:String>
 	<system:String x:Key="DefaultHotkeys">Restaurar</system:String>
     <system:String x:Key="Language">Idioma</system:String>
     <system:String x:Key="Color">Cor</system:String>
@@ -117,8 +117,8 @@
     <system:String x:Key="SuccessfullyInstalled">Os assemblies selecionados foram corretamente instalados.</system:String>
     <system:String x:Key="ErrorInstalling">Ocorreu um erro ao instalar os assemblies, abra o ficheiro de erro para mais informações.</system:String>
 
-    <system:String x:Key="EnableDeveloper">Ativar opções de desenvolvedor</system:String>
-    <system:String x:Key="Developer">desenvolvedor</system:String>
+    <system:String x:Key="EnableDeveloper">Ativar opções de Desenvolvedor</system:String>
+    <system:String x:Key="Developer">Desenvolvedor</system:String>
     <system:String x:Key="New">Novo</system:String>
     <system:String x:Key="Edit">Editar</system:String>
     <system:String x:Key="Clone">Clonar</system:String>
@@ -131,8 +131,8 @@
 
     <system:String x:Key="LoaderUpdateFailed">Não foi possível descarregar a atualização, por favor atualize manualmente. Erro:</system:String>
     <system:String x:Key="LeagueNotFound">Não foi possível encontrar a localização do "League of Legends.exe", experimente começar uma partida personalizada.</system:String>
-    <system:String x:Key="UpdateSuccess">O LeagueSharp atualizou com sucesso para a versão do league of legends instalado.</system:String>
-    <system:String x:Key="UpdateUnknown">Não foi possível determinar se o LeagueSharp está atualizado para versão do league of legends instalado, normalmente isto quer dizer que www.joduska.me está inacessível.</system:String>
-    <system:String x:Key="NotUpdateNeeded">O LeagueSharp está atualizado para versão instalada do league of legends.</system:String>
+    <system:String x:Key="UpdateSuccess">O LeagueSharp atualizou com sucesso para a versão do League of Legends instalado.</system:String>
+    <system:String x:Key="UpdateUnknown">Não foi possível determinar se o LeagueSharp está atualizado para versão do League of Legends instalado, normalmente isto quer dizer que www.joduska.me está inacessível.</system:String>
+    <system:String x:Key="NotUpdateNeeded">O LeagueSharp está atualizado para versão instalada do League of Legends.</system:String>
     <system:String x:Key="RandomizationFailed">Could not randomize the dll names.</system:String>
 </ResourceDictionary>

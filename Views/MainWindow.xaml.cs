@@ -926,6 +926,20 @@ namespace LeagueSharp.Loader.Views
             Config.SelectedProfile.InstalledAssemblies.Insert(index, changedAssembly);
         }
 
+        private bool IsColumnSelected(MouseButtonEventArgs e)
+        {
+            DependencyObject dep = (DependencyObject)e.OriginalSource;
+            while ((dep != null) && !(dep is DataGridCell) && !(dep is DataGridColumnHeader))
+            {
+                dep = VisualTreeHelper.GetParent(dep);
+            }
+            if (dep is DataGridColumnHeader)
+            {
+                return true;
+            }
+            return false;
+        }
+
         private void InstalledAssembliesDataGrid_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             rowIndex = GetCurrentRowIndex(e.GetPosition);
@@ -933,6 +947,11 @@ namespace LeagueSharp.Loader.Views
             {
                 return;
             }
+            if (IsColumnSelected(e))
+            {
+                return;
+            }
+
             InstalledAssembliesDataGrid.SelectedIndex = rowIndex;
             LeagueSharpAssembly selectedAssembly = InstalledAssembliesDataGrid.Items[rowIndex] as LeagueSharpAssembly;
             if (selectedAssembly == null)
@@ -942,7 +961,7 @@ namespace LeagueSharp.Loader.Views
             if (DragDrop.DoDragDrop(InstalledAssembliesDataGrid, selectedAssembly, DragDropEffects.Move) !=
                 DragDropEffects.None)
             {
-                //InstalledAssembliesDataGrid.SelectedItem = selectedAssembly;
+
             }
         }
 
@@ -986,12 +1005,15 @@ namespace LeagueSharp.Loader.Views
             for (int i = 0; i < InstalledAssembliesDataGrid.Items.Count; i++)
             {
                 DataGridRow row = GetRowItem(i);
-                DataGridCell cell = GetCell(row);
-                if (row != null && cell != null && 
-                    GetMouseTargetRow(row, pos) && !GetMouseTargetRow(cell, pos))
+                if (row != null)
                 {
-                    curIndex = i;
-                    break;
+                    DataGridCell cell = GetCell(row);
+                    if (cell != null &&
+                        GetMouseTargetRow(row, pos) && !GetMouseTargetRow(cell, pos))
+                    {
+                        curIndex = i;
+                        break;
+                    }
                 }
             }
             return curIndex;

@@ -926,7 +926,7 @@ namespace LeagueSharp.Loader.Views
             Config.SelectedProfile.InstalledAssemblies.Insert(index, changedAssembly);
         }
 
-        private bool IsColumnSelected(MouseButtonEventArgs e)
+        private bool IsColumnSelected(MouseEventArgs e)
         {
             DependencyObject dep = (DependencyObject)e.OriginalSource;
             while ((dep != null) && !(dep is DataGridCell) && !(dep is DataGridColumnHeader))
@@ -951,18 +951,71 @@ namespace LeagueSharp.Loader.Views
             {
                 return;
             }
-
             InstalledAssembliesDataGrid.SelectedIndex = rowIndex;
             LeagueSharpAssembly selectedAssembly = InstalledAssembliesDataGrid.Items[rowIndex] as LeagueSharpAssembly;
             if (selectedAssembly == null)
             {
                 return;
             }
+
             if (DragDrop.DoDragDrop(InstalledAssembliesDataGrid, selectedAssembly, DragDropEffects.Move) !=
                 DragDropEffects.None)
             {
 
             }
+        }
+
+        private void InstalledAssembliesDataGrid_OnPreviewDragOver(object sender, DragEventArgs e)
+        {
+            FrameworkElement container = sender as FrameworkElement;
+
+            if (container == null)
+            {
+                return;
+            }
+
+            ScrollViewer scrollViewer = FindVisualChild<ScrollViewer>(container);
+
+            if (scrollViewer == null)
+            {
+                return;
+            }
+
+            double tolerance = 15;
+            double verticalPos = e.GetPosition(container).Y;
+            double offset = 1;
+
+            if (verticalPos < tolerance) // Top visible? 
+            {
+                //Scroll up
+                scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset - offset);
+            }
+            else if (verticalPos > container.ActualHeight - tolerance) //Bot visible? 
+            {
+                //Scroll down
+                scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset + offset);
+            }
+        }
+
+        private TChildItem FindVisualChild<TChildItem>(DependencyObject obj) where TChildItem : DependencyObject
+        {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(obj); i++)
+            {
+                DependencyObject child = VisualTreeHelper.GetChild(obj, i);
+                if (child != null && child is TChildItem)
+                {
+                    return (TChildItem)child;
+                }
+                else
+                {
+                    TChildItem childOfChild = FindVisualChild<TChildItem>(child);
+                    if (childOfChild != null)
+                    {
+                        return childOfChild;
+                    }
+                }
+            }
+            return null;
         }
 
         private bool GetMouseTargetRow(Visual theTarget, GetPosition position)

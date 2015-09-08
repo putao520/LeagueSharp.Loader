@@ -120,7 +120,7 @@
             </TabItem>
             <TabItem x:Name="AssembliesTabItem" Header="Assemblies" Height="36" VerticalAlignment="Top">
                 <Grid Background="#FFE5E5E5" Margin="0,2,0,-2">
-                    <DataGrid x:Name="InstalledAssembliesDataGrid" 
+                    <DataGrid x:Name="InstalledAssembliesDataGrid"
                               Margin="10,41,10,40" 
                               CanUserAddRows="False"
                               AutoGenerateColumns="False"
@@ -130,6 +130,7 @@
                               SelectionMode="Extended"
                               PreviewMouseLeftButtonDown="InstalledAssembliesDataGrid_PreviewMouseLeftButtonDown"
                               Drop="InstalledAssembliesDataGrid_Drop"
+                              PreviewDragOver="InstalledAssembliesDataGrid_OnPreviewDragOver"
                                >
                         <DataGrid.ContextMenu>
                             <ContextMenu>

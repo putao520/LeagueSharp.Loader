@@ -53,14 +53,14 @@ namespace LeagueSharp.Loader.Class
                             repo.Config.Set("user.name", Config.Instance.Username);
                             repo.Config.Set("user.email", Config.Instance.Username + "@joduska.me");
                             repo.Fetch("origin");
+
                             if (repoDirectory != null)
                             {
-                                repo.CheckoutPaths("origin/master", new List<String>() { repoDirectory }, new CheckoutOptions { CheckoutModifiers = CheckoutModifiers.Force });
+                                repo.CheckoutPaths("origin/master", new List<String>() { repoDirectory }, 
+                                    new CheckoutOptions { CheckoutModifiers = CheckoutModifiers.Force });
                             }
-                            else
-                            {
-                                repo.Checkout("origin/master", new CheckoutOptions { CheckoutModifiers = CheckoutModifiers.Force });
-                            }
+  
+                            repo.Checkout("origin/master", new CheckoutOptions { CheckoutModifiers = CheckoutModifiers.Force });
                         }
 
                     }

@@ -74,6 +74,7 @@ namespace LeagueSharp.Loader.Views.Settings
             senderBox.Items.Add("Arabic");
             senderBox.Items.Add("Bulgarian");
             senderBox.Items.Add("Chinese");
+            senderBox.Items.Add("Czech");
             senderBox.Items.Add("Dutch");
             senderBox.Items.Add("English");
             senderBox.Items.Add("French");

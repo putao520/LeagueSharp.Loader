@@ -1,0 +1,143 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:system="clr-namespace:System;assembly=mscorlib">
+
+    <!-- MainWindow TopBar -->
+    <system:String x:Key="Website">Web stránka</system:String>
+    <system:String x:Key="Settings">Nastavení</system:String>
+
+    <!-- MainWindow Tabs -->
+    <system:String x:Key="News">Novinky</system:String>
+    <system:String x:Key="Assemblies">Assemblies</system:String>
+
+    <!-- MainWindow Profile selector -->
+    <system:String x:Key="DefaultProfile">Default</system:String>
+
+    <!-- MainWindow Assemblies datagrid columns -->
+    <system:String x:Key="ColumnName">Jméno</system:String>
+    <system:String x:Key="ColumnType">Typ</system:String>
+    <system:String x:Key="ColumnVersion">Verze</system:String>
+    <system:String x:Key="ColumnLocation">Umístìní</system:String>
+    <system:String x:Key="ColumnDescription">Popis</system:String>
+
+    <!-- MainWindow Assemblies datagrid Menu -->
+    <system:String x:Key="MenuUpdateAndCompile">Aktualizovat a kompilovat</system:String>
+    <system:String x:Key="MenuRemove">Smazat</system:String>
+    <system:String x:Key="MenuGithub">GitHub</system:String>
+    <system:String x:Key="MenuGithubAssemblies">GitHub Assemblies</system:String>
+    <system:String x:Key="MenuShare">Sdílet</system:String>
+    <system:String x:Key="MenuViewLog">Ukázat Log</system:String>
+
+	<!-- MainWindow Profiles Menu -->
+    <system:String x:Key="NewProfile">Pøidat</system:String>
+    <system:String x:Key="ChangeName">Zmìnit jméno</system:String>
+    <system:String x:Key="DeleteProfile">Smazat</system:String>
+	
+    <!-- MainWindow Buttons -->
+    <system:String x:Key="AcceptTosButton">Souhlasím</system:String>
+    <system:String x:Key="DeclineTosButton">Nesouhlasím</system:String>
+    <system:String x:Key="UpdateAll">Aktualizovat vše</system:String>
+    <system:String x:Key="CompileAll">Kompilovat vše</system:String>
+    <system:String x:Key="InstallNewAssembly">Pøidat nový Assembly</system:String>
+
+    <!-- InstallerWindow Title -->
+    <system:String x:Key="AssemblyInstaller">Assembly instalátor</system:String>
+
+    <!-- InstallerWindow Tabs -->
+    <system:String x:Key="Search">Hledat</system:String>
+    <system:String x:Key="Select">Vybrat</system:String>
+
+    <!-- InstallerWindow Search tab -->
+    <system:String x:Key="SelectAssembliesText">Vyber umístìní assembly:</system:String>
+    <system:String x:Key="Local">Local</system:String>
+    <system:String x:Key="Github">GitHub</system:String>
+    <system:String x:Key="Installed">Instalováno</system:String>
+    <system:String x:Key="Next">Další</system:String>
+
+    <!-- InstallerWindow Select tab -->
+    <system:String x:Key="SelectAll">Oznaèit Vše</system:String>
+    <system:String x:Key="DeselectAll">Odoznaèit Vše</system:String>
+    <system:String x:Key="Previous">Zpìt</system:String>
+    <system:String x:Key="Add">Pøidat</system:String>
+
+    <!-- Settings General -->
+    <system:String x:Key="General">Obecné</system:String>
+    <system:String x:Key="GameSettings">Nastavení hry</system:String>
+    <system:String x:Key="Anti-AFK">Anti-AFK</system:String>
+    <system:String x:Key="Debug Console">Debugovací konzole</system:String>
+    <system:String x:Key="Show Ping">Ukázat Pingy</system:String>
+    <system:String x:Key="Show Drawings">Ukázat Drawings</system:String>
+    <system:String x:Key="Send Anonymous Assembly Statistics">Zasílat anonymní assembly data</system:String>
+    <system:String x:Key="Always Inject Default Profile">Pokažde zvolit výchozí profil</system:String>
+    <system:String x:Key="Display Enemy Tower Range">Ukázat range nepøátelské vìže</system:String>
+    <system:String x:Key="Extended Zoom">Vylepšený zoom</system:String>
+    <system:String x:Key="UpdateOnStart">Aktualizovat assemblies na startu</system:String>
+    <system:String x:Key="Inject">Inject</system:String>
+    <system:String x:Key="Logout">Odhlásit se</system:String>
+    <system:String x:Key="DefaultHotkeys">Obnovit</system:String>
+	<system:String x:Key="Language">Jazyk</system:String>
+    <system:String x:Key="Color">Barva</system:String>
+	
+    <!-- Settings Hotkeys -->
+    <system:String x:Key="Hotkeys">Kláv. zkratky</system:String>
+    <system:String x:Key="Hotkey">Kláv. zkratky</system:String>
+    <system:String x:Key="Reload the assemblies">Znovu naèíst assemblies</system:String>
+    <system:String x:Key="Recompile and reload the assemblies">Kompilovat a naèíst assemblies</system:String>
+    <system:String x:Key="Shows the menu (Press)">Ukázat menu (Stisknout)</system:String>
+    <system:String x:Key="Shows the menu (Toggle)">Ukázat menu (Pøepnout)</system:String>
+
+    <!-- Settings Log -->
+    <system:String x:Key="Log">Log</system:String>
+    <system:String x:Key="Status">Status</system:String>
+    <system:String x:Key="Source">Zdroj</system:String>
+    <system:String x:Key="Content">Content</system:String>
+    <system:String x:Key="OpenFolder">Otevøít složku</system:String>
+
+    <!-- UpdateWindow -->
+    <system:String x:Key="UpdatingLeagueSharp">Updatování LeagueSharp</system:String>
+    <system:String x:Key="Updating">Updatování...</system:String>
+    <system:String x:Key="UpdateWaiting">Èekání...</system:String>
+    <system:String x:Key="UpdateText">Staženo {0}/{1} KB.</system:String>
+
+    <!-- Errors and other strings -->
+    <system:String x:Key="WrongAuth">Špatné heslo nebo jméno, registrace na {0}</system:String>
+    <system:String x:Key="AuthEmpty">Heslo nebo jméno je prázdné</system:String>
+    <system:String x:Key="FailedToDelete">Nemohu smazat soubor updatu, prosím smažte to manuálnì a restartujte LeagueSharp</system:String>
+    <system:String x:Key="WrongVersion">League Of Legends verze nepodporována, to znamená že League of Legends updatováno bylo, ale LeagueSharp zatím ne. Více informací najdete na fóru a nebo poèkejte na LeagueSharp update. Hash:</system:String>
+    <system:String x:Key="FailedToDownload">Chyba stahování.</system:String>
+    <system:String x:Key="FailedToLogin">Chyba pøihlášení: {0}</system:String>
+    <system:String x:Key="Login">Pøihlásit se</system:String>
+    <system:String x:Key="LoginError">Chyba pøihlašování za {0}: {1}</system:String>
+    <system:String x:Key="Uninstall">Odinstalovat</system:String>
+    <system:String x:Key="UninstallConfirm">Jste si jistý, že chcete odinstalovat zvolené assemblies?</system:String>
+    <system:String x:Key="ConfigWriteError">Nemùžu zapisovat do config.xml</system:String>
+    <system:String x:Key="ShareText">Assembly url zkopírováno do schránky</system:String>
+    <system:String x:Key="LogNotFound">Log soubor nenalezen</system:String>
+    <system:String x:Key="NewProfile2">Nový profil</system:String>
+    <system:String x:Key="Rename">Pøejmenovat</system:String>
+    <system:String x:Key="RenameText">Vložte nové jméno pro profil</system:String>
+    <system:String x:Key="DownloadingData">Stahování nezbytných dat.</system:String>
+    <system:String x:Key="Installer">Installer</system:String>
+    <system:String x:Key="SuccessfullyInstalled">Zvolené assemblies úspìšnì nainstalovány.</system:String>
+    <system:String x:Key="ErrorInstalling">Vyskytla se chyba pøi instalování nìkterých assemblies, v logu najdete více informací.</system:String>
+
+    <system:String x:Key="EnableDeveloper">Zpøístupnit vývojáøské nastavení</system:String>
+    <system:String x:Key="Developer">Vývojáø</system:String>
+    <system:String x:Key="New">Nový</system:String>
+    <system:String x:Key="Edit">Upravit</system:String>
+    <system:String x:Key="Clone">Klonovat</system:String>
+    
+	<system:String x:Key="Checking">Ovìøování...</system:String>
+    <system:String x:Key="Updated">Aktualizováno</system:String>
+    <system:String x:Key="OUTDATED">OUTDATED</system:String>
+	<system:String x:Key="Unknown">Neznámý</system:String>
+	<system:String x:Key="UpdateStatus">Status</system:String>
+	
+	<system:String x:Key="LoaderUpdateFailed">Nelze stáhnout update, prosím aktualizujte ruènì. Error: </system:String>
+    <system:String x:Key="LeagueNotFound">Nenalezeno umístìní "League of legends.exe", zapnìte prosím Custom hru.</system:String>
+    <system:String x:Key="UpdateSuccess">LeagueSharp úspìšnì aktualizován na verzi stejnou jako League of Legends.</system:String>
+    <system:String x:Key="UpdateUnknown">Nelze urèit, zda je LeagueSharp aktualizován na nejnovìjší verzi League of Legends, což obvykle znamená, že joduska.me není dostupná.</system:String>
+	<system:String x:Key="NotUpdateNeeded">LeagueSharp je aktualizován pro nynìjší League of Legends verzi.</system:String>
+    <system:String x:Key="RandomizationFailed">Nelze randomizovat dll.</system:String>
+    
+</ResourceDictionary>

@@ -107,6 +107,20 @@ namespace LeagueSharp.Loader.Class
                         }
                     }
                 }
+
+                var targetFramework = Project.GetProperty("TargetFrameworkVersion").EvaluatedValue;
+
+                switch (targetFramework)
+                {
+                    case "v4.5":
+                    case "v4.5.1":
+                        Project.SetProperty("TargetFrameworkVersion", "v4.5.2");
+                        break;
+
+                    case "v4.6":
+                        break;
+                }
+
                 Project.Save();
                 Utility.Log(LogStatus.Ok, "ProjectFile", string.Format("File Updated - {0}", Project.FullPath), _log);
             }

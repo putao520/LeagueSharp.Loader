@@ -1,6 +1,6 @@
 ﻿#region LICENSE
 
-// Copyright 2014 LeagueSharp.Loader
+// Copyright 2015-2015 LeagueSharp.Loader
 // LSUriScheme.cs is part of LeagueSharp.Loader.
 // 
 // LeagueSharp.Loader is free software: you can redistribute it and/or modify
@@ -18,18 +18,19 @@
 
 #endregion
 
-
-
 namespace LeagueSharp.Loader.Class
 {
     #region
 
     using System;
     using System.Collections.Generic;
-    using Data;
     using System.Net;
     using System.Text.RegularExpressions;
-    using Views;
+    using System.Threading.Tasks;
+
+    using LeagueSharp.Loader.Data;
+    using LeagueSharp.Loader.Views;
+
     using MahApps.Metro.Controls;
 
     #endregion
@@ -40,10 +41,13 @@ namespace LeagueSharp.Loader.Class
 
         public static string FullName
         {
-            get { return Name + "://"; }
+            get
+            {
+                return Name + "://";
+            }
         }
 
-        public static void HandleUrl(string url, MetroWindow window)
+        public static async Task HandleUrl(string url, MetroWindow window)
         {
             url = WebUtility.UrlDecode(url.Remove(0, FullName.Length));
 
@@ -51,7 +55,7 @@ namespace LeagueSharp.Loader.Class
             foreach (Match m in r)
             {
                 var linkType = m.Groups[1].ToString();
-              
+
                 switch (linkType)
                 {
                     case "project":
@@ -61,30 +65,35 @@ namespace LeagueSharp.Loader.Class
 
                         var w = new InstallerWindow { Owner = window };
                         w.ListAssemblies(
-                            string.Format("https://github.com/{0}/{1}", gitHubUser, repositoryName), true,
+                            string.Format("https://github.com/{0}/{1}", gitHubUser, repositoryName),
+                            true,
                             assemblyName != "" ? m.Groups[4].ToString() : null);
                         w.ShowDialog();
                         break;
 
                     case "projectGroup":
-                        
+
                         var remaining = url.Remove(0, 13);
                         var assemblies = new List<LeagueSharpAssembly>();
 
                         while (remaining.IndexOf("/", StringComparison.InvariantCulture) != -1)
                         {
-                            var data = remaining.Split(new[] {'/'});
+                            var data = remaining.Split(new[] { '/' });
                             if (data.Length < 3)
                             {
                                 break;
                             }
-                            
-                            var assembly = new LeagueSharpAssembly(data[2], "", 
+
+                            var assembly = new LeagueSharpAssembly(
+                                data[2],
+                                "",
                                 string.Format("https://github.com/{0}/{1}", data[0], data[1]));
                             assemblies.Add(assembly);
-                            for (int i = 0; i < 3; i++)
+                            for (var i = 0; i < 3; i++)
                             {
-                                remaining = remaining.Remove(0, remaining.IndexOf("/", StringComparison.InvariantCulture) + 1);
+                                remaining = remaining.Remove(
+                                    0,
+                                    remaining.IndexOf("/", StringComparison.InvariantCulture) + 1);
                             }
                         }
 
@@ -92,8 +101,9 @@ namespace LeagueSharp.Loader.Class
                         {
                             assemblies.ForEach(
                                 assembly => Config.Instance.SelectedProfile.InstalledAssemblies.Add(assembly));
-                            ((MainWindow) window).PrepareAssemblies(assemblies, true, true, false);
-                            ((MainWindow) window).ShowTextMessage(Utility.GetMultiLanguageText("Installer"),
+                            await ((MainWindow)window).PrepareAssemblies(assemblies, true, true, false);
+                            ((MainWindow)window).ShowTextMessage(
+                                Utility.GetMultiLanguageText("Installer"),
                                 Utility.GetMultiLanguageText("SuccessfullyInstalled"));
                         }
                         break;

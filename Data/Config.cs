@@ -1,6 +1,6 @@
 ﻿#region LICENSE
 
-// Copyright 2014 LeagueSharp.Loader
+// Copyright 2015-2015 LeagueSharp.Loader
 // Config.cs is part of LeagueSharp.Loader.
 // 
 // LeagueSharp.Loader is free software: you can redistribute it and/or modify
@@ -22,15 +22,14 @@ namespace LeagueSharp.Loader.Data
 {
     #region
 
-    using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.ComponentModel;
-    using System.IO;
     using System.Runtime.CompilerServices;
     using System.Windows;
     using System.Windows.Input;
     using System.Xml.Serialization;
+
     using LeagueSharp.Loader.Class;
 
     #endregion
@@ -39,247 +38,339 @@ namespace LeagueSharp.Loader.Data
     [XmlRoot(Namespace = "", IsNullable = false)]
     public class Config : INotifyPropertyChanged
     {
-        [XmlIgnore] public static Config Instance;
+        [XmlIgnore]
+        public static Config Instance;
+
+        private string _appDirectory;
+
+        private double _columnCheckWidth = 20;
+
+        private double _columnLocationWidth = 180;
+
+        private double _columnNameWidth = 150;
+
+        private double _columnTypeWidth = 75;
+
+        private double _columnVersionWidth = 90;
+
         private bool _firstRun = true;
+
         private Hotkeys _hotkeys;
 
         private bool _install = true;
+
         private ObservableCollection<string> _knownRepositories;
+
         private string _leagueOfLegendsExePath;
+
         private ObservableCollection<Profile> _profiles;
-        private string _selectedLanguage;
-        private Profile _selectedProfile;
-        private ConfigSettings _settings;
-        private bool _showDevOptions;
-        private bool _updateOnLoad;
-        private bool _tosAccepted;
-        private string _appDirectory;
+
         private string _selectedColor;
 
-        private double _columnCheckWidth = 20;
-        private double _columnNameWidth = 150;
-        private double _columnTypeWidth = 75;
-        private double _columnVersionWidth = 90;
-        private double _columnLocationWidth = 180;
+        private string _selectedLanguage;
 
-        private double windowTop = 150;
+        private Profile _selectedProfile;
 
-        private double windowLeft = 150;
+        private ConfigSettings _settings;
 
-        private double windowWidth = 800;
+        private bool _showDevOptions;
+
+        private bool _tosAccepted;
+
+        private bool _updateOnLoad;
+
+        private bool updateCoreOnInject = true;
 
         private double windowHeight = 450;
 
+        private double windowLeft = 150;
+
         private WindowState windowState;
 
-        public string RandomName { get; set; }
+        private double windowTop = 150;
+
+        private double windowWidth = 800;
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public string AppDirectory
+        {
+            get
+            {
+                return this._appDirectory;
+            }
+            set
+            {
+                this._appDirectory = value;
+                this.OnPropertyChanged();
+            }
+        }
 
         public double ColumnCheckWidth
         {
-            get { return _columnCheckWidth; }
-            set
+            get
             {
-                _columnCheckWidth = value;
-                OnPropertyChanged();
+                return this._columnCheckWidth;
             }
-        }
-
-        public double ColumnNameWidth
-        {
-            get { return _columnNameWidth; }
             set
             {
-                _columnNameWidth = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public double ColumnTypeWidth
-        {
-            get { return _columnTypeWidth; }
-            set
-            {
-                _columnTypeWidth = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public double ColumnVersionWidth
-        {
-            get { return _columnVersionWidth; }
-            set
-            {
-                _columnVersionWidth = value;
-                OnPropertyChanged();
+                this._columnCheckWidth = value;
+                this.OnPropertyChanged();
             }
         }
 
         public double ColumnLocationWidth
         {
-            get { return _columnLocationWidth; }
+            get
+            {
+                return this._columnLocationWidth;
+            }
             set
             {
-                _columnLocationWidth = value;
-                OnPropertyChanged();
+                this._columnLocationWidth = value;
+                this.OnPropertyChanged();
             }
         }
 
-        public string SelectedColor
+        public double ColumnNameWidth
         {
-            get { return _selectedColor; }
+            get
+            {
+                return this._columnNameWidth;
+            }
             set
             {
-                _selectedColor = value;
-                OnPropertyChanged();
+                this._columnNameWidth = value;
+                this.OnPropertyChanged();
             }
         }
 
-        public string AppDirectory
+        public double ColumnTypeWidth
         {
-            get { return _appDirectory; }
+            get
+            {
+                return this._columnTypeWidth;
+            }
             set
             {
-                _appDirectory = value;
-                OnPropertyChanged();
+                this._columnTypeWidth = value;
+                this.OnPropertyChanged();
             }
         }
 
-        public bool TosAccepted
+        public double ColumnVersionWidth
         {
-            get { return _tosAccepted; }
-            set
+            get
             {
-                _tosAccepted = value;
-                OnPropertyChanged();
+                return this._columnVersionWidth;
             }
-        }
-
-        public string SelectedLanguage
-        {
-            get { return _selectedLanguage; }
             set
             {
-                _selectedLanguage = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public string LeagueOfLegendsExePath
-        {
-            get { return _leagueOfLegendsExePath; }
-            set
-            {
-                _leagueOfLegendsExePath = value;
-                OnPropertyChanged();
+                this._columnVersionWidth = value;
+                this.OnPropertyChanged();
             }
         }
 
         public bool FirstRun
         {
-            get { return _firstRun; }
-            set
+            get
             {
-                _firstRun = value;
-                OnPropertyChanged();
+                return this._firstRun;
             }
-        }
-
-        public bool ShowDevOptions
-        {
-            get { return _showDevOptions; }
             set
             {
-                _showDevOptions = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public bool Install
-        {
-            get { return _install; }
-            set
-            {
-                _install = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public bool UpdateOnLoad
-        {
-            get { return _updateOnLoad; }
-            set
-            {
-                _updateOnLoad = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public string Username { get; set; }
-
-        public string Password { get; set; }
-
-        public ConfigSettings Settings
-        {
-            get { return _settings; }
-            set
-            {
-                _settings = value;
-                OnPropertyChanged();
+                this._firstRun = value;
+                this.OnPropertyChanged();
             }
         }
 
         public Hotkeys Hotkeys
         {
-            get { return _hotkeys; }
+            get
+            {
+                return this._hotkeys;
+            }
             set
             {
-                _hotkeys = value;
-                OnPropertyChanged();
+                this._hotkeys = value;
+                this.OnPropertyChanged();
             }
         }
 
-        public Profile SelectedProfile
+        public bool Install
         {
-            get { return _selectedProfile; }
-            set
+            get
             {
-                _selectedProfile = value;
-                OnPropertyChanged();
+                return this._install;
             }
-        }
-
-        [XmlArrayItem("Profiles", IsNullable = true)]
-        public ObservableCollection<Profile> Profiles
-        {
-            get { return _profiles; }
             set
             {
-                _profiles = value;
-                OnPropertyChanged();
+                this._install = value;
+                this.OnPropertyChanged();
             }
         }
 
         [XmlArrayItem("KnownRepositories", IsNullable = true)]
         public ObservableCollection<string> KnownRepositories
         {
-            get { return _knownRepositories; }
+            get
+            {
+                return this._knownRepositories;
+            }
             set
             {
-                _knownRepositories = value;
-                OnPropertyChanged();
+                this._knownRepositories = value;
+                this.OnPropertyChanged();
             }
         }
 
-        public double WindowTop
+        public string LeagueOfLegendsExePath
         {
             get
             {
-                return this.windowTop;
+                return this._leagueOfLegendsExePath;
             }
             set
             {
-                this.windowTop = value;
-                OnPropertyChanged();
+                this._leagueOfLegendsExePath = value;
+                this.OnPropertyChanged();
+            }
+        }
+
+        public string Password { get; set; }
+
+        [XmlArrayItem("Profiles", IsNullable = true)]
+        public ObservableCollection<Profile> Profiles
+        {
+            get
+            {
+                return this._profiles;
+            }
+            set
+            {
+                this._profiles = value;
+                this.OnPropertyChanged();
+            }
+        }
+
+        public string RandomName { get; set; }
+
+        public string SelectedColor
+        {
+            get
+            {
+                return this._selectedColor;
+            }
+            set
+            {
+                this._selectedColor = value;
+                this.OnPropertyChanged();
+            }
+        }
+
+        public string SelectedLanguage
+        {
+            get
+            {
+                return this._selectedLanguage;
+            }
+            set
+            {
+                this._selectedLanguage = value;
+                this.OnPropertyChanged();
+            }
+        }
+
+        public Profile SelectedProfile
+        {
+            get
+            {
+                return this._selectedProfile;
+            }
+            set
+            {
+                this._selectedProfile = value;
+                this.OnPropertyChanged();
+            }
+        }
+
+        public ConfigSettings Settings
+        {
+            get
+            {
+                return this._settings;
+            }
+            set
+            {
+                this._settings = value;
+                this.OnPropertyChanged();
+            }
+        }
+
+        public bool ShowDevOptions
+        {
+            get
+            {
+                return this._showDevOptions;
+            }
+            set
+            {
+                this._showDevOptions = value;
+                this.OnPropertyChanged();
+            }
+        }
+
+        public bool TosAccepted
+        {
+            get
+            {
+                return this._tosAccepted;
+            }
+            set
+            {
+                this._tosAccepted = value;
+                this.OnPropertyChanged();
+            }
+        }
+
+        public bool UpdateCoreOnInject
+        {
+            get
+            {
+                return this.updateCoreOnInject;
+            }
+            set
+            {
+                this.updateCoreOnInject = value;
+                this.OnPropertyChanged();
+            }
+        }
+
+        public bool UpdateOnLoad
+        {
+            get
+            {
+                return this._updateOnLoad;
+            }
+            set
+            {
+                this._updateOnLoad = value;
+                this.OnPropertyChanged();
+            }
+        }
+
+        public string Username { get; set; }
+
+        public double WindowHeight
+        {
+            get
+            {
+                return this.windowHeight;
+            }
+            set
+            {
+                this.windowHeight = value;
+                this.OnPropertyChanged();
             }
         }
 
@@ -292,33 +383,7 @@ namespace LeagueSharp.Loader.Data
             set
             {
                 this.windowLeft = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public double WindowWidth
-        {
-            get
-            {
-                return this.windowWidth;
-            }
-            set
-            {
-                this.windowWidth = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public double WindowHeight
-        {
-            get
-            {
-                return this.windowHeight;
-            }
-            set
-            {
-                this.windowHeight = value;
-                OnPropertyChanged();
+                this.OnPropertyChanged();
             }
         }
 
@@ -331,45 +396,71 @@ namespace LeagueSharp.Loader.Data
             set
             {
                 this.windowState = value;
-                OnPropertyChanged();
+                this.OnPropertyChanged();
             }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private void OnPropertyChanged([CallerMemberName]string propertyName = null)
+        public double WindowTop
         {
-            if (PropertyChanged != null)
+            get
             {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+                return this.windowTop;
+            }
+            set
+            {
+                this.windowTop = value;
+                this.OnPropertyChanged();
+            }
+        }
+
+        public double WindowWidth
+        {
+            get
+            {
+                return this.windowWidth;
+            }
+            set
+            {
+                this.windowWidth = value;
+                this.OnPropertyChanged();
+            }
+        }
+
+        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            if (this.PropertyChanged != null)
+            {
+                this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
     }
-
 
     [XmlType(AnonymousType = true)]
     public class ConfigSettings : INotifyPropertyChanged
     {
         private ObservableCollection<GameSettings> _gameSettings;
 
+        public event PropertyChangedEventHandler PropertyChanged;
+
         [XmlArrayItem("GameSettings", IsNullable = true)]
         public ObservableCollection<GameSettings> GameSettings
         {
-            get { return _gameSettings; }
+            get
+            {
+                return this._gameSettings;
+            }
             set
             {
-                _gameSettings = value;
-                OnPropertyChanged("GameSettings");
+                this._gameSettings = value;
+                this.OnPropertyChanged("GameSettings");
             }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
         private void OnPropertyChanged(string propertyName)
         {
-            if (PropertyChanged != null)
+            if (this.PropertyChanged != null)
             {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+                this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
     }
@@ -379,51 +470,64 @@ namespace LeagueSharp.Loader.Data
         private string _name;
 
         private List<string> _posibleValues;
+
         private string _selectedValue;
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         [XmlIgnore]
         public string DisplayName
         {
-            get { return Utility.GetMultiLanguageText(_name); }
+            get
+            {
+                return Utility.GetMultiLanguageText(this._name);
+            }
         }
 
         public string Name
         {
-            get { return _name; }
+            get
+            {
+                return this._name;
+            }
             set
             {
-                _name = value;
-                OnPropertyChanged("Name");
+                this._name = value;
+                this.OnPropertyChanged("Name");
             }
         }
 
         public List<string> PosibleValues
         {
-            get { return _posibleValues; }
+            get
+            {
+                return this._posibleValues;
+            }
             set
             {
-                _posibleValues = value;
-                OnPropertyChanged("PosibleValues");
+                this._posibleValues = value;
+                this.OnPropertyChanged("PosibleValues");
             }
         }
 
         public string SelectedValue
         {
-            get { return _selectedValue; }
+            get
+            {
+                return this._selectedValue;
+            }
             set
             {
-                _selectedValue = value;
-                OnPropertyChanged("SelectedValue");
+                this._selectedValue = value;
+                this.OnPropertyChanged("SelectedValue");
             }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
         private void OnPropertyChanged(string propertyName)
         {
-            if (PropertyChanged != null)
+            if (this.PropertyChanged != null)
             {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+                this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
     }
@@ -433,24 +537,27 @@ namespace LeagueSharp.Loader.Data
     {
         private ObservableCollection<HotkeyEntry> _selectedHotkeys;
 
+        public event PropertyChangedEventHandler PropertyChanged;
+
         [XmlArrayItem("SelectedHotkeys", IsNullable = true)]
         public ObservableCollection<HotkeyEntry> SelectedHotkeys
         {
-            get { return _selectedHotkeys; }
+            get
+            {
+                return this._selectedHotkeys;
+            }
             set
             {
-                _selectedHotkeys = value;
-                OnPropertyChanged("Hotkeys");
+                this._selectedHotkeys = value;
+                this.OnPropertyChanged("Hotkeys");
             }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
         private void OnPropertyChanged(string propertyName)
         {
-            if (PropertyChanged != null)
+            if (this.PropertyChanged != null)
             {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+                this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
     }
@@ -458,33 +565,34 @@ namespace LeagueSharp.Loader.Data
     public class HotkeyEntry : INotifyPropertyChanged
     {
         private Key _hotkey;
+
         private string _name;
 
-        public string Name
-        {
-            get { return _name; }
-            set
-            {
-                _name = value;
-                OnPropertyChanged("Name");
-            }
-        }
+        public event PropertyChangedEventHandler PropertyChanged;
 
-        public string DisplayDescription
-        {
-            get { return Utility.GetMultiLanguageText(Description); }
-        }
+        public Key DefaultKey { get; set; }
 
         public string Description { get; set; }
 
+        public string DisplayDescription
+        {
+            get
+            {
+                return Utility.GetMultiLanguageText(this.Description);
+            }
+        }
+
         public Key Hotkey
         {
-            get { return _hotkey; }
+            get
+            {
+                return this._hotkey;
+            }
             set
             {
-                _hotkey = value;
-                OnPropertyChanged("Hotkey");
-                OnPropertyChanged("HotkeyString");
+                this._hotkey = value;
+                this.OnPropertyChanged("Hotkey");
+                this.OnPropertyChanged("HotkeyString");
             }
         }
 
@@ -492,40 +600,54 @@ namespace LeagueSharp.Loader.Data
         {
             get
             {
-                if (Hotkey == Key.LeftShift || Hotkey == Key.RightShift)
+                if (this.Hotkey == Key.LeftShift || this.Hotkey == Key.RightShift)
                 {
                     return 16;
                 }
 
-                if (Hotkey == Key.LeftAlt || Hotkey == Key.RightAlt)
+                if (this.Hotkey == Key.LeftAlt || this.Hotkey == Key.RightAlt)
                 {
                     return 0x12;
                 }
 
-                if (Hotkey == Key.LeftCtrl || Hotkey == Key.RightCtrl)
+                if (this.Hotkey == Key.LeftCtrl || this.Hotkey == Key.RightCtrl)
                 {
                     return 0x11;
                 }
 
-                return (byte) KeyInterop.VirtualKeyFromKey(Hotkey);
+                return (byte)KeyInterop.VirtualKeyFromKey(this.Hotkey);
             }
-            set { }
+            set
+            {
+            }
         }
 
         public string HotkeyString
         {
-            get { return _hotkey.ToString(); }
+            get
+            {
+                return this._hotkey.ToString();
+            }
         }
 
-        public Key DefaultKey { get; set; }
-
-        public event PropertyChangedEventHandler PropertyChanged;
+        public string Name
+        {
+            get
+            {
+                return this._name;
+            }
+            set
+            {
+                this._name = value;
+                this.OnPropertyChanged("Name");
+            }
+        }
 
         private void OnPropertyChanged(string propertyName)
         {
-            if (PropertyChanged != null)
+            if (this.PropertyChanged != null)
             {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+                this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
     }

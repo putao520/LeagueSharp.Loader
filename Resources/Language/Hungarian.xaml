@@ -1,6 +1,6 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:system="clr-namespace:System;assembly=mscorlib">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib">
 
     <!-- MainWindow TopBar -->
     <system:String x:Key="Website">Weboldal</system:String>
@@ -27,11 +27,11 @@
     <system:String x:Key="MenuShare">Megosztás</system:String>
     <system:String x:Key="MenuViewLog">Napló megtekintése</system:String>
 
-	<!-- MainWindow Profiles Menu -->
+    <!-- MainWindow Profiles Menu -->
     <system:String x:Key="NewProfile">Új</system:String>
     <system:String x:Key="ChangeName">Átnevezés</system:String>
     <system:String x:Key="DeleteProfile">Törlés</system:String>
-	
+
     <!-- MainWindow Buttons -->
     <system:String x:Key="UpdateAll">Mind Frissítése</system:String>
     <system:String x:Key="CompileAll">Mind Összeállítása</system:String>
@@ -68,9 +68,9 @@
     <system:String x:Key="Inject">Betöltés</system:String>
     <system:String x:Key="Logout">Kijelentkezés</system:String>
     <system:String x:Key="DefaultHotkeys">Visszaállítás</system:String>
-	<system:String x:Key="Language">Nyelv</system:String>
+    <system:String x:Key="Language">Nyelv</system:String>
     <system:String x:Key="Color">Color</system:String>
-	
+
     <!-- Settings Hotkeys -->
     <system:String x:Key="Hotkeys">Gyorsbillentyűk</system:String>
     <system:String x:Key="Hotkey">Gyorsbillentyű</system:String>
@@ -118,17 +118,17 @@
     <system:String x:Key="New">Új</system:String>
     <system:String x:Key="Edit">Szerkesztés</system:String>
     <system:String x:Key="Clone">Duplikálás</system:String>
-    
-	<system:String x:Key="Checking">Ellenőrzés...</system:String>
+
+    <system:String x:Key="Checking">Ellenőrzés...</system:String>
     <system:String x:Key="Updated">Frissítve</system:String>
     <system:String x:Key="OUTDATED">ELAVULT</system:String>
-	<system:String x:Key="Unknown">Ismeretlen</system:String>
-	<system:String x:Key="UpdateStatus">Státusz</system:String>
-	
-	<system:String x:Key="LoaderUpdateFailed">Sikertelen volt a frissítés letöltése, kérem frissítsen manuálisan. Hiba: </system:String>
+    <system:String x:Key="Unknown">Ismeretlen</system:String>
+    <system:String x:Key="UpdateStatus">Státusz</system:String>
+
+    <system:String x:Key="LoaderUpdateFailed">Sikertelen volt a frissítés letöltése, kérem frissítsen manuálisan. Hiba: </system:String>
     <system:String x:Key="LeagueNotFound">Nem sikerült a "League of Legends.exe" helyét meghatározni, próbáljon meg egy egyéni játék-szobát elindítani.</system:String>
     <system:String x:Key="UpdateSuccess">LeagueSharp sikeresen frissítve a jelenleg telepített league of legends verziójához.</system:String>
     <system:String x:Key="UpdateUnknown">Nem sikerült meghatározni, hogy a LeagueSharp frissítve van e a jelenleg telepített League Of Legends verziójához, ez általában azt jelenti, hogy a www.joduska.me webkiszolgáló nem elérhető.</system:String>
-	<system:String x:Key="NotUpdateNeeded">LeagueSharp már frissítve van a jelenleg telepített league of legends verziójához.</system:String>
+    <system:String x:Key="NotUpdateNeeded">LeagueSharp már frissítve van a jelenleg telepített league of legends verziójához.</system:String>
     <system:String x:Key="RandomizationFailed">Could not randomize the dll names.</system:String>
 </ResourceDictionary>

@@ -1,6 +1,6 @@
 ﻿#region LICENSE
 
-// Copyright 2014 LeagueSharp.Loader
+// Copyright 2015-2015 LeagueSharp.Loader
 // Auth.cs is part of LeagueSharp.Loader.
 // 
 // LeagueSharp.Loader is free software: you can redistribute it and/or modify
@@ -23,10 +23,11 @@ namespace LeagueSharp.Loader.Class
     #region
 
     using System;
+    using System.IO;
     using System.Net;
     using System.Text;
-    using System.IO;
     using System.Text.RegularExpressions;
+
     using LeagueSharp.Loader.Data;
 
     #endregion
@@ -34,7 +35,13 @@ namespace LeagueSharp.Loader.Class
     internal static class Auth
     {
         public const string AuthServer = "loader.joduska.me";
+
         public static bool Authed { get; set; }
+
+        public static string Hash(string input)
+        {
+            return Utility.Md5Hash(IPB_Clean_Password(input));
+        }
 
         public static Tuple<bool, string> Login(string user, string hash)
         {
@@ -48,7 +55,7 @@ namespace LeagueSharp.Loader.Class
                 var data = "p=" + hash;
                 var dataBytes = Encoding.UTF8.GetBytes(data);
 
-                var wr = HttpWebRequest.Create("https://" + AuthServer + "/login/" + WebUtility.UrlEncode(user));
+                var wr = WebRequest.Create("https://" + AuthServer + "/login/" + WebUtility.UrlEncode(user));
                 wr.Timeout = 2000;
                 wr.ContentLength = dataBytes.Length;
                 wr.Method = "POST";
@@ -66,7 +73,9 @@ namespace LeagueSharp.Loader.Class
                 {
                     if ((int)((HttpWebResponse)ex.Response).StatusCode == 403)
                     {
-                        return new Tuple<bool, string>(false, string.Format(Utility.GetMultiLanguageText("WrongAuth"), "www.joduska.me"));
+                        return new Tuple<bool, string>(
+                            false,
+                            string.Format(Utility.GetMultiLanguageText("WrongAuth"), "www.joduska.me"));
                     }
                 }
                 if (response != null && response.GetResponseStream() != null)
@@ -106,11 +115,6 @@ namespace LeagueSharp.Loader.Class
             pass = pass.Replace("'", "&#39;");
 
             return pass;
-        }
-
-        public static string Hash(string input)
-        {
-            return Utility.Md5Hash(IPB_Clean_Password(input));
         }
     }
 }

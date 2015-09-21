@@ -1,6 +1,6 @@
 ﻿#region LICENSE
 
-// Copyright 2014 LeagueSharp.Loader
+// Copyright 2015-2015 LeagueSharp.Loader
 // GitUpdater.cs is part of LeagueSharp.Loader.
 // 
 // LeagueSharp.Loader is free software: you can redistribute it and/or modify
@@ -18,8 +18,6 @@
 
 #endregion
 
-using System.Linq;
-
 namespace LeagueSharp.Loader.Class
 {
     #region
@@ -27,77 +25,21 @@ namespace LeagueSharp.Loader.Class
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
+
     using LeagueSharp.Loader.Data;
+
     using LibGit2Sharp;
 
     #endregion
 
     internal class GitUpdater
     {
-        public static string Update(string url, Log log, string directory, string repoDirectory = null)
-        {
-            if (string.IsNullOrWhiteSpace(url))
-            {
-                Utility.Log(LogStatus.Skipped, "Updater", string.Format("No Url specified - {0}", url), log);
-            }
-            else
-            {
-                try
-                {
-                    var dir = Path.Combine(directory, url.GetHashCode().ToString("X"), "trunk");
-
-                    if (Repository.IsValid(dir))
-                    {
-                        using (var repo = new Repository(dir))
-                        {
-                            repo.Config.Set("user.name", Config.Instance.Username);
-                            repo.Config.Set("user.email", Config.Instance.Username + "@joduska.me");
-                            repo.Fetch("origin");
-
-                            if (repoDirectory != null)
-                            {
-                                repo.CheckoutPaths("origin/master", new List<String>() { repoDirectory }, 
-                                    new CheckoutOptions { CheckoutModifiers = CheckoutModifiers.Force });
-                            }
-  
-                            repo.Checkout("origin/master", new CheckoutOptions { CheckoutModifiers = CheckoutModifiers.Force });
-                        }
-
-                    }
-                    else
-                    {
-                        var oldPath = Path.Combine(directory, url.GetHashCode().ToString("X"));
-
-                        if (Directory.Exists(oldPath))
-                        {
-                            Directory.Delete(oldPath, true);
-                        }
-
-                        Repository.Clone(url, dir, new CloneOptions { Checkout = true });
-                        using (var repo = new Repository(dir))
-                        {
-                            repo.Config.Set("user.name", Config.Instance.Username);
-                            repo.Config.Set("user.email", Config.Instance.Username + "@joduska.me");
-                        }
-                    }
-
-                    return dir;
-                }
-                catch (Exception ex)
-                {
-                    Utility.Log(LogStatus.Error, "Updater", string.Format("{0} - {1}", ex.Message, url), log);
-                }
-            }
-
-            return string.Empty;
-        }
-
         /// <summary>
-        /// Clearing unused folders to reduce file space usage.
+        ///     Clearing unused folders to reduce file space usage.
         /// </summary>
         /// <param name="repoDirectory">Path to unused folder</param>
         /// <param name="log">Log</param>
-
         public static void ClearUnusedRepoFolder(string repoDirectory, Log log)
         {
             try
@@ -141,7 +83,70 @@ namespace LeagueSharp.Loader.Class
                     }
                 }
             }
-            catch (Exception) { }
+            catch (Exception)
+            {
+            }
+        }
+
+        public static string Update(string url, Log log, string directory, string repoDirectory = null)
+        {
+            if (string.IsNullOrWhiteSpace(url))
+            {
+                Utility.Log(LogStatus.Skipped, "Updater", string.Format("No Url specified - {0}", url), log);
+            }
+            else
+            {
+                try
+                {
+                    var dir = Path.Combine(directory, url.GetHashCode().ToString("X"), "trunk");
+
+                    if (Repository.IsValid(dir))
+                    {
+                        using (var repo = new Repository(dir))
+                        {
+                            repo.Config.Set("user.name", Config.Instance.Username);
+                            repo.Config.Set("user.email", Config.Instance.Username + "@joduska.me");
+                            repo.Fetch("origin");
+
+                            if (repoDirectory != null)
+                            {
+                                repo.CheckoutPaths(
+                                    "origin/master",
+                                    new List<string>() { repoDirectory },
+                                    new CheckoutOptions { CheckoutModifiers = CheckoutModifiers.Force });
+                            }
+
+                            repo.Checkout(
+                                "origin/master",
+                                new CheckoutOptions { CheckoutModifiers = CheckoutModifiers.Force });
+                        }
+                    }
+                    else
+                    {
+                        var oldPath = Path.Combine(directory, url.GetHashCode().ToString("X"));
+
+                        if (Directory.Exists(oldPath))
+                        {
+                            Directory.Delete(oldPath, true);
+                        }
+
+                        Repository.Clone(url, dir, new CloneOptions { Checkout = true });
+                        using (var repo = new Repository(dir))
+                        {
+                            repo.Config.Set("user.name", Config.Instance.Username);
+                            repo.Config.Set("user.email", Config.Instance.Username + "@joduska.me");
+                        }
+                    }
+
+                    return dir;
+                }
+                catch (Exception ex)
+                {
+                    Utility.Log(LogStatus.Error, "Updater", string.Format("{0} - {1}", ex.Message, url), log);
+                }
+            }
+
+            return string.Empty;
         }
     }
 }

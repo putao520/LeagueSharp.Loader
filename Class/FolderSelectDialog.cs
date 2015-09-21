@@ -1,106 +1,135 @@
-﻿using System;
-using System.Windows.Forms;
+﻿#region LICENSE
 
-// ------------------------------------------------------------------
+// Copyright 2015-2015 LeagueSharp.Loader
+// FolderSelectDialog.cs is part of LeagueSharp.Loader.
+// 
+// LeagueSharp.Loader is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// LeagueSharp.Loader is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with LeagueSharp.Loader. If not, see <http://www.gnu.org/licenses/>.
+
+#endregion
+
+ // ------------------------------------------------------------------
 // Wraps System.Windows.Forms.OpenFileDialog to make it present
 // a vista-style dialog.
 // ------------------------------------------------------------------
 
 namespace LeagueSharp.Loader.Class
 {
+    using System;
+    using System.Windows.Forms;
+
     /// <summary>
-    /// Wraps System.Windows.Forms.OpenFileDialog to make it present
-    /// a vista-style dialog.
+    ///     Wraps System.Windows.Forms.OpenFileDialog to make it present
+    ///     a vista-style dialog.
     /// </summary>
     public class FolderSelectDialog
     {
-        // Wrapped dialog
-        System.Windows.Forms.OpenFileDialog ofd = null;
-
         /// <summary>
-        /// Default constructor
+        ///     Default constructor
         /// </summary>
         public FolderSelectDialog()
         {
-            ofd = new System.Windows.Forms.OpenFileDialog();
+            this.ofd = new OpenFileDialog();
 
-            ofd.Filter = "Folders|\n";
-            ofd.AddExtension = false;
-            ofd.CheckFileExists = false;
-            ofd.DereferenceLinks = true;
-            ofd.Multiselect = false;
+            this.ofd.Filter = "Folders|\n";
+            this.ofd.AddExtension = false;
+            this.ofd.CheckFileExists = false;
+            this.ofd.DereferenceLinks = true;
+            this.ofd.Multiselect = false;
         }
 
-        #region Properties
+        // Wrapped dialog
+        private OpenFileDialog ofd = null;
 
         /// <summary>
-        /// Gets/Sets the initial folder to be selected. A null value selects the current directory.
-        /// </summary>
-        public string InitialDirectory
-        {
-            get { return ofd.InitialDirectory; }
-            set { ofd.InitialDirectory = value == null || value.Length == 0 ? Environment.CurrentDirectory : value; }
-        }
-
-        /// <summary>
-        /// Gets/Sets the title to show in the dialog
-        /// </summary>
-        public string Title
-        {
-            get { return ofd.Title; }
-            set { ofd.Title = value == null ? "Select a folder" : value; }
-        }
-
-        /// <summary>
-        /// Gets the selected folder
+        ///     Gets the selected folder
         /// </summary>
         public string FileName
         {
-            get { return ofd.FileName; }
+            get
+            {
+                return this.ofd.FileName;
+            }
         }
 
-        #endregion
-
-        #region Methods
+        /// <summary>
+        ///     Gets/Sets the initial folder to be selected. A null value selects the current directory.
+        /// </summary>
+        public string InitialDirectory
+        {
+            get
+            {
+                return this.ofd.InitialDirectory;
+            }
+            set
+            {
+                this.ofd.InitialDirectory = value == null || value.Length == 0 ? Environment.CurrentDirectory : value;
+            }
+        }
 
         /// <summary>
-        /// Shows the dialog
+        ///     Gets/Sets the title to show in the dialog
+        /// </summary>
+        public string Title
+        {
+            get
+            {
+                return this.ofd.Title;
+            }
+            set
+            {
+                this.ofd.Title = value == null ? "Select a folder" : value;
+            }
+        }
+
+        /// <summary>
+        ///     Shows the dialog
         /// </summary>
         /// <returns>True if the user presses OK else false</returns>
         public bool ShowDialog()
         {
-            return ShowDialog(IntPtr.Zero);
+            return this.ShowDialog(IntPtr.Zero);
         }
 
         /// <summary>
-        /// Shows the dialog
+        ///     Shows the dialog
         /// </summary>
         /// <param name="hWndOwner">Handle of the control to be parent</param>
         /// <returns>True if the user presses OK else false</returns>
         public bool ShowDialog(IntPtr hWndOwner)
         {
-            bool flag = false;
+            var flag = false;
 
             if (Environment.OSVersion.Version.Major >= 6)
             {
                 var r = new Reflector("System.Windows.Forms");
 
                 uint num = 0;
-                Type typeIFileDialog = r.GetType("FileDialogNative.IFileDialog");
-                object dialog = r.Call(ofd, "CreateVistaDialog");
-                r.Call(ofd, "OnBeforeVistaDialog", dialog);
+                var typeIFileDialog = r.GetType("FileDialogNative.IFileDialog");
+                var dialog = r.Call(this.ofd, "CreateVistaDialog");
+                r.Call(this.ofd, "OnBeforeVistaDialog", dialog);
 
-                uint options = (uint)r.CallAs(typeof(System.Windows.Forms.FileDialog), ofd, "GetOptions");
+                var options = (uint)r.CallAs(typeof(FileDialog), this.ofd, "GetOptions");
                 options |= (uint)r.GetEnum("FileDialogNative.FOS", "FOS_PICKFOLDERS");
                 r.CallAs(typeIFileDialog, dialog, "SetOptions", options);
 
-                object pfde = r.New("FileDialog.VistaDialogEvents", ofd);
-                object[] parameters = new object[] { pfde, num };
+                var pfde = r.New("FileDialog.VistaDialogEvents", this.ofd);
+                var parameters = new object[] { pfde, num };
                 r.CallAs2(typeIFileDialog, dialog, "Advise", parameters);
                 num = (uint)parameters[1];
                 try
                 {
-                    int num2 = (int)r.CallAs(typeIFileDialog, dialog, "Show", hWndOwner);
+                    var num2 = (int)r.CallAs(typeIFileDialog, dialog, "Show", hWndOwner);
                     flag = 0 == num2;
                 }
                 finally
@@ -115,40 +144,43 @@ namespace LeagueSharp.Loader.Class
                 fbd.Description = this.Title;
                 fbd.SelectedPath = this.InitialDirectory;
                 fbd.ShowNewFolderButton = false;
-                if (fbd.ShowDialog(new WindowWrapper(hWndOwner)) != DialogResult.OK) return false;
-                ofd.FileName = fbd.SelectedPath;
+                if (fbd.ShowDialog(new WindowWrapper(hWndOwner)) != DialogResult.OK)
+                {
+                    return false;
+                }
+                this.ofd.FileName = fbd.SelectedPath;
                 flag = true;
             }
 
             return flag;
         }
-
-        #endregion
     }
 
     /// <summary>
-    /// Creates IWin32Window around an IntPtr
+    ///     Creates IWin32Window around an IntPtr
     /// </summary>
-    public class WindowWrapper : System.Windows.Forms.IWin32Window
+    public class WindowWrapper : IWin32Window
     {
         /// <summary>
-        /// Constructor
+        ///     Constructor
         /// </summary>
         /// <param name="handle">Handle to wrap</param>
         public WindowWrapper(IntPtr handle)
         {
-            _hwnd = handle;
-        }
-
-        /// <summary>
-        /// Original ptr
-        /// </summary>
-        public IntPtr Handle
-        {
-            get { return _hwnd; }
+            this._hwnd = handle;
         }
 
         private IntPtr _hwnd;
-    }
 
+        /// <summary>
+        ///     Original ptr
+        /// </summary>
+        public IntPtr Handle
+        {
+            get
+            {
+                return this._hwnd;
+            }
+        }
+    }
 }

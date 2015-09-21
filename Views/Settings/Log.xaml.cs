@@ -1,6 +1,6 @@
 ﻿#region LICENSE
 
-// Copyright 2014 LeagueSharp.Loader
+// Copyright 2015-2015 LeagueSharp.Loader
 // Log.xaml.cs is part of LeagueSharp.Loader.
 // 
 // LeagueSharp.Loader is free software: you can redistribute it and/or modify
@@ -26,6 +26,7 @@ namespace LeagueSharp.Loader.Views.Settings
     using System.IO;
     using System.Windows;
     using System.Windows.Controls;
+
     using LeagueSharp.Loader.Data;
 
     #endregion
@@ -37,8 +38,8 @@ namespace LeagueSharp.Loader.Views.Settings
     {
         public Log()
         {
-            InitializeComponent();
-            LogsDataGrid.ItemsSource = Logs.MainLog.Items;
+            this.InitializeComponent();
+            this.LogsDataGrid.ItemsSource = Logs.MainLog.Items;
         }
 
         private void OpenFolderButton_Click(object sender, RoutedEventArgs e)

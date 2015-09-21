@@ -1,6 +1,6 @@
 ﻿#region LICENSE
 
-// Copyright 2014 LeagueSharp.Loader
+// Copyright 2015-2015 LeagueSharp.Loader
 // Compiler.cs is part of LeagueSharp.Loader.
 // 
 // LeagueSharp.Loader is free software: you can redistribute it and/or modify
@@ -24,7 +24,9 @@ namespace LeagueSharp.Loader.Class
 
     using System;
     using System.IO;
+
     using LeagueSharp.Loader.Data;
+
     using Microsoft.Build.Evaluation;
     using Microsoft.Build.Logging;
 
@@ -63,10 +65,12 @@ namespace LeagueSharp.Loader.Class
                     ProjectCollection.GlobalProjectCollection.UnregisterAllLoggers();
                     ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
                     Utility.Log(
-                        result ? LogStatus.Ok : LogStatus.Error, "Compiler",
+                        result ? LogStatus.Ok : LogStatus.Error,
+                        "Compiler",
                         result
                             ? string.Format("Compile - {0}", project.FullPath)
-                            : string.Format("Compile - Check ./logs/ for details - {0}", project.FullPath), log);
+                            : string.Format("Compile - Check ./logs/ for details - {0}", project.FullPath),
+                        log);
 
                     if (!result && doLog && File.Exists(logfile))
                     {
@@ -74,7 +78,8 @@ namespace LeagueSharp.Loader.Class
                         if (!string.IsNullOrWhiteSpace(pathDir))
                         {
                             File.Move(
-                                logfile, Path.Combine(Directories.LogsDir, ("Error - " + Path.GetFileName(logfile))));
+                                logfile,
+                                Path.Combine(Directories.LogsDir, ("Error - " + Path.GetFileName(logfile))));
                         }
                     }
                     else if (result && File.Exists(logfile))
@@ -96,13 +101,16 @@ namespace LeagueSharp.Loader.Class
             if (project != null)
             {
                 var extension = project.GetPropertyValue("OutputType").ToLower().Contains("exe")
-                    ? ".exe"
-                    : (project.GetPropertyValue("OutputType").ToLower() == "library" ? ".dll" : string.Empty);
+                                    ? ".exe"
+                                    : (project.GetPropertyValue("OutputType").ToLower() == "library"
+                                           ? ".dll"
+                                           : string.Empty);
                 var pathDir = Path.GetDirectoryName(project.FullPath);
                 if (!string.IsNullOrWhiteSpace(extension) && !string.IsNullOrWhiteSpace(pathDir))
                 {
                     return Path.Combine(
-                        pathDir, project.GetPropertyValue("OutputPath"),
+                        pathDir,
+                        project.GetPropertyValue("OutputPath"),
                         (project.GetPropertyValue("AssemblyName") + extension));
                 }
             }

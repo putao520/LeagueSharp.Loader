@@ -1,6 +1,6 @@
 ﻿#region LICENSE
 
-// Copyright 2014 LeagueSharp.Loader
+// Copyright 2015-2015 LeagueSharp.Loader
 // Profile.cs is part of LeagueSharp.Loader.
 // 
 // LeagueSharp.Loader is free software: you can redistribute it and/or modify
@@ -30,35 +30,42 @@ namespace LeagueSharp.Loader.Class
     public class Profile : INotifyPropertyChanged
     {
         private ObservableCollection<LeagueSharpAssembly> _installedAssemblies;
+
         private string _name;
-
-        public string Name
-        {
-            get { return _name; }
-            set
-            {
-                _name = value;
-                OnPropertyChanged("Name");
-            }
-        }
-
-        public ObservableCollection<LeagueSharpAssembly> InstalledAssemblies
-        {
-            get { return _installedAssemblies; }
-            set
-            {
-                _installedAssemblies = value;
-                OnPropertyChanged("InstalledAssemblies");
-            }
-        }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
+        public ObservableCollection<LeagueSharpAssembly> InstalledAssemblies
+        {
+            get
+            {
+                return this._installedAssemblies;
+            }
+            set
+            {
+                this._installedAssemblies = value;
+                this.OnPropertyChanged("InstalledAssemblies");
+            }
+        }
+
+        public string Name
+        {
+            get
+            {
+                return this._name;
+            }
+            set
+            {
+                this._name = value;
+                this.OnPropertyChanged("Name");
+            }
+        }
+
         public void OnPropertyChanged(string propertyName)
         {
-            if (PropertyChanged != null)
+            if (this.PropertyChanged != null)
             {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+                this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
     }

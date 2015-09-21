@@ -1,6 +1,6 @@
 ﻿#region LICENSE
 
-// Copyright 2014 LeagueSharp.Loader
+// Copyright 2015-2015 LeagueSharp.Loader
 // LeagueSharpAssembly.cs is part of LeagueSharp.Loader.
 // 
 // LeagueSharp.Loader is free software: you can redistribute it and/or modify
@@ -23,14 +23,16 @@ namespace LeagueSharp.Loader.Class
     #region
 
     using System;
-    using System.Linq;
     using System.Collections.Generic;
     using System.ComponentModel;
     using System.IO;
+    using System.Linq;
     using System.Reflection;
     using System.Windows;
     using System.Xml.Serialization;
-    using Data;
+
+    using LeagueSharp.Loader.Data;
+
     using Microsoft.Build.Evaluation;
 
     #endregion
@@ -63,51 +65,70 @@ namespace LeagueSharp.Loader.Class
     public enum AssemblyType
     {
         Library,
+
         Executable,
+
         Unknown,
     }
 
     public enum AssemblyStatus
     {
         Ready,
+
         Updating,
+
         UpdatingError,
+
         CompilingError,
+
         Compiling,
     }
 
-    [XmlType(AnonymousType = true), Serializable]
+    [XmlType(AnonymousType = true)]
+    [Serializable]
     public class LeagueSharpAssembly : INotifyPropertyChanged
     {
-        private string _displayName = "";
-        private bool _injectChecked;
-        private bool _installChecked;
-        private string _pathToProjectFile = "";
-        private string _svnUrl;
-        private AssemblyType? _type = null;
-        private string _pathToBinary = null;
-
         public LeagueSharpAssembly()
         {
-            Status = AssemblyStatus.Ready;
+            this.Status = AssemblyStatus.Ready;
         }
 
         public LeagueSharpAssembly(string name, string path, string svnUrl)
         {
-            Name = name;
-            PathToProjectFile = path;
-            SvnUrl = svnUrl;
-            Description = "";
-            Status = AssemblyStatus.Ready;
+            this.Name = name;
+            this.PathToProjectFile = path;
+            this.SvnUrl = svnUrl;
+            this.Description = "";
+            this.Status = AssemblyStatus.Ready;
         }
 
-        public bool InstallChecked
+        private string _displayName = "";
+
+        private bool _injectChecked;
+
+        private bool _installChecked;
+
+        private string _pathToBinary = null;
+
+        private string _pathToProjectFile = "";
+
+        private string _svnUrl;
+
+        private AssemblyType? _type = null;
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public string Description { get; set; }
+
+        public string DisplayName
         {
-            get { return _installChecked; }
+            get
+            {
+                return this._displayName == "" ? this.Name : this._displayName;
+            }
             set
             {
-                _installChecked = value;
-                OnPropertyChanged("InstallChecked");
+                this._displayName = value;
             }
         }
 
@@ -115,47 +136,81 @@ namespace LeagueSharp.Loader.Class
         {
             get
             {
-                if (Type == AssemblyType.Library)
+                if (this.Type == AssemblyType.Library)
                 {
                     return true;
                 }
 
-                return _injectChecked;
+                return this._injectChecked;
             }
             set
             {
-                _injectChecked = value;
-                OnPropertyChanged("InjectChecked");
+                this._injectChecked = value;
+                this.OnPropertyChanged("InjectChecked");
             }
         }
 
-        public AssemblyStatus Status { get; set; }
-
-        public string DisplayName
+        public bool InstallChecked
         {
-            get { return _displayName == "" ? Name : _displayName; }
-            set { _displayName = value; }
+            get
+            {
+                return this._installChecked;
+            }
+            set
+            {
+                this._installChecked = value;
+                this.OnPropertyChanged("InstallChecked");
+            }
+        }
+
+        public string Location
+        {
+            get
+            {
+                return this.SvnUrl == "" ? "Local" : this.SvnUrl;
+            }
         }
 
         public string Name { get; set; }
+
+        public string PathToBinary
+        {
+            get
+            {
+                if (this._pathToBinary == null)
+                {
+                    this._pathToBinary =
+                        Path.Combine(
+                            (this.Type == AssemblyType.Library ? Directories.CoreDirectory : Directories.AssembliesDir),
+                            (this.Type == AssemblyType.Library ? "" : this.PathToProjectFile.GetHashCode().ToString("X"))
+                            + Path.GetFileName(Compiler.GetOutputFilePath(this.GetProject())));
+                }
+
+                return this._pathToBinary;
+            }
+        }
 
         public string PathToProjectFile
         {
             get
             {
-                if (File.Exists(_pathToProjectFile))
+                if (File.Exists(this._pathToProjectFile))
                 {
-                    return _pathToProjectFile;
+                    return this._pathToProjectFile;
                 }
 
                 try
                 {
-                    var folderToSearch = Path.Combine(Directories.RepositoryDir, SvnUrl.GetHashCode().ToString("X"), "trunk");
-                    var projectFile = Directory.GetFiles(folderToSearch, "*.csproj", SearchOption.AllDirectories)
-                        .FirstOrDefault(file => Path.GetFileNameWithoutExtension(file) == Name);
+                    var folderToSearch = Path.Combine(
+                        Directories.RepositoryDir,
+                        this.SvnUrl.GetHashCode().ToString("X"),
+                        "trunk");
+                    var projectFile =
+                        Directory.GetFiles(folderToSearch, "*.csproj", SearchOption.AllDirectories)
+                                 .FirstOrDefault(file => Path.GetFileNameWithoutExtension(file) == this.Name);
                     if (projectFile != default(string))
                     {
-                        _pathToProjectFile = projectFile;
+                        this._pathToProjectFile = projectFile;
                         return projectFile;
                     }
                 }
@@ -163,129 +218,145 @@ namespace LeagueSharp.Loader.Class
                 {
                     // ignored
                 }
-                
-                return _pathToProjectFile;
+
+                return this._pathToProjectFile;
             }
             set
             {
                 if (!value.Contains("%AppData%"))
                 {
-                    _pathToProjectFile = value;
+                    this._pathToProjectFile = value;
                 }
                 else
                 {
-                    _pathToProjectFile = value.Replace(
-                        "%AppData%", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData));
+                    this._pathToProjectFile = value.Replace(
+                        "%AppData%",
+                        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData));
                 }
             }
         }
 
-        public string PathToBinary
+        public AssemblyStatus Status { get; set; }
+
+        public string SvnUrl
         {
             get
             {
-                if (_pathToBinary == null)
-                {
-                    _pathToBinary =
-                        Path.Combine(
-                            (Type == AssemblyType.Library ? Directories.CoreDirectory : Directories.AssembliesDir),
-                            (Type == AssemblyType.Library ? "" : PathToProjectFile.GetHashCode().ToString("X")) +
-                            Path.GetFileName(Compiler.GetOutputFilePath(GetProject())));
-                }
-
-                return _pathToBinary;
+                return this._svnUrl;
+            }
+            set
+            {
+                this._svnUrl = value;
+                this.OnPropertyChanged("SvnUrl");
             }
         }
-
-        public string Location
-        {
-            get { return SvnUrl == "" ? "Local" : SvnUrl; }
-        }
-
 
         public AssemblyType Type
         {
             get
             {
-                if (_type == null)
+                if (this._type == null)
                 {
-                    var project = GetProject();
+                    var project = this.GetProject();
                     if (project != null)
                     {
-                        _type = project.GetPropertyValue("OutputType").ToLower().Contains("exe")
-                            ? AssemblyType.Executable
-                            : AssemblyType.Library;
+                        this._type = project.GetPropertyValue("OutputType").ToLower().Contains("exe")
+                                         ? AssemblyType.Executable
+                                         : AssemblyType.Library;
                     }
                 }
 
-                return _type ?? AssemblyType.Unknown;
+                return this._type ?? AssemblyType.Unknown;
             }
         }
-
-        public string Description { get; set; }
 
         public string Version
         {
             get
             {
-                if (Status != AssemblyStatus.Ready)
+                if (this.Status != AssemblyStatus.Ready)
                 {
-                    return Status.ToString();
+                    return this.Status.ToString();
                 }
 
-                if (!string.IsNullOrEmpty(PathToBinary) && File.Exists(PathToBinary))
+                if (!string.IsNullOrEmpty(this.PathToBinary) && File.Exists(this.PathToBinary))
                 {
-                    return AssemblyName.GetAssemblyName(PathToBinary).Version.ToString();
+                    return AssemblyName.GetAssemblyName(this.PathToBinary).Version.ToString();
                 }
                 return "?";
             }
         }
 
-        public string SvnUrl
+        public bool Compile()
         {
-            get { return _svnUrl; }
-            set
+            this.Status = AssemblyStatus.Compiling;
+            this.OnPropertyChanged("Version");
+            var project = this.GetProject();
+
+            if (Compiler.Compile(project, Path.Combine(Directories.LogsDir, this.Name + ".txt"), Logs.MainLog))
             {
-                _svnUrl = value;
-                OnPropertyChanged("SvnUrl");
+                var result = Utility.OverwriteFile(Compiler.GetOutputFilePath(project), this.PathToBinary);
+
+                Utility.ClearDirectory(Path.Combine(project.DirectoryPath, "bin"));
+                Utility.ClearDirectory(Path.Combine(project.DirectoryPath, "obj"));
+
+                if (result)
+                {
+                    this.Status = AssemblyStatus.Ready;
+                }
+                else
+                {
+                    this.Status = AssemblyStatus.CompilingError;
+                }
+
+                this.OnPropertyChanged("Version");
+                this.OnPropertyChanged("Type");
+                return result;
             }
+
+            this.Status = AssemblyStatus.CompilingError;
+            this.OnPropertyChanged("Version");
+            return false;
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public LeagueSharpAssembly Copy()
+        {
+            return new LeagueSharpAssembly(this.Name, this.PathToProjectFile, this.SvnUrl);
+        }
 
         public override bool Equals(object obj)
         {
             if (obj is LeagueSharpAssembly)
             {
-                return ((LeagueSharpAssembly) obj).PathToProjectFile == PathToProjectFile;
+                return ((LeagueSharpAssembly)obj).PathToProjectFile == this.PathToProjectFile;
             }
             return false;
         }
 
         public override int GetHashCode()
         {
-            return PathToProjectFile.GetHashCode();
+            return this.PathToProjectFile.GetHashCode();
         }
 
         public Project GetProject()
         {
-            if (File.Exists(PathToProjectFile))
+            if (File.Exists(this.PathToProjectFile))
             {
                 try
                 {
-                    var pf = new ProjectFile(PathToProjectFile, Logs.MainLog)
-                    {
-                        Configuration = "Release",
-                        PlatformTarget = "x86",
-                        ReferencesPath = Directories.CoreDirectory,
-                        UpdateReferences = true,
-                        PostbuildEvent = true,
-                        PrebuildEvent = true,
-                        ResetOutputPath = true
-                    };
+                    var pf = new ProjectFile(this.PathToProjectFile, Logs.MainLog)
+                        {
+                            Configuration = "Release",
+                            PlatformTarget = "x86",
+                            ReferencesPath = Directories.CoreDirectory,
+                            UpdateReferences = true,
+                            PostbuildEvent = true,
+                            PrebuildEvent = true,
+                            ResetOutputPath = true
+                        };
                     pf.Change();
 
-                   /* _pathToBinary =
+                    /* _pathToBinary =
                         Path.Combine(
                             (Type == AssemblyType.Library ? Directories.CoreDirectory : Directories.AssembliesDir),
                             (Type == AssemblyType.Library ? "" : PathToProjectFile.GetHashCode().ToString("X")) +
@@ -306,80 +377,43 @@ namespace LeagueSharp.Loader.Class
         }
 
         /// <summary>
-        /// Returns the relative path to the Project after the trunk folder.
+        ///     Returns the relative path to the Project after the trunk folder.
         /// </summary>
         /// <returns></returns>
-        public String GetProjectPathRelative()
+        public string GetProjectPathRelative()
         {
-            var dir = PathToProjectFile.Remove(PathToProjectFile.LastIndexOf("\\"));
+            var dir = this.PathToProjectFile.Remove(this.PathToProjectFile.LastIndexOf("\\"));
             return dir.Remove(0, dir.LastIndexOf("trunk\\") + "trunk\\".Length);
         }
 
         public void Update()
         {
-            if (Status == AssemblyStatus.Updating || SvnUrl == "")
+            if (this.Status == AssemblyStatus.Updating || this.SvnUrl == "")
             {
                 return;
             }
 
-            Status = AssemblyStatus.Updating;
-            OnPropertyChanged("Version");
+            this.Status = AssemblyStatus.Updating;
+            this.OnPropertyChanged("Version");
             try
             {
-                GitUpdater.Update(SvnUrl, Logs.MainLog, Directories.RepositoryDir, GetProjectPathRelative());
+                GitUpdater.Update(this.SvnUrl, Logs.MainLog, Directories.RepositoryDir, this.GetProjectPathRelative());
             }
             catch (Exception e)
             {
                 MessageBox.Show(e.ToString());
             }
 
-            Status = AssemblyStatus.Ready;
-            OnPropertyChanged("Version");
-        }
-
-        public bool Compile()
-        {
-            Status = AssemblyStatus.Compiling;
-            OnPropertyChanged("Version");
-            var project = GetProject();
-
-            if (Compiler.Compile(project, Path.Combine(Directories.LogsDir, Name + ".txt"), Logs.MainLog))
-            {
-                var result = Utility.OverwriteFile(Compiler.GetOutputFilePath(project), PathToBinary);
-
-                Utility.ClearDirectory(Path.Combine(project.DirectoryPath, "bin"));
-                Utility.ClearDirectory(Path.Combine(project.DirectoryPath, "obj"));
-
-                if (result)
-                {
-                    Status = AssemblyStatus.Ready;
-                }
-                else
-                {
-                    Status = AssemblyStatus.CompilingError;
-                }
-
-                OnPropertyChanged("Version");
-                OnPropertyChanged("Type");
-                return result;
-            }
-
-            Status = AssemblyStatus.CompilingError;
-            OnPropertyChanged("Version");
-            return false;
+            this.Status = AssemblyStatus.Ready;
+            this.OnPropertyChanged("Version");
         }
 
         private void OnPropertyChanged(string propertyName)
         {
-            if (PropertyChanged != null)
+            if (this.PropertyChanged != null)
             {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+                this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
-        }
-
-        public LeagueSharpAssembly Copy()
-        {
-            return new LeagueSharpAssembly(Name, PathToProjectFile, SvnUrl);
         }
     }
 }

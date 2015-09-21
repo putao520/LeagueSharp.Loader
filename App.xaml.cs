@@ -1,6 +1,6 @@
 ﻿#region LICENSE
 
-// Copyright 2014 LeagueSharp.Loader
+// Copyright 2015-2015 LeagueSharp.Loader
 // App.xaml.cs is part of LeagueSharp.Loader.
 // 
 // LeagueSharp.Loader is free software: you can redistribute it and/or modify
@@ -18,36 +18,30 @@
 
 #endregion
 
-using System.Diagnostics;
-
 namespace LeagueSharp.Loader
 {
-    #region
-
     using System;
     using System.Collections.Generic;
-    using System.Globalization;
+    using System.Diagnostics;
     using System.IO;
     using System.Linq;
     using System.Reflection;
     using System.Runtime.InteropServices;
     using System.Threading;
     using System.Windows;
+
     using LeagueSharp.Loader.Class;
     using LeagueSharp.Loader.Data;
-    using MahApps.Metro;
 
-    #endregion
+    using MahApps.Metro;
 
     public partial class App
     {
         private Mutex _mutex;
 
-        [DllImport("user32.dll")]
-        private static extern bool SetForegroundWindow(IntPtr hWnd);
+        private string[] args;
 
-        [DllImport("user32.dll")]
-        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+        private bool createdNew;
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -56,15 +50,105 @@ namespace LeagueSharp.Loader
                 Thread.Sleep(1000);
             }
 
-            bool createdNew;
-            _mutex = new Mutex(true, Utility.Md5Hash(Environment.UserName), out createdNew);
+            this._mutex = new Mutex(true, Utility.Md5Hash(Environment.UserName), out this.createdNew);
+            this.args = e.Args;
 
+            #region Remove the old loader
+
+            try
+            {
+                if (string.Compare(
+                    Process.GetCurrentProcess().ProcessName,
+                    "LeagueSharp.Loader.exe",
+                    StringComparison.InvariantCultureIgnoreCase) != 0
+                    && File.Exists(Path.Combine(Directories.CurrentDirectory, "LeagueSharp.Loader.exe")))
+                {
+                    File.Delete(Path.Combine(Directories.CurrentDirectory, "LeagueSharp.Loader.exe"));
+                    File.Delete(Path.Combine(Directories.CurrentDirectory, "LeagueSharp.Loader.exe.config"));
+                }
+            }
+            catch (Exception ex)
+            {
+                //ignore
+            }
+
+            #endregion
+
+            this.ConfigInit();
+            this.AppDataRandomization();
+
+#if !DEBUG
+            this.ExecutableRandomization();
+#endif
+
+            this.Localize();
+
+            if (Config.Instance.SelectedColor != null)
+            {
+                ThemeManager.ChangeAppStyle(
+                    Current,
+                    ThemeManager.GetAccent(Config.Instance.SelectedColor),
+                    ThemeManager.GetAppTheme("BaseLight"));
+            }
+
+            base.OnStartup(e);
+        }
+
+        [DllImport("user32.dll")]
+        private static extern bool SetForegroundWindow(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        private void AppDataRandomization()
+        {
+            #region AppData randomization
+
+            try
+            {
+                if (!Directory.Exists(Directories.AppDataDirectory))
+                {
+                    Directory.CreateDirectory(Directories.AppDataDirectory);
+
+                    var oldPath = Path.Combine(
+                        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                        "LeagueSharp" + Environment.UserName.GetHashCode().ToString("X"));
+
+                    var oldPath2 = Path.Combine(
+                        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                        "LeagueSharp");
+
+                    if (Directory.Exists(oldPath))
+                    {
+                        Utility.CopyDirectory(oldPath, Directories.AppDataDirectory, true, true);
+                        Utility.ClearDirectory(oldPath);
+                        Directory.Delete(oldPath, true);
+                    }
+
+                    if (Directory.Exists(oldPath2))
+                    {
+                        Utility.CopyDirectory(oldPath2, Directories.AppDataDirectory, true, true);
+                        Utility.ClearDirectory(oldPath2);
+                        Directory.Delete(oldPath2, true);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                //ignore
+            }
+
+            #endregion
+        }
+
+        private void ConfigInit()
+        {
             Utility.CreateFileFromResource(Directories.ConfigFilePath, "LeagueSharp.Loader.Resources.config.xml");
 
             var configCorrupted = false;
             try
             {
-                Config.Instance = ((Config) Utility.MapXmlFileToClass(typeof(Config), Directories.ConfigFilePath));
+                Config.Instance = ((Config)Utility.MapXmlFileToClass(typeof(Config), Directories.ConfigFilePath));
             }
             catch (Exception)
             {
@@ -91,7 +175,8 @@ namespace LeagueSharp.Loader
             {
                 try
                 {
-                    Config.Instance = ((Config)Utility.MapXmlFileToClass(typeof(Config), Directories.ConfigFilePath + ".bak"));
+                    Config.Instance =
+                        ((Config)Utility.MapXmlFileToClass(typeof(Config), Directories.ConfigFilePath + ".bak"));
                     File.Delete(Directories.ConfigFilePath);
                     File.Copy(Directories.ConfigFilePath + ".bak", Directories.ConfigFilePath);
                     File.SetAttributes(Directories.ConfigFilePath, FileAttributes.Normal);
@@ -109,42 +194,46 @@ namespace LeagueSharp.Loader
 
             if (Config.Instance.Settings.GameSettings.All(x => x.Name != "Show Drawings"))
             {
-                Config.Instance.Settings.GameSettings.Add(new GameSettings
-                {
-                    Name = "Show Drawings",
-                    PosibleValues = new List<string> { "True", "False" },
-                    SelectedValue = "True"
-                });
+                Config.Instance.Settings.GameSettings.Add(
+                    new GameSettings
+                        {
+                            Name = "Show Drawings",
+                            PosibleValues = new List<string> { "True", "False" },
+                            SelectedValue = "True"
+                        });
             }
 
             if (Config.Instance.Settings.GameSettings.All(x => x.Name != "Show Ping"))
             {
-                Config.Instance.Settings.GameSettings.Add(new GameSettings
-                {
-                    Name = "Show Ping",
-                    PosibleValues = new List<string> { "True", "False" },
-                    SelectedValue = "True"
-                });
+                Config.Instance.Settings.GameSettings.Add(
+                    new GameSettings
+                        {
+                            Name = "Show Ping",
+                            PosibleValues = new List<string> { "True", "False" },
+                            SelectedValue = "True"
+                        });
             }
 
             if (Config.Instance.Settings.GameSettings.All(x => x.Name != "Send Anonymous Assembly Statistics"))
             {
-                Config.Instance.Settings.GameSettings.Add(new GameSettings
-                {
-                    Name = "Send Anonymous Assembly Statistics",
-                    PosibleValues = new List<string> { "True", "False" },
-                    SelectedValue = "True"
-                });
+                Config.Instance.Settings.GameSettings.Add(
+                    new GameSettings
+                        {
+                            Name = "Send Anonymous Assembly Statistics",
+                            PosibleValues = new List<string> { "True", "False" },
+                            SelectedValue = "True"
+                        });
             }
 
             if (Config.Instance.Settings.GameSettings.All(x => x.Name != "Always Inject Default Profile"))
             {
-                Config.Instance.Settings.GameSettings.Add(new GameSettings
-                {
-                    Name = "Always Inject Default Profile",
-                    PosibleValues = new List<string> { "True", "False" },
-                    SelectedValue = "False"
-                });
+                Config.Instance.Settings.GameSettings.Add(
+                    new GameSettings
+                        {
+                            Name = "Always Inject Default Profile",
+                            PosibleValues = new List<string> { "True", "False" },
+                            SelectedValue = "False"
+                        });
             }
 
             try
@@ -152,14 +241,15 @@ namespace LeagueSharp.Loader
                 if (Config.Instance.Profiles.First().InstalledAssemblies.All(a => a.Name != "LeagueSharp.SDK"))
                 {
                     var sdk = new LeagueSharpAssembly
-                    {
-                        Name = "LeagueSharp.SDK",
-                        DisplayName = "LeagueSharp.SDK",
-                        SvnUrl = "https://github.com/LeagueSharp/LeagueSharp.SDK",
-                        InjectChecked = true,
-                        InstallChecked = true,
-                        PathToProjectFile = Path.Combine(Directories.RepositoryDir, "8443D874", "trunk", "LeagueSharp.SDK.csproj")
-                    };
+                        {
+                            Name = "LeagueSharp.SDK",
+                            DisplayName = "LeagueSharp.SDK",
+                            SvnUrl = "https://github.com/LeagueSharp/LeagueSharp.SDK",
+                            InjectChecked = true,
+                            InstallChecked = true,
+                            PathToProjectFile =
+                                Path.Combine(Directories.RepositoryDir, "8443D874", "trunk", "LeagueSharp.SDK.csproj")
+                        };
 
                     sdk.Update();
                     sdk.Compile();
@@ -173,75 +263,130 @@ namespace LeagueSharp.Loader
             }
 
             #endregion
+        }
 
-            #region Remove the old loader
+        private void ExecutableRandomization()
+        {
+            #region Executable Randomization
 
-            try
+            if (Assembly.GetExecutingAssembly().Location.EndsWith("loader.exe")
+                || Assembly.GetExecutingAssembly().Location.EndsWith("Loader.exe"))
             {
-                if (String.Compare(
-                   Process.GetCurrentProcess().ProcessName, "LeagueSharp.Loader.exe",
-                   StringComparison.InvariantCultureIgnoreCase) != 0 && File.Exists(Path.Combine(Directories.CurrentDirectory, "LeagueSharp.Loader.exe")))
+                try
                 {
-                    File.Delete(Path.Combine(Directories.CurrentDirectory, "LeagueSharp.Loader.exe"));
-                    File.Delete(Path.Combine(Directories.CurrentDirectory, "LeagueSharp.Loader.exe.config"));
-                }
-            }
-            catch (Exception ex)
-            {
-                //ignore
-            }
-
-            #endregion
-
-            #region AppData randomization
-
-            try
-            {
-                if (!Directory.Exists(Directories.AppDataDirectory))
-                {
-                    Directory.CreateDirectory(Directories.AppDataDirectory);
-
-                    var oldPath = Path.Combine(Environment.GetFolderPath(
-                    Environment.SpecialFolder.ApplicationData), "LeagueSharp" + Environment.UserName.GetHashCode().ToString("X"));
-
-                    var oldPath2 = Path.Combine(Environment.GetFolderPath(
-                        Environment.SpecialFolder.ApplicationData), "LeagueSharp");
-
-                    if (Directory.Exists(oldPath))
+                    if (Config.Instance.RandomName != null)
                     {
-                        Utility.CopyDirectory(oldPath, Directories.AppDataDirectory, true, true);
-                        Utility.ClearDirectory(oldPath);
-                        Directory.Delete(oldPath, true);
+                        try
+                        {
+                            var oldFile = Path.Combine(Directories.CurrentDirectory, Config.Instance.RandomName);
+                            var oldConfigFile = Path.Combine(
+                                AppDomain.CurrentDomain.BaseDirectory,
+                                Config.Instance.RandomName + ".config");
+
+                            if (File.Exists(oldFile))
+                            {
+                                File.SetAttributes(oldFile, FileAttributes.Normal);
+                                File.Delete(oldFile);
+                            }
+
+                            if (File.Exists(oldConfigFile))
+                            {
+                                File.SetAttributes(oldConfigFile, FileAttributes.Normal);
+                                File.Delete(oldConfigFile);
+                            }
+                        }
+                        catch
+                        {
+                        }
+
+                        if (!this.createdNew)
+                        {
+                            if (this.args.Length > 0)
+                            {
+                                var loader =
+                                    Process.GetProcessesByName(
+                                        Path.GetFileNameWithoutExtension(Config.Instance.RandomName)).FirstOrDefault();
+
+                                if (loader != null && loader.MainWindowHandle != IntPtr.Zero)
+                                {
+                                    Clipboard.SetText(this.args[0]);
+                                    ShowWindow(loader.MainWindowHandle, 5);
+                                    SetForegroundWindow(loader.MainWindowHandle);
+                                }
+                            }
+
+                            this._mutex = null;
+                            Environment.Exit(0);
+                        }
                     }
 
-                    if (Directory.Exists(oldPath2))
-                    {
-                        Utility.CopyDirectory(oldPath2, Directories.AppDataDirectory, true, true);
-                        Utility.ClearDirectory(oldPath2);
-                        Directory.Delete(oldPath2, true);
-                    }
+                    Config.Instance.RandomName = Utility.GetUniqueKey(6) + ".exe";
+                    var filePath = Path.Combine(Directories.CurrentDirectory, "loader.exe");
+                    var rndExePath = Path.Combine(Directories.CurrentDirectory, Config.Instance.RandomName);
+                    Utility.MapClassToXmlFile(typeof(Config), Config.Instance, Directories.ConfigFilePath);
+
+                    File.Copy(filePath, rndExePath);
+                    File.Copy(filePath + ".config", rndExePath + ".config");
+                    Process.Start(rndExePath);
+                    Environment.Exit(0);
+                }
+                catch (Exception)
+                {
+                    // restart
                 }
             }
-            catch (Exception ex)
-            {
-                //ignore
-            }
+
+            AppDomain.CurrentDomain.ProcessExit += (sender, args) =>
+                {
+                    try
+                    {
+                        if (this._mutex != null && this.createdNew)
+                        {
+                            this._mutex.ReleaseMutex();
+                        }
+                    }
+                    catch
+                    {
+                    }
+
+                    if (!Assembly.GetExecutingAssembly().Location.EndsWith("loader.exe"))
+                    {
+                        var oldConfigFile = Path.Combine(
+                            AppDomain.CurrentDomain.BaseDirectory,
+                            Config.Instance.RandomName + ".config");
+
+                        var info = new ProcessStartInfo
+                            {
+                                Arguments =
+                                    "/C choice /C Y /N /D Y /T 1 & Del " + Assembly.GetExecutingAssembly().Location + " "
+                                    + oldConfigFile,
+                                WindowStyle = ProcessWindowStyle.Hidden,
+                                CreateNoWindow = true,
+                                FileName = "cmd.exe"
+                            };
+                        Process.Start(info);
+                    }
+                };
 
             #endregion
+        }
 
+        private void Localize()
+        {
             //Load the language resources.
             var dict = new ResourceDictionary();
 
             if (Config.Instance.SelectedLanguage != null)
             {
                 dict.Source = new Uri(
-                    "..\\Resources\\Language\\" + Config.Instance.SelectedLanguage + ".xaml", UriKind.Relative);
+                    "..\\Resources\\Language\\" + Config.Instance.SelectedLanguage + ".xaml",
+                    UriKind.Relative);
             }
             else
             {
                 var lid = Thread.CurrentThread.CurrentCulture.ToString().Contains("-")
-                    ? Thread.CurrentThread.CurrentCulture.ToString().Split('-')[0].ToUpperInvariant()
-                    : Thread.CurrentThread.CurrentCulture.ToString().ToUpperInvariant();
+                              ? Thread.CurrentThread.CurrentCulture.ToString().Split('-')[0].ToUpperInvariant()
+                              : Thread.CurrentThread.CurrentCulture.ToString().ToUpperInvariant();
                 switch (lid)
                 {
                     case "DE":
@@ -301,111 +446,7 @@ namespace LeagueSharp.Loader
                 }
             }
 
-            if (Config.Instance.SelectedColor != null)
-            {
-                ThemeManager.ChangeAppStyle(Application.Current, ThemeManager.GetAccent(Config.Instance.SelectedColor), ThemeManager.GetAppTheme("BaseLight"));
-            }
-
-            Resources.MergedDictionaries.Add(dict);
-
-            #region Executable Randomization
-
-            if (Assembly.GetExecutingAssembly().Location.EndsWith("loader.exe") || Assembly.GetExecutingAssembly().Location.EndsWith("Loader.exe"))
-            {
-                try
-                {
-                    if (Config.Instance.RandomName != null)
-                    {
-                        try
-                        {
-                            var oldFile = Path.Combine(Directories.CurrentDirectory, Config.Instance.RandomName);
-                            var oldConfigFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Config.Instance.RandomName + ".config");
-
-                            if (File.Exists(oldFile))
-                            {
-                                File.SetAttributes(oldFile, FileAttributes.Normal);
-                                File.Delete(oldFile);
-                            }
-
-                            if (File.Exists(oldConfigFile))
-                            {
-                                File.SetAttributes(oldConfigFile, FileAttributes.Normal);
-                                File.Delete(oldConfigFile);
-                            }
-                        }
-                        catch
-                        {
-                        }
-
-                        if (!createdNew)
-                        {
-                            if (e.Args.Length > 0)
-                            {
-                                var loader = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(Config.Instance.RandomName)).FirstOrDefault();
-                                if (loader != null && loader.MainWindowHandle != IntPtr.Zero)
-                                {
-                                    Clipboard.SetText(e.Args[0]);
-                                    ShowWindow(loader.MainWindowHandle, 5);
-                                    SetForegroundWindow(loader.MainWindowHandle);
-                                }
-                            }
-
-                            _mutex = null;
-                            Environment.Exit(0);
-                        }
-                    }
-
-                    Config.Instance.RandomName = Utility.GetUniqueKey(6) + ".exe";
-                    var filePath = Path.Combine(Directories.CurrentDirectory, "loader.exe");
-                    var rndExePath = Path.Combine(Directories.CurrentDirectory, Config.Instance.RandomName);
-                    Utility.MapClassToXmlFile(typeof(Config), Config.Instance, Directories.ConfigFilePath);
-
-                    File.Copy(filePath, rndExePath);
-                    File.Copy(filePath + ".config", rndExePath + ".config");
-                    Process.Start(rndExePath);
-                    Environment.Exit(0);
-                }
-                catch (Exception)
-                {
-                    // restart
-                }
-            }
-
-            AppDomain.CurrentDomain.ProcessExit += (sender, args) =>
-                {
-                    try
-                    {
-                        if (_mutex != null && createdNew)
-                        {
-                            _mutex.ReleaseMutex();
-                        }
-                    }
-                    catch
-                    {
-                    }
-
-                    if (!Assembly.GetExecutingAssembly().Location.EndsWith("loader.exe"))
-                    {
-                        var oldConfigFile = Path.Combine(
-                            AppDomain.CurrentDomain.BaseDirectory,
-                            Config.Instance.RandomName + ".config");
-
-                        var info = new ProcessStartInfo
-                            {
-                                Arguments =
-                                    "/C choice /C Y /N /D Y /T 1 & Del " + Assembly.GetExecutingAssembly().Location + " "
-                                    + oldConfigFile,
-                                WindowStyle = ProcessWindowStyle.Hidden,
-                                CreateNoWindow = true,
-                                FileName = "cmd.exe"
-                            };
-                        Process.Start(info);
-                    }
-                };
-
-            #endregion
-
-            base.OnStartup(e);
+            this.Resources.MergedDictionaries.Add(dict);
         }
     }
 }

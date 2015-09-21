@@ -1,6 +1,6 @@
-<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:system="clr-namespace:System;assembly=mscorlib">
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib">
 
     <!-- MainWindow TopBar -->
     <system:String x:Key="Website">網站</system:String>
@@ -27,11 +27,11 @@
     <system:String x:Key="MenuShare">分享</system:String>
     <system:String x:Key="MenuViewLog">查看記錄檔</system:String>
 
-	<!-- MainWindow Profiles Menu -->
+    <!-- MainWindow Profiles Menu -->
     <system:String x:Key="NewProfile">新增</system:String>
     <system:String x:Key="ChangeName">更改名稱</system:String>
     <system:String x:Key="DeleteProfile">刪除</system:String>
-	
+
     <!-- MainWindow Buttons -->
     <system:String x:Key="UpdateAll">升級全部</system:String>
     <system:String x:Key="CompileAll">編譯全部</system:String>
@@ -70,7 +70,7 @@
     <system:String x:Key="DefaultHotkeys">預設值</system:String>
     <system:String x:Key="Language">語言</system:String>
     <system:String x:Key="Color">Color</system:String>
-	
+
     <!-- Settings Hotkeys -->
     <system:String x:Key="Hotkeys">快捷鍵</system:String>
     <system:String x:Key="Hotkey">快捷鍵</system:String>

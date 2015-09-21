@@ -1,6 +1,6 @@
 ﻿#region LICENSE
 
-// Copyright 2014 LeagueSharp.Loader
+// Copyright 2015-2015 LeagueSharp.Loader
 // ProjectFile.cs is part of LeagueSharp.Loader.
 // 
 // LeagueSharp.Loader is free software: you can redistribute it and/or modify
@@ -24,7 +24,9 @@ namespace LeagueSharp.Loader.Class
 
     using System;
     using System.IO;
+
     using LeagueSharp.Loader.Data;
+
     using Microsoft.Build.Evaluation;
 
     #endregion
@@ -32,68 +34,75 @@ namespace LeagueSharp.Loader.Class
     [Serializable]
     internal class ProjectFile
     {
-        public readonly Project Project;
-        private readonly Log _log;
-
         public ProjectFile(string file, Log log)
         {
             try
             {
-                _log = log;
+                this._log = log;
 
                 if (File.Exists(file))
                 {
                     ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
-                    Project = new Project(file);
+                    this.Project = new Project(file);
                 }
             }
             catch (Exception ex)
             {
-                Utility.Log(LogStatus.Error, "ProjectFile", string.Format("Error - {0}", ex.Message), _log);
+                Utility.Log(LogStatus.Error, "ProjectFile", string.Format("Error - {0}", ex.Message), this._log);
             }
         }
 
-        public bool PrebuildEvent { get; set; }
-        public bool PostbuildEvent { get; set; }
+        public readonly Project Project;
+
+        private readonly Log _log;
+
         public string Configuration { get; set; }
+
         public string PlatformTarget { get; set; }
-        public bool UpdateReferences { get; set; }
+
+        public bool PostbuildEvent { get; set; }
+
+        public bool PrebuildEvent { get; set; }
+
         public string ReferencesPath { get; set; }
+
         public bool ResetOutputPath { get; set; }
+
+        public bool UpdateReferences { get; set; }
 
         public void Change()
         {
             try
             {
-                if (Project == null)
+                if (this.Project == null)
                 {
                     return;
                 }
-                if (!string.IsNullOrWhiteSpace(Configuration))
+                if (!string.IsNullOrWhiteSpace(this.Configuration))
                 {
-                    Project.SetProperty("Configuration", Configuration);
-                    Project.Save();
+                    this.Project.SetProperty("Configuration", this.Configuration);
+                    this.Project.Save();
                 }
-                if (PrebuildEvent)
+                if (this.PrebuildEvent)
                 {
-                    Project.SetProperty("PreBuildEvent", string.Empty);
+                    this.Project.SetProperty("PreBuildEvent", string.Empty);
                 }
-                if (PostbuildEvent)
+                if (this.PostbuildEvent)
                 {
-                    Project.SetProperty("PostBuildEvent", string.Empty);
+                    this.Project.SetProperty("PostBuildEvent", string.Empty);
                 }
-                if (!string.IsNullOrWhiteSpace(PlatformTarget))
+                if (!string.IsNullOrWhiteSpace(this.PlatformTarget))
                 {
-                    Project.SetProperty("PlatformTarget", PlatformTarget);
+                    this.Project.SetProperty("PlatformTarget", this.PlatformTarget);
                 }
-                var outputPath = Project.GetProperty("OutputPath");
-                if (ResetOutputPath || outputPath == null || string.IsNullOrWhiteSpace(outputPath.EvaluatedValue))
+                var outputPath = this.Project.GetProperty("OutputPath");
+                if (this.ResetOutputPath || outputPath == null || string.IsNullOrWhiteSpace(outputPath.EvaluatedValue))
                 {
-                    Project.SetProperty("OutputPath", "bin\\" + Configuration);
+                    this.Project.SetProperty("OutputPath", "bin\\" + this.Configuration);
                 }
-                if (UpdateReferences)
+                if (this.UpdateReferences)
                 {
-                    foreach (var item in Project.GetItems("Reference"))
+                    foreach (var item in this.Project.GetItems("Reference"))
                     {
                         if (item == null)
                         {
@@ -103,30 +112,35 @@ namespace LeagueSharp.Loader.Class
                         if (hintPath != null && !string.IsNullOrWhiteSpace(hintPath.EvaluatedValue))
                         {
                             item.SetMetadataValue(
-                                "HintPath", Path.Combine(ReferencesPath, Path.GetFileName(hintPath.EvaluatedValue)));
+                                "HintPath",
+                                Path.Combine(this.ReferencesPath, Path.GetFileName(hintPath.EvaluatedValue)));
                         }
                     }
                 }
 
-                var targetFramework = Project.GetProperty("TargetFrameworkVersion").EvaluatedValue;
+                var targetFramework = this.Project.GetProperty("TargetFrameworkVersion").EvaluatedValue;
 
                 switch (targetFramework)
                 {
                     case "v4.5":
                     case "v4.5.1":
-                        Project.SetProperty("TargetFrameworkVersion", "v4.5.2");
+                        this.Project.SetProperty("TargetFrameworkVersion", "v4.5.2");
                         break;
 
                     case "v4.6":
                         break;
                 }
 
-                Project.Save();
-                Utility.Log(LogStatus.Ok, "ProjectFile", string.Format("File Updated - {0}", Project.FullPath), _log);
+                this.Project.Save();
+                Utility.Log(
+                    LogStatus.Ok,
+                    "ProjectFile",
+                    string.Format("File Updated - {0}", this.Project.FullPath),
+                    this._log);
             }
             catch (Exception ex)
             {
-                Utility.Log(LogStatus.Error, "ProjectFile", ex.Message, _log);
+                Utility.Log(LogStatus.Error, "ProjectFile", ex.Message, this._log);
             }
         }
     }

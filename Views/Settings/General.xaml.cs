@@ -1,74 +1,112 @@
-using System;
-using System.Diagnostics;
-using System.Linq;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
-using LeagueSharp.Loader.Data;
-using MahApps.Metro;
+#region LICENSE
+
+// Copyright 2015-2015 LeagueSharp.Loader
+// General.xaml.cs is part of LeagueSharp.Loader.
+// 
+// LeagueSharp.Loader is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// LeagueSharp.Loader is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with LeagueSharp.Loader. If not, see <http://www.gnu.org/licenses/>.
+
+#endregion
 
 namespace LeagueSharp.Loader.Views.Settings
 {
+    using System;
+    using System.Diagnostics;
+    using System.Linq;
+    using System.Windows;
+    using System.Windows.Controls;
+    using System.Windows.Input;
+
+    using LeagueSharp.Loader.Data;
+
+    using MahApps.Metro;
+
     public partial class General
     {
-        private readonly string[] _accentColors =
-        {
-            "Red", "Green", "Blue", "Purple", "Orange", "Lime", "Emerald", "Teal",
-            "Cyan", "Cobalt", "Indigo", "Violet", "Pink", "Magenta", "Crimson", "Amber", "Yellow", "Brown", "Olive",
-            "Steel", "Mauve", "Taupe", "Sienna"
-        };
-
         public General()
         {
-            InitializeComponent();
+            this.InitializeComponent();
         }
 
-        private void GameSettingsDataGrid_OnMouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            var item = ((DataGrid) sender).SelectedItem;
-            if (item != null)
+        private readonly string[] _accentColors =
             {
-                ((GameSettings) item).SelectedValue = ((GameSettings) item).SelectedValue ==
-                                                      ((GameSettings) item).PosibleValues[0]
-                    ? ((GameSettings) item).PosibleValues[1]
-                    : ((GameSettings) item).PosibleValues[0];
+                "Red",
+                "Green",
+                "Blue",
+                "Purple",
+                "Orange",
+                "Lime",
+                "Emerald",
+                "Teal",
+                "Cyan",
+                "Cobalt",
+                "Indigo",
+                "Violet",
+                "Pink",
+                "Magenta",
+                "Crimson",
+                "Amber",
+                "Yellow",
+                "Brown",
+                "Olive",
+                "Steel",
+                "Mauve",
+                "Taupe",
+                "Sienna"
+            };
+
+        private void AppData_OnClick(object sender, RoutedEventArgs e)
+        {
+            Process.Start(Directories.AppDataDirectory);
+        }
+
+        private void Color_Loaded(object sender, RoutedEventArgs e)
+        {
+            var colorBox = (ComboBox)sender;
+
+            foreach (var asccent in this._accentColors)
+            {
+                colorBox.Items.Add(asccent);
+            }
+
+            if (Config.Instance.SelectedColor != null)
+            {
+                colorBox.SelectedItem = Config.Instance.SelectedColor;
+            }
+
+            if (colorBox.SelectedIndex == -1)
+            {
+                colorBox.SelectedIndex = colorBox.Items.IndexOf("Blue");
             }
         }
 
-        private void Logout_OnClick(object sender, RoutedEventArgs e)
+        private void Color_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            Config.Instance.Username = "";
-            Config.Instance.Password = "";
-            ((MainWindow) DataContext).MainWindow_OnClosing(null, null);
+            var color = ((ComboBox)sender).SelectedValue.ToString();
 
-            Process.Start(Application.ResourceAssembly.Location);
-            Environment.Exit(0);
-        }
-
-        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (e.AddedItems.Count <= 0 || e.RemovedItems.Count <= 0)
+            if (this._accentColors.Contains(color))
             {
-                return;
+                ThemeManager.ChangeAppStyle(
+                    Application.Current,
+                    ThemeManager.GetAccent(color),
+                    ThemeManager.GetAppTheme("BaseLight"));
+                Config.Instance.SelectedColor = color;
             }
-
-            var selected = (string) e.AddedItems[0];
-
-            if (Config.Instance.SelectedLanguage == selected ||
-                (Config.Instance.SelectedLanguage == null && selected == "English"))
-            {
-                return;
-            }
-
-            Config.Instance.SelectedLanguage = selected;
-            ((MainWindow) DataContext).MainWindow_OnClosing(null, null);
-            Process.Start(Application.ResourceAssembly.Location);
-            Environment.Exit(0);
         }
 
         private void ComboBox_Loaded(object sender, RoutedEventArgs e)
         {
-            var senderBox = (ComboBox) sender;
+            var senderBox = (ComboBox)sender;
 
             senderBox.Items.Clear();
             senderBox.Items.Add("Arabic");
@@ -99,8 +137,7 @@ namespace LeagueSharp.Loader.Views.Settings
             if (Config.Instance.SelectedLanguage != null)
             {
                 senderBox.SelectedItem =
-                    senderBox.Items.Cast<string>()
-                        .FirstOrDefault(item => item == Config.Instance.SelectedLanguage);
+                    senderBox.Items.Cast<string>().FirstOrDefault(item => item == Config.Instance.SelectedLanguage);
             }
 
             //English as default
@@ -110,40 +147,47 @@ namespace LeagueSharp.Loader.Views.Settings
             }
         }
 
-        private void Color_Loaded(object sender, RoutedEventArgs e)
+        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var colorBox = (ComboBox)sender;
-
-            foreach (var asccent in _accentColors)
+            if (e.AddedItems.Count <= 0 || e.RemovedItems.Count <= 0)
             {
-                colorBox.Items.Add(asccent);
+                return;
             }
 
-            if (Config.Instance.SelectedColor != null)
+            var selected = (string)e.AddedItems[0];
+
+            if (Config.Instance.SelectedLanguage == selected
+                || (Config.Instance.SelectedLanguage == null && selected == "English"))
             {
-                colorBox.SelectedItem = Config.Instance.SelectedColor;
+                return;
             }
 
-            if (colorBox.SelectedIndex == -1)
+            Config.Instance.SelectedLanguage = selected;
+            ((MainWindow)this.DataContext).MainWindow_OnClosing(null, null);
+            Process.Start(Application.ResourceAssembly.Location);
+            Environment.Exit(0);
+        }
+
+        private void GameSettingsDataGrid_OnMouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            var item = ((DataGrid)sender).SelectedItem;
+            if (item != null)
             {
-                colorBox.SelectedIndex = colorBox.Items.IndexOf("Blue");
+                ((GameSettings)item).SelectedValue = ((GameSettings)item).SelectedValue
+                                                     == ((GameSettings)item).PosibleValues[0]
+                                                         ? ((GameSettings)item).PosibleValues[1]
+                                                         : ((GameSettings)item).PosibleValues[0];
             }
         }
 
-        private void Color_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void Logout_OnClick(object sender, RoutedEventArgs e)
         {
-            var color = ((ComboBox)sender).SelectedValue.ToString();
+            Config.Instance.Username = "";
+            Config.Instance.Password = "";
+            ((MainWindow)this.DataContext).MainWindow_OnClosing(null, null);
 
-            if (_accentColors.Contains(color))
-            {
-                ThemeManager.ChangeAppStyle(Application.Current, ThemeManager.GetAccent(color), ThemeManager.GetAppTheme("BaseLight"));
-                Config.Instance.SelectedColor = color;
-            }
-        }
-
-        private void AppData_OnClick(object sender, RoutedEventArgs e)
-        {
-            Process.Start(Directories.AppDataDirectory);
+            Process.Start(Application.ResourceAssembly.Location);
+            Environment.Exit(0);
         }
     }
 }

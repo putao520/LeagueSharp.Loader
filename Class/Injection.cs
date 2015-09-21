@@ -1,6 +1,6 @@
 ﻿#region LICENSE
 
-// Copyright 2014 LeagueSharp.Loader
+// Copyright 2015-2015 LeagueSharp.Loader
 // Injection.cs is part of LeagueSharp.Loader.
 // 
 // LeagueSharp.Loader is free software: you can redistribute it and/or modify
@@ -18,278 +18,302 @@
 
 #endregion
 
-using System.IO.MemoryMappedFiles;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using LeagueSharp.Loader.Data;
-
 namespace LeagueSharp.Loader.Class
 {
-	public static class Injection
-	{
-		[StructLayout(LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Unicode)]
-		struct SharedMemoryLayout
-		{
-			[MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
-			readonly String SandboxPath;
-			[MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
-			readonly String BootstrapPath;
-			[MarshalAs(UnmanagedType.ByValTStr, SizeConst = 64)]
-			readonly String User;
-			[MarshalAs(UnmanagedType.ByValTStr, SizeConst = 64)]
-			readonly String Password;
+    using System;
+    using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.IO.MemoryMappedFiles;
+    using System.Linq;
+    using System.Runtime.InteropServices;
+    using System.Text;
 
-			public SharedMemoryLayout(String sandboxPath, String bootstrapPath, String user, String password)
-			{
-				SandboxPath = sandboxPath;
-				BootstrapPath = bootstrapPath;
-				User = user;
-				Password = password;
-			}
-		}
+    using LeagueSharp.Loader.Data;
 
-		[UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode)]
-		private delegate bool InjectDLLDelegate(int processId, string path);
+    public static class Injection
+    {
+        public static MemoryMappedFile mmf = null;
 
-		[UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode)]
-		private delegate bool HasModuleDelegate(int processId, string path);
+        private static GetFilePathDelegate getFilePath;
 
-		[UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode)]
-		private delegate bool GetFilePathDelegate(int processId, [Out] StringBuilder path, int size);
+        private static HasModuleDelegate hasModule;
 
-		private static InjectDLLDelegate injectDLL;
-		private static HasModuleDelegate hasModule;
-		private static GetFilePathDelegate getFilePath;
+        private static InjectDLLDelegate injectDLL;
 
-		public delegate void OnInjectDelegate(IntPtr hwnd);
+        public delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
 
-		public static event OnInjectDelegate OnInject;
+        public delegate void OnInjectDelegate(IntPtr hwnd);
 
-		public static MemoryMappedFile mmf = null;
+        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode)]
+        private delegate bool GetFilePathDelegate(int processId, [Out] StringBuilder path, int size);
 
-		public static bool InjectedAssembliesChanged { get; set; }
+        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode)]
+        private delegate bool HasModuleDelegate(int processId, string path);
 
-		private static bool IsProcessInjected(Process leagueProcess)
-		{
-			if (leagueProcess != null)
-			{
+        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode)]
+        private delegate bool InjectDLLDelegate(int processId, string path);
 
-				try
-				{
-					return hasModule(leagueProcess.Id, PathRandomizer.LeagueSharpCoreDllName);
-				}
-				catch (Exception e)
-				{
-					Utility.Log(LogStatus.Error, "Injector", string.Format("Error - {0}", e), Logs.MainLog);
-				}
-			}
-			return false;
-		}
+        public static event OnInjectDelegate OnInject;
 
-		public static bool IsInjected
-		{
-			get { return LeagueProcess.Any(IsProcessInjected); }
-		}
+        public static bool InjectedAssembliesChanged { get; set; }
 
-		public delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+        public static bool IsInjected
+        {
+            get
+            {
+                return LeagueProcess.Any(IsProcessInjected);
+            }
+        }
 
-		private static string GetWindowText(IntPtr hWnd)
-		{
-			var size = Win32Imports.GetWindowTextLength(hWnd);
-			if (size++ > 0)
-			{
-				var builder = new StringBuilder(size);
-				Win32Imports.GetWindowText(hWnd, builder, builder.Capacity);
-				return builder.ToString();
-			}
+        public static List<IntPtr> LeagueInstances
+        {
+            get
+            {
+                return FindWindows("League of Legends (TM) Client");
+            }
+        }
 
-			return String.Empty;
-		}
+        public static bool PrepareDone { get; set; }
 
-		private static List<IntPtr> FindWindows(string title)
-		{
-			var windows = new List<IntPtr>();
+        internal static bool IsLeagueOfLegendsFocused
+        {
+            get
+            {
+                return GetWindowText(Win32Imports.GetForegroundWindow()).Contains("League of Legends (TM) Client");
+            }
+        }
 
-			Win32Imports.EnumWindows(delegate(IntPtr wnd, IntPtr param)
-			{
-				if (GetWindowText(wnd).Contains(title))
-				{
-					windows.Add(wnd);
-				}
-				return true;
-			}, IntPtr.Zero);
+        private static List<Process> LeagueProcess
+        {
+            get
+            {
+                return Process.GetProcessesByName("League of Legends").ToList();
+            }
+        }
 
-			return windows;
-		}
+        public static void Pulse()
+        {
+            if (injectDLL == null || hasModule == null)
+            {
+                ResolveInjectDLL();
+            }
 
-		internal static bool IsLeagueOfLegendsFocused
-		{
-			get
-			{
-				return GetWindowText(Win32Imports.GetForegroundWindow()).Contains("League of Legends (TM) Client");
-			}
-		}
+            if (LeagueProcess == null)
+            {
+                return;
+            }
 
-		private static void ResolveInjectDLL()
-		{
-			try
-			{
-				mmf = MemoryMappedFile.CreateOrOpen("Local\\LeagueSharpBootstrap", 260 * 2,
-					MemoryMappedFileAccess.ReadWrite);
+            //Don't inject untill we checked that there are not updates for the loader.
+            if (Updater.Updating || !Updater.CheckedForUpdates || !PrepareDone)
+            {
+                return;
+            }
 
-				var sharedMem = new SharedMemoryLayout(PathRandomizer.LeagueSharpSandBoxDllPath, PathRandomizer.LeagueSharpBootstrapDllPath,
-					Config.Instance.Username, Config.Instance.Password);
+            foreach (var instance in LeagueProcess)
+            {
+                try
+                {
+                    Config.Instance.LeagueOfLegendsExePath = GetFilePath(instance);
+                    var updateCheck = true;
 
-				using (var writer = mmf.CreateViewAccessor())
-				{
-					var len = Marshal.SizeOf(typeof(SharedMemoryLayout));
-					var arr = new byte[len];
-					var ptr = Marshal.AllocHGlobal(len);
-					Marshal.StructureToPtr(sharedMem, ptr, true);
-					Marshal.Copy(ptr, arr, 0, len);
-					Marshal.FreeHGlobal(ptr);
-					writer.WriteArray(0, arr, 0, arr.Length);
-				}
+                    if (Config.Instance.UpdateCoreOnInject)
+                    {
+                        updateCheck = Updater.UpdateCore(GetFilePath(instance), true).Result.Item1;
+                    }
 
-				var hModule = Win32Imports.LoadLibrary(PathRandomizer.LeagueSharpBootstrapDllPath);
-				if (!(hModule != IntPtr.Zero))
-				{
-					return;
-				}
+                    if (!IsProcessInjected(instance) && updateCheck)
+                    {
+                        if (injectDLL != null)
+                        {
+                            injectDLL(instance.Id, PathRandomizer.LeagueSharpCoreDllPath);
 
-				var procAddress = Win32Imports.GetProcAddress(hModule, "InjectModule");
-				if (!(procAddress != IntPtr.Zero))
-				{
-					return;
-				}
+                            if (OnInject != null)
+                            {
+                                OnInject(IntPtr.Zero);
+                            }
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    Utility.Log(LogStatus.Error, "Pulse", e.Message, Logs.MainLog);
+                    // ignored
+                }
+            }
+        }
 
-				injectDLL = Marshal.GetDelegateForFunctionPointer(procAddress, typeof(InjectDLLDelegate)) as InjectDLLDelegate;
+        public static void SendConfig(IntPtr wnd)
+        {
+            var str = string.Format(
+                "{0}{1}{2}{3}",
+                (Config.Instance.Settings.GameSettings[0].SelectedValue == "True") ? "1" : "0",
+                (Config.Instance.Settings.GameSettings[3].SelectedValue == "True") ? "1" : "0",
+                (Config.Instance.Settings.GameSettings[1].SelectedValue == "True") ? "1" : "0",
+                (Config.Instance.Settings.GameSettings[2].SelectedValue == "True") ? "2" : "0");
 
-				procAddress = Win32Imports.GetProcAddress(hModule, "HasModule");
-				if (!(procAddress != IntPtr.Zero))
-				{
-					return;
-				}
+            var lParam = new COPYDATASTRUCT { cbData = 2, dwData = str.Length * 2 + 2, lpData = str };
+            Win32Imports.SendMessage(wnd, 74U, IntPtr.Zero, ref lParam);
+        }
 
-				hasModule = Marshal.GetDelegateForFunctionPointer(procAddress, typeof(HasModuleDelegate)) as HasModuleDelegate;
+        public static void SendLoginCredentials(IntPtr wnd, string user, string passwordHash)
+        {
+            var str = string.Format("LOGIN|{0}|{1}", user, passwordHash);
+            var lParam = new COPYDATASTRUCT { cbData = 2, dwData = str.Length * 2 + 2, lpData = str };
+            Win32Imports.SendMessage(wnd, 74U, IntPtr.Zero, ref lParam);
+        }
 
-				procAddress = Win32Imports.GetProcAddress(hModule, "GetFilePath");
-				if (!(procAddress != IntPtr.Zero))
-				{
-					return;
-				}
+        private static List<IntPtr> FindWindows(string title)
+        {
+            var windows = new List<IntPtr>();
 
-				getFilePath = Marshal.GetDelegateForFunctionPointer(procAddress, typeof(GetFilePathDelegate)) as GetFilePathDelegate;
-			}
-			catch (Exception e)
-			{
-				Console.WriteLine(e);
-			}
-		}
+            Win32Imports.EnumWindows(
+                delegate(IntPtr wnd, IntPtr param)
+                    {
+                        if (GetWindowText(wnd).Contains(title))
+                        {
+                            windows.Add(wnd);
+                        }
+                        return true;
+                    },
+                IntPtr.Zero);
 
-		public static List<IntPtr> LeagueInstances
-		{
-			get
-			{
-				return FindWindows("League of Legends (TM) Client");
-			}
-		}
+            return windows;
+        }
 
-		private static List<Process> LeagueProcess
-		{
-			get
-			{
-				return Process.GetProcessesByName("League of Legends").ToList();
-			}
-		}
+        private static string GetFilePath(Process process)
+        {
+            var sb = new StringBuilder(255);
+            getFilePath(process.Id, sb, sb.Capacity);
+            return sb.ToString();
+        }
 
-	    public static bool PrepareDone { get; set; }
+        private static string GetWindowText(IntPtr hWnd)
+        {
+            var size = Win32Imports.GetWindowTextLength(hWnd);
+            if (size++ > 0)
+            {
+                var builder = new StringBuilder(size);
+                Win32Imports.GetWindowText(hWnd, builder, builder.Capacity);
+                return builder.ToString();
+            }
 
-	    private static String GetFilePath(Process process)
-		{
-			StringBuilder sb = new StringBuilder(255);
-			getFilePath(process.Id, sb, sb.Capacity);
-			return sb.ToString();
-		}
+            return string.Empty;
+        }
 
-		public static void Pulse()
-		{
-			if (injectDLL == null || hasModule == null)
-			{
-				ResolveInjectDLL();
-			}
+        private static bool IsProcessInjected(Process leagueProcess)
+        {
+            if (leagueProcess != null)
+            {
+                try
+                {
+                    return hasModule(leagueProcess.Id, PathRandomizer.LeagueSharpCoreDllName);
+                }
+                catch (Exception e)
+                {
+                    Utility.Log(LogStatus.Error, "Injector", string.Format("Error - {0}", e), Logs.MainLog);
+                }
+            }
+            return false;
+        }
 
+        private static void ResolveInjectDLL()
+        {
+            try
+            {
+                mmf = MemoryMappedFile.CreateOrOpen(
+                    "Local\\LeagueSharpBootstrap",
+                    260 * 2,
+                    MemoryMappedFileAccess.ReadWrite);
 
-			if (LeagueProcess == null)
-			{
-				return;
-			}
+                var sharedMem = new SharedMemoryLayout(
+                    PathRandomizer.LeagueSharpSandBoxDllPath,
+                    PathRandomizer.LeagueSharpBootstrapDllPath,
+                    Config.Instance.Username,
+                    Config.Instance.Password);
 
-			//Don't inject untill we checked that there are not updates for the loader.
-			if (Updater.Updating || !Updater.CheckedForUpdates || !PrepareDone)
-			{
-				return;
-			}
+                using (var writer = mmf.CreateViewAccessor())
+                {
+                    var len = Marshal.SizeOf(typeof(SharedMemoryLayout));
+                    var arr = new byte[len];
+                    var ptr = Marshal.AllocHGlobal(len);
+                    Marshal.StructureToPtr(sharedMem, ptr, true);
+                    Marshal.Copy(ptr, arr, 0, len);
+                    Marshal.FreeHGlobal(ptr);
+                    writer.WriteArray(0, arr, 0, arr.Length);
+                }
 
-			foreach (var instance in LeagueProcess)
-			{
-				try
-				{
+                var hModule = Win32Imports.LoadLibrary(PathRandomizer.LeagueSharpBootstrapDllPath);
+                if (!(hModule != IntPtr.Zero))
+                {
+                    return;
+                }
 
-					Config.Instance.LeagueOfLegendsExePath = GetFilePath(instance);
-				    var updateCheck = Updater.UpdateCore(GetFilePath(instance), true).Result;
+                var procAddress = Win32Imports.GetProcAddress(hModule, "InjectModule");
+                if (!(procAddress != IntPtr.Zero))
+                {
+                    return;
+                }
 
-                    if (!IsProcessInjected(instance) && updateCheck.Item1)
-					{
-						if (injectDLL != null)
-						{
-							injectDLL(instance.Id, PathRandomizer.LeagueSharpCoreDllPath);
+                injectDLL =
+                    Marshal.GetDelegateForFunctionPointer(procAddress, typeof(InjectDLLDelegate)) as InjectDLLDelegate;
 
-							if (OnInject != null)
-							{
-								OnInject(IntPtr.Zero);
-							}
-						}
-					}
-				}
-				catch (Exception e)
-				{
-					Utility.Log(LogStatus.Error, "Pulse", e.Message, Logs.MainLog);
-					// ignored
-				}
-			}
-		}
+                procAddress = Win32Imports.GetProcAddress(hModule, "HasModule");
+                if (!(procAddress != IntPtr.Zero))
+                {
+                    return;
+                }
 
-		public static void SendLoginCredentials(IntPtr wnd, string user, string passwordHash)
-		{
-			var str = string.Format("LOGIN|{0}|{1}", user, passwordHash);
-			var lParam = new COPYDATASTRUCT { cbData = 2, dwData = str.Length * 2 + 2, lpData = str };
-			Win32Imports.SendMessage(wnd, 74U, IntPtr.Zero, ref lParam);
-		}
+                hasModule =
+                    Marshal.GetDelegateForFunctionPointer(procAddress, typeof(HasModuleDelegate)) as HasModuleDelegate;
 
-		public static void SendConfig(IntPtr wnd)
-		{
-			var str = string.Format(
-				"{0}{1}{2}{3}", (Config.Instance.Settings.GameSettings[0].SelectedValue == "True") ? "1" : "0",
-				(Config.Instance.Settings.GameSettings[3].SelectedValue == "True") ? "1" : "0",
-				(Config.Instance.Settings.GameSettings[1].SelectedValue == "True") ? "1" : "0",
-				(Config.Instance.Settings.GameSettings[2].SelectedValue == "True") ? "2" : "0");
+                procAddress = Win32Imports.GetProcAddress(hModule, "GetFilePath");
+                if (!(procAddress != IntPtr.Zero))
+                {
+                    return;
+                }
 
-			var lParam = new COPYDATASTRUCT { cbData = 2, dwData = str.Length * 2 + 2, lpData = str };
-			Win32Imports.SendMessage(wnd, 74U, IntPtr.Zero, ref lParam);
-		}
+                getFilePath =
+                    Marshal.GetDelegateForFunctionPointer(procAddress, typeof(GetFilePathDelegate)) as
+                    GetFilePathDelegate;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
 
-		public struct COPYDATASTRUCT
-		{
-			public int cbData;
-			public int dwData;
-			[MarshalAs(UnmanagedType.LPWStr)]
-			public string lpData;
-		}
-	}
+        public struct COPYDATASTRUCT
+        {
+            public int cbData;
+
+            public int dwData;
+
+            [MarshalAs(UnmanagedType.LPWStr)]
+            public string lpData;
+        }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Unicode)]
+        private struct SharedMemoryLayout
+        {
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
+            private readonly string SandboxPath;
+
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
+            private readonly string BootstrapPath;
+
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 64)]
+            private readonly string User;
+
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 64)]
+            private readonly string Password;
+
+            public SharedMemoryLayout(string sandboxPath, string bootstrapPath, string user, string password)
+            {
+                this.SandboxPath = sandboxPath;
+                this.BootstrapPath = bootstrapPath;
+                this.User = user;
+                this.Password = password;
+            }
+        }
+    }
 }

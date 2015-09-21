@@ -1,6 +1,6 @@
 ﻿#region LICENSE
 
-// Copyright 2014 LeagueSharp.Loader
+// Copyright 2015-2015 LeagueSharp.Loader
 // UpdateWindow.xaml.cs is part of LeagueSharp.Loader.
 // 
 // LeagueSharp.Loader is free software: you can redistribute it and/or modify
@@ -17,8 +17,6 @@
 // along with LeagueSharp.Loader. If not, see <http://www.gnu.org/licenses/>.
 
 #endregion
-
-using System.Resources;
 
 namespace LeagueSharp.Loader.Views
 {

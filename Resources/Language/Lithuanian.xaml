@@ -1,6 +1,6 @@
-<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:system="clr-namespace:System;assembly=mscorlib">
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib">
 
     <!-- MainWindow TopBar -->
     <system:String x:Key="Website">Tinklalapis</system:String>
@@ -28,11 +28,11 @@
     <system:String x:Key="MenuShare">Dalintis</system:String>
     <system:String x:Key="MenuViewLog">Žiūrėti žurnala</system:String>
 
-	<!-- MainWindow Profiles Menu -->
+    <!-- MainWindow Profiles Menu -->
     <system:String x:Key="NewProfile">Naujas</system:String>
     <system:String x:Key="ChangeName">Keisti pavadinimą</system:String>
     <system:String x:Key="DeleteProfile">Ištrinti</system:String>
-	
+
     <!-- MainWindow Buttons -->
     <system:String x:Key="AcceptTosButton">Sutinku</system:String>
     <system:String x:Key="DeclineTosButton">Nesutinku</system:String>
@@ -71,9 +71,9 @@
     <system:String x:Key="Inject">Įkrauti L#</system:String>
     <system:String x:Key="Logout">Atsijungti</system:String>
     <system:String x:Key="DefaultHotkeys">Atstatyti</system:String>
-	<system:String x:Key="Language">Kalba</system:String>
+    <system:String x:Key="Language">Kalba</system:String>
     <system:String x:Key="Color">Spalva</system:String>
-	
+
     <!-- Settings Hotkeys -->
     <system:String x:Key="Hotkeys">Numatytieji klavišai</system:String>
     <system:String x:Key="Hotkey">Numatytasis klavišas</system:String>
@@ -122,17 +122,17 @@
     <system:String x:Key="New">Naujas</system:String>
     <system:String x:Key="Edit">Redaguoti</system:String>
     <system:String x:Key="Clone">Klonuoti</system:String>
-    
-	<system:String x:Key="Checking">Tikrinama...</system:String>
+
+    <system:String x:Key="Checking">Tikrinama...</system:String>
     <system:String x:Key="Updated">Galioja</system:String>
     <system:String x:Key="OUTDATED">PASENĘS</system:String>
-	<system:String x:Key="Unknown">Nežinoma</system:String>
-	<system:String x:Key="UpdateStatus">Būsena</system:String>
-	
-	<system:String x:Key="LoaderUpdateFailed">Parsiųsti atnaujinto failo nepavyko. Prašome tai padaryti rankiniu būdu. Klaida: </system:String>
+    <system:String x:Key="Unknown">Nežinoma</system:String>
+    <system:String x:Key="UpdateStatus">Būsena</system:String>
+
+    <system:String x:Key="LoaderUpdateFailed">Parsiųsti atnaujinto failo nepavyko. Prašome tai padaryti rankiniu būdu. Klaida: </system:String>
     <system:String x:Key="LeagueNotFound">Neįmanoma rasti "League of Legends.exe" vietos, pamėginkite paleisti 'Custom Game'.</system:String>
     <system:String x:Key="UpdateSuccess">LeagueSharp sėkmingai atnaujintas instaliuotai League of Legends versijai.</system:String>
     <system:String x:Key="UpdateUnknown">Nepavyko nustatyti ar LeagueSharp galioja instaliuotai League of Legends versijai, tai dažniausiai reiškia, kad www.joduska.me neprieinamas.</system:String>
-	<system:String x:Key="NotUpdateNeeded">LeagueSharp jau yra naujausios versijos.</system:String>
+    <system:String x:Key="NotUpdateNeeded">LeagueSharp jau yra naujausios versijos.</system:String>
     <system:String x:Key="RandomizationFailed">Could not randomize the dll names.</system:String>
 </ResourceDictionary>

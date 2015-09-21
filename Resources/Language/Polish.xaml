@@ -1,6 +1,6 @@
-<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:system="clr-namespace:System;assembly=mscorlib">
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib">
 
     <!-- MainWindow TopBar -->
     <system:String x:Key="Website">Strona</system:String>
@@ -28,11 +28,11 @@
     <system:String x:Key="MenuShare">Udostępnij</system:String>
     <system:String x:Key="MenuViewLog">Pokaż logi</system:String>
 
-	<!-- MainWindow Profiles Menu -->
+    <!-- MainWindow Profiles Menu -->
     <system:String x:Key="NewProfile">Nowy</system:String>
     <system:String x:Key="ChangeName">Zmień nazwę</system:String>
     <system:String x:Key="DeleteProfile">Usuń profil</system:String>
-	
+
     <!-- MainWindow Buttons -->
     <system:String x:Key="AcceptTosButton">Akceptuję</system:String>
     <system:String x:Key="DeclineTosButton">Odmawiam</system:String>
@@ -71,9 +71,9 @@
     <system:String x:Key="Inject">Injectuj</system:String>
     <system:String x:Key="Logout">Wyloguj</system:String>
     <system:String x:Key="DefaultHotkeys">Przywróć</system:String>
-	<system:String x:Key="Language">Język</system:String>
+    <system:String x:Key="Language">Język</system:String>
     <system:String x:Key="Color">Kolor</system:String>
-	
+
     <!-- Settings Hotkeys -->
     <system:String x:Key="Hotkeys">Klawisze</system:String>
     <system:String x:Key="Hotkey">Klawisz</system:String>

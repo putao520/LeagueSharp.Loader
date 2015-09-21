@@ -1,6 +1,6 @@
 ﻿#region LICENSE
 
-// Copyright 2014 LeagueSharp.Loader
+// Copyright 2015-2015 LeagueSharp.Loader
 // Log.cs is part of LeagueSharp.Loader.
 // 
 // LeagueSharp.Loader is free software: you can redistribute it and/or modify
@@ -36,23 +36,26 @@ namespace LeagueSharp.Loader.Data
     {
         private ObservableCollection<LogItem> _items = new ObservableCollection<LogItem>();
 
+        public event PropertyChangedEventHandler PropertyChanged;
+
         public ObservableCollection<LogItem> Items
         {
-            get { return _items; }
+            get
+            {
+                return this._items;
+            }
             set
             {
-                _items = value;
-                OnPropertyChanged("Items");
+                this._items = value;
+                this.OnPropertyChanged("Items");
             }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
         private void OnPropertyChanged(string propertyName)
         {
-            if (PropertyChanged != null)
+            if (this.PropertyChanged != null)
             {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+                this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
     }
@@ -60,70 +63,93 @@ namespace LeagueSharp.Loader.Data
     public class LogItem : INotifyPropertyChanged
     {
         private string _message;
+
         private string _source;
+
         private string _status;
 
-        public string Status
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public string Message
         {
-            get { return _status; }
+            get
+            {
+                return this._message;
+            }
             set
             {
-                _status = value;
-                OnPropertyChanged("Status");
+                this._message = value;
+                this.OnPropertyChanged("Message");
             }
         }
 
         public string Source
         {
-            get { return _source; }
+            get
+            {
+                return this._source;
+            }
             set
             {
-                _source = value;
-                OnPropertyChanged("Source");
+                this._source = value;
+                this.OnPropertyChanged("Source");
             }
         }
 
-        public string Message
+        public string Status
         {
-            get { return _message; }
+            get
+            {
+                return this._status;
+            }
             set
             {
-                _message = value;
-                OnPropertyChanged("Message");
+                this._status = value;
+                this.OnPropertyChanged("Status");
             }
         }
-
-        public event PropertyChangedEventHandler PropertyChanged;
 
         private void OnPropertyChanged(string propertyName)
         {
-            if (PropertyChanged != null)
+            if (this.PropertyChanged != null)
             {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+                this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
     }
 
     public static class LogStatus
     {
-        public static string Ok
+        public static string Error
         {
-            get { return "Ok"; }
+            get
+            {
+                return "Error";
+            }
         }
 
         public static string Info
         {
-            get { return "Info"; }
+            get
+            {
+                return "Info";
+            }
         }
 
-        public static string Error
+        public static string Ok
         {
-            get { return "Error"; }
+            get
+            {
+                return "Ok";
+            }
         }
 
         public static string Skipped
         {
-            get { return "Skipped"; }
+            get
+            {
+                return "Skipped";
+            }
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿#region LICENSE
 
-// Copyright 2014 LeagueSharp.Loader
+// Copyright 2015-2015 LeagueSharp.Loader
 // MainWindow.xaml.cs is part of LeagueSharp.Loader.
 // 
 // LeagueSharp.Loader is free software: you can redistribute it and/or modify
@@ -18,16 +18,8 @@
 
 #endregion
 
-using System.Windows.Controls.Primitives;
-using System.Windows.Documents;
-using System.Windows.Media;
-using LeagueSharp.Sandbox.Shared;
-using MahApps.Metro.Controls;
-
 namespace LeagueSharp.Loader.Views
 {
-    #region
-
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
@@ -40,115 +32,283 @@ namespace LeagueSharp.Loader.Views
     using System.Threading.Tasks;
     using System.Windows;
     using System.Windows.Controls;
+    using System.Windows.Controls.Primitives;
     using System.Windows.Data;
     using System.Windows.Input;
-    using System.Windows.Interop;
+    using System.Windows.Media;
+
     using LeagueSharp.Loader.Class;
     using LeagueSharp.Loader.Data;
-    using MahApps.Metro.Controls.Dialogs;
-    using Microsoft.Build.Evaluation;
 
-    #endregion
+    using MahApps.Metro.Controls;
+    using MahApps.Metro.Controls.Dialogs;
+
+    using Microsoft.Build.Evaluation;
 
     public partial class MainWindow : INotifyPropertyChanged
     {
-        public delegate Point GetPosition(IInputElement element);
-        private bool _columnWidthChanging;
+        public BackgroundWorker AssembliesWorker = new BackgroundWorker();
+
+        public bool AssembliesWorkerCancelled;
+
+        public bool FirstTimeActivated = true;
+
+        public BackgroundWorker UpdaterWorker = new BackgroundWorker();
+
+        private bool checkingForUpdates;
+
+        private bool columnWidthChanging;
+
+        private Tuple<bool, string> loaderVersionCheckResult;
 
         private int rowIndex = -1;
-        public BackgroundWorker AssembliesWorker = new BackgroundWorker();
-        public BackgroundWorker UpdaterWorker = new BackgroundWorker();
-        public bool AssembliesWorkerCancelled;
-        public bool FirstTimeActivated = true;
-        private bool _working;
-        private bool _checkingForUpdates;
-        private string _statusString = "?";
-        private Tuple<bool, string> _loaderVersionCheckResult;
 
-        private string _updateMessage;
+        private string statusString = "?";
 
-        public Config Config
-        {
-            get { return Config.Instance; }
-        }
+        private string updateMessage;
 
-        public string StatusString
-        {
-            get { return _statusString; }
-            set
-            {
-                _statusString = value;
-                OnPropertyChanged("StatusString");
-            }
-        }
+        private bool working;
+
+        public delegate Point GetPosition(IInputElement element);
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public bool CheckingForUpdates
         {
-            get { return _checkingForUpdates; }
+            get
+            {
+                return this.checkingForUpdates;
+            }
             set
             {
-                _checkingForUpdates = value;
-                OnPropertyChanged("CheckingForUpdates");
+                this.checkingForUpdates = value;
+                this.OnPropertyChanged("CheckingForUpdates");
+            }
+        }
+
+        public Config Config
+        {
+            get
+            {
+                return Config.Instance;
+            }
+        }
+
+        public Thread InjectThread { get; set; }
+
+        public string StatusString
+        {
+            get
+            {
+                return this.statusString;
+            }
+            set
+            {
+                this.statusString = value;
+                this.OnPropertyChanged("StatusString");
             }
         }
 
         public bool Working
         {
-            get { return _working; }
+            get
+            {
+                return this.working;
+            }
             set
             {
-                _working = value;
-                OnPropertyChanged("Working");
+                this.working = value;
+                this.OnPropertyChanged("Working");
             }
         }
 
-        public Thread InjectThread { get; set; }
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private async void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
+        public void MainWindow_OnClosing(object sender, CancelEventArgs e)
         {
-            Browser.Visibility = Visibility.Hidden;
-            TosBrowser.Visibility = Visibility.Hidden;
-            GeneralSettingsItem.IsSelected = true;
+            if (this.AssembliesWorker.IsBusy && e != null)
+            {
+                this.AssembliesWorker.CancelAsync();
+                e.Cancel = true;
+                this.Hide();
+                return;
+            }
+
+            try
+            {
+                Utility.MapClassToXmlFile(typeof(Config), Config.Instance, Directories.ConfigFilePath);
+            }
+            catch
+            {
+                MessageBox.Show(Utility.GetMultiLanguageText("ConfigWriteError"));
+            }
+
+            try
+            {
+                if (this.InjectThread != null)
+                {
+                    this.InjectThread.Abort();
+                }
+            }
+            catch
+            {
+                // ignored
+            }
+
+            var allAssemblies = new List<LeagueSharpAssembly>();
+            foreach (var profile in Config.Instance.Profiles)
+            {
+                allAssemblies.AddRange(profile.InstalledAssemblies.ToList());
+            }
+
+            Utility.ClearDirectory(Directories.AssembliesDir);
+            Utility.ClearDirectory(Directories.LogsDir);
+            GitUpdater.ClearUnusedRepos(allAssemblies);
+        }
+
+        public async Task PrepareAssemblies(
+            IEnumerable<LeagueSharpAssembly> assemblies,
+            bool update,
+            bool compile,
+            bool updateCommonLibOnly = false)
+        {
+            if (this.Working)
+            {
+                return;
+            }
+
+            this.Working = true;
+            var leagueSharpAssemblies = assemblies as IList<LeagueSharpAssembly> ?? assemblies.ToList();
+
+            await Task.Factory.StartNew(
+                () =>
+                    {
+                        if (update || updateCommonLibOnly)
+                        {
+                            var updateList = leagueSharpAssemblies.GroupBy(a => a.SvnUrl).Select(g => g.First());
+
+                            Parallel.ForEach(
+                                updateList.Where(
+                                    a =>
+                                    !updateCommonLibOnly
+                                    || a.SvnUrl == "https://github.com/LeagueSharp/LeagueSharpCommon"),
+                                new ParallelOptions { MaxDegreeOfParallelism = 5 },
+                                (assembly, state) =>
+                                    {
+                                        assembly.Update();
+                                        if (this.AssembliesWorker.CancellationPending)
+                                        {
+                                            this.AssembliesWorkerCancelled = true;
+                                            state.Break();
+                                        }
+                                    });
+                        }
+
+                        if (compile)
+                        {
+                            foreach (var assembly in leagueSharpAssemblies.OrderBy(a => a.Type))
+                            {
+                                assembly.Compile();
+
+                                if (this.AssembliesWorker.CancellationPending)
+                                {
+                                    this.AssembliesWorkerCancelled = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        Injection.PrepareDone = true;
+                    });
+
+            await Task.Factory.StartNew(
+                () =>
+                    {
+                        ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
+                        this.Working = false;
+                        if (this.AssembliesWorkerCancelled)
+                        {
+                            this.Close();
+                        }
+                    });
+        }
+
+        public async void ShowTextMessage(string title, string message)
+        {
+            var visibility = this.Browser.Visibility;
+            this.Browser.Visibility = Visibility.Hidden;
+            await this.ShowMessageAsync(title, message);
+            this.Browser.Visibility = (visibility == Visibility.Hidden) ? Visibility.Hidden : Visibility.Visible;
+        }
+
+        private void AssemblyButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            this.MainTabControl.SelectedIndex = 2;
+        }
+
+        private void BaseDataGrid_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (this.columnWidthChanging)
+            {
+                this.columnWidthChanging = false;
+
+                Config.Instance.ColumnCheckWidth = this.ColumnCheck.Width.DesiredValue;
+                Config.Instance.ColumnNameWidth = this.ColumnName.Width.DesiredValue;
+                Config.Instance.ColumnTypeWidth = this.ColumnType.Width.DesiredValue;
+                Config.Instance.ColumnVersionWidth = this.ColumnVersion.Width.DesiredValue;
+                Config.Instance.ColumnLocationWidth = this.ColumnLocation.Width.DesiredValue;
+            }
+        }
+
+        private async Task Bootstrap()
+        {
+            #region UI
+
+            this.Browser.Visibility = Visibility.Hidden;
+            this.TosBrowser.Visibility = Visibility.Hidden;
+            this.GeneralSettingsItem.IsSelected = true;
 
             foreach (var gameSetting in Config.Instance.Settings.GameSettings)
             {
-                gameSetting.PropertyChanged += GameSettingOnPropertyChanged;
+                gameSetting.PropertyChanged += this.GameSettingOnPropertyChanged;
             }
 
             #region ColumnWidth
 
-            PropertyDescriptor pd = DependencyPropertyDescriptor.FromProperty(DataGridColumn.ActualWidthProperty, typeof(DataGridColumn));
+            PropertyDescriptor pd = DependencyPropertyDescriptor.FromProperty(
+                DataGridColumn.ActualWidthProperty,
+                typeof(DataGridColumn));
 
-            foreach (DataGridColumn column in InstalledAssembliesDataGrid.Columns)
+            foreach (var column in this.InstalledAssembliesDataGrid.Columns)
             {
-                //Add a listener for this column's width
-                pd.AddValueChanged(column, new EventHandler(ColumnWidthPropertyChanged));
+                pd.AddValueChanged(column, this.ColumnWidthPropertyChanged);
             }
 
-            ColumnCheck.Width = Config.Instance.ColumnCheckWidth;
-            ColumnName.Width = Config.Instance.ColumnNameWidth;
-            ColumnType.Width = Config.Instance.ColumnTypeWidth;
-            ColumnVersion.Width = Config.Instance.ColumnVersionWidth;
-            ColumnLocation.Width = Config.Instance.ColumnLocationWidth;
+            this.ColumnCheck.Width = Config.Instance.ColumnCheckWidth;
+            this.ColumnName.Width = Config.Instance.ColumnNameWidth;
+            this.ColumnType.Width = Config.Instance.ColumnTypeWidth;
+            this.ColumnVersion.Width = Config.Instance.ColumnVersionWidth;
+            this.ColumnLocation.Width = Config.Instance.ColumnLocationWidth;
 
             #endregion
 
-            NewsTabItem.Visibility = Visibility.Hidden;
-            AssembliesTabItem.Visibility = Visibility.Hidden;
-            SettingsTabItem.Visibility = Visibility.Hidden;
-            DataContext = this;
+            this.NewsTabItem.Visibility = Visibility.Hidden;
+            this.AssembliesTabItem.Visibility = Visibility.Hidden;
+            this.SettingsTabItem.Visibility = Visibility.Hidden;
+            this.DataContext = this;
 
             #region ContextMenu.DevMenu
 
-            DevMenu.Visibility = Config.Instance.ShowDevOptions ? Visibility.Visible : Visibility.Collapsed;
-            Config.PropertyChanged += (o, args) =>
-            {
-                if (args.PropertyName == "ShowDevOptions")
+            this.DevMenu.Visibility = Config.Instance.ShowDevOptions ? Visibility.Visible : Visibility.Collapsed;
+            this.Config.PropertyChanged += (o, args) =>
                 {
-                    DevMenu.Visibility = Config.Instance.ShowDevOptions ? Visibility.Visible : Visibility.Collapsed;
-                }
-            };
+                    if (args.PropertyName == "ShowDevOptions")
+                    {
+                        this.DevMenu.Visibility = Config.Instance.ShowDevOptions
+                                                      ? Visibility.Visible
+                                                      : Visibility.Collapsed;
+                    }
+                };
+
+            #endregion
 
             #endregion
 
@@ -156,40 +316,75 @@ namespace LeagueSharp.Loader.Views
 
             if (!Config.Instance.TosAccepted)
             {
-                RightWindowCommands.Visibility = Visibility.Collapsed;
+                this.RightWindowCommands.Visibility = Visibility.Collapsed;
             }
             else
             {
-                MainTabControl.SelectedIndex = 1;
+                this.MainTabControl.SelectedIndex = 1;
             }
 
             #endregion
 
-            if (!File.Exists(Directories.CoreFilePath))
-            {
-                MessageBox.Show(string.Format("Couldn't find {0}", Path.GetFileName(Directories.CoreFilePath)));
-                Environment.Exit(0);
-            }
-
             Updater.MainWindow = this;
+
             await this.CheckForUpdates(true, true, false);
 
             Updater.GetRepositories(
                 delegate(List<string> list)
-                {
-                    if (list.Count > 0)
                     {
-                        Config.Instance.KnownRepositories.Clear();
-                        foreach (var repo in list)
+                        if (list.Count > 0)
                         {
-                            Config.Instance.KnownRepositories.Add(repo);
+                            Config.Instance.KnownRepositories.Clear();
+                            foreach (var repo in list)
+                            {
+                                Config.Instance.KnownRepositories.Add(repo);
+                            }
                         }
-                    }
-                });
+                    });
 
             Config.Instance.FirstRun = false;
 
-            this.Activate();
+            //Try to login with the saved credentials.
+            if (!Auth.Login(Config.Instance.Username, Config.Instance.Password).Item1)
+            {
+                await this.ShowLoginDialog();
+            }
+            else
+            {
+                this.OnLogin(Config.Instance.Username);
+            }
+
+            // wait for tos accept
+            await Task.Factory.StartNew(
+                () =>
+                    {
+                        while (Config.Instance.TosAccepted == false)
+                        {
+                            Thread.Sleep(100);
+                        }
+                    });
+
+            Console.WriteLine("Tos Accepted");
+
+            var allAssemblies = new List<LeagueSharpAssembly>();
+            foreach (var profile in Config.Instance.Profiles)
+            {
+                allAssemblies.AddRange(profile.InstalledAssemblies);
+            }
+
+            allAssemblies = allAssemblies.Distinct().ToList();
+
+            GitUpdater.ClearUnusedRepos(allAssemblies);
+            await this.PrepareAssemblies(allAssemblies, Config.Instance.FirstRun || Config.Instance.UpdateOnLoad, true);
+
+            this.MainTabControl.SelectedIndex = 2;
+
+            var text = Clipboard.GetText();
+            if (text.StartsWith(LSUriScheme.FullName))
+            {
+                Clipboard.SetText("");
+                await LSUriScheme.HandleUrl(text, this);
+            }
         }
 
         private async Task CheckForUpdates(bool loader, bool core, bool showDialogOnFinish)
@@ -204,12 +399,12 @@ namespace LeagueSharp.Loader.Views
                 Console.WriteLine("Checking");
 
                 this.StatusString = Utility.GetMultiLanguageText("Checking");
-                this._updateMessage = "";
+                this.updateMessage = "";
                 this.CheckingForUpdates = true;
 
                 if (loader)
                 {
-                    this._loaderVersionCheckResult = Updater.CheckLoaderVersion();
+                    this.loaderVersionCheckResult = Updater.CheckLoaderVersion();
 
                     try
                     {
@@ -225,14 +420,14 @@ namespace LeagueSharp.Loader.Views
                         Environment.Exit(0);
                     }
 
-                    if (this._loaderVersionCheckResult != null && this._loaderVersionCheckResult.Item1)
+                    if (this.loaderVersionCheckResult != null && this.loaderVersionCheckResult.Item1)
                     {
                         //Update the loader only when we are not injected to be able to replace the core files.
                         if (!Injection.IsInjected)
                         {
                             Console.WriteLine("Update Loader");
                             Updater.Updating = true;
-                            await Updater.UpdateLoader(this._loaderVersionCheckResult);
+                            await Updater.UpdateLoader(this.loaderVersionCheckResult);
                         }
                     }
                 }
@@ -246,7 +441,7 @@ namespace LeagueSharp.Loader.Views
                         {
                             Console.WriteLine("Update Core");
                             var updateResult = await Updater.UpdateCore(exe, !showDialogOnFinish);
-                            this._updateMessage = updateResult.Item3;
+                            this.updateMessage = updateResult.Item3;
 
                             switch (updateResult.Item2)
                             {
@@ -265,7 +460,7 @@ namespace LeagueSharp.Loader.Views
                         }
                     }
                     this.StatusString = Utility.GetMultiLanguageText("Unknown");
-                    this._updateMessage = Utility.GetMultiLanguageText("LeagueNotFound");
+                    this.updateMessage = Utility.GetMultiLanguageText("LeagueNotFound");
                 }
             }
             finally
@@ -275,9 +470,110 @@ namespace LeagueSharp.Loader.Views
 
                 if (showDialogOnFinish)
                 {
-                    this.ShowTextMessage(Utility.GetMultiLanguageText("UpdateStatus"), this._updateMessage);
+                    this.ShowTextMessage(Utility.GetMultiLanguageText("UpdateStatus"), this.updateMessage);
                 }
             }
+        }
+
+        private void CloneItem_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (this.InstalledAssembliesDataGrid.SelectedItems.Count <= 0)
+            {
+                return;
+            }
+            var selectedAssembly = (LeagueSharpAssembly)this.InstalledAssembliesDataGrid.SelectedItems[0];
+            try
+            {
+                var source = Path.GetDirectoryName(selectedAssembly.PathToProjectFile);
+                var destination = Path.Combine(Directories.LocalRepoDir, selectedAssembly.Name) + "_clone_"
+                                  + Environment.TickCount.GetHashCode().ToString("X");
+                Utility.CopyDirectory(source, destination);
+                var leagueSharpAssembly = new LeagueSharpAssembly(
+                    selectedAssembly.Name + "_clone",
+                    Path.Combine(destination, Path.GetFileName(selectedAssembly.PathToProjectFile)),
+                    "");
+                leagueSharpAssembly.Compile();
+                this.Config.SelectedProfile.InstalledAssemblies.Add(leagueSharpAssembly);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+        }
+
+        private void ColumnWidthPropertyChanged(object sender, EventArgs e)
+        {
+            // listen for when the mouse is released
+            this.columnWidthChanging = true;
+            if (sender != null)
+            {
+                Mouse.AddPreviewMouseUpHandler(this, this.BaseDataGrid_MouseLeftButtonUp);
+            }
+        }
+
+        private async void CompileAll_OnClick(object sender, RoutedEventArgs e)
+        {
+            await this.PrepareAssemblies(Config.Instance.SelectedProfile.InstalledAssemblies, false, true);
+        }
+
+        private async void DeleteWithConfirmation(IEnumerable<LeagueSharpAssembly> asemblies)
+        {
+            var result =
+                await
+                this.ShowMessageAsync(
+                    Utility.GetMultiLanguageText("Uninstall"),
+                    Utility.GetMultiLanguageText("UninstallConfirm"),
+                    MessageDialogStyle.AffirmativeAndNegative);
+
+            if (result == MessageDialogResult.Negative)
+            {
+                return;
+            }
+
+            foreach (var ee in asemblies)
+            {
+                Config.Instance.SelectedProfile.InstalledAssemblies.Remove(ee);
+            }
+        }
+
+        private void EditItem_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (this.InstalledAssembliesDataGrid.SelectedItems.Count <= 0)
+            {
+                return;
+            }
+
+            var selectedAssembly = (LeagueSharpAssembly)this.InstalledAssembliesDataGrid.SelectedItems[0];
+            if (File.Exists(selectedAssembly.PathToProjectFile))
+            {
+                Process.Start(selectedAssembly.PathToProjectFile);
+            }
+        }
+
+        private void EditProfileMenuItem_OnClick(object sender, RoutedEventArgs e)
+        {
+            this.ShowProfileNameChangeDialog();
+        }
+
+        private TChildItem FindVisualChild<TChildItem>(DependencyObject obj) where TChildItem : DependencyObject
+        {
+            for (var i = 0; i < VisualTreeHelper.GetChildrenCount(obj); i++)
+            {
+                var child = VisualTreeHelper.GetChild(obj, i);
+                if (child != null && child is TChildItem)
+                {
+                    return (TChildItem)child;
+                }
+                else
+                {
+                    var childOfChild = this.FindVisualChild<TChildItem>(child);
+                    if (childOfChild != null)
+                    {
+                        return childOfChild;
+                    }
+                }
+            }
+            return null;
         }
 
         private void GameSettingOnPropertyChanged(object sender, PropertyChangedEventArgs propertyChangedEventArgs)
@@ -288,16 +584,402 @@ namespace LeagueSharp.Loader.Views
             }
         }
 
-        private async void ShowLoginDialog()
+        private DataGridCell GetCell(DataGridRow row, int columnIndex = 0)
         {
-            MetroDialogOptions.ColorScheme = MetroDialogColorScheme.Theme;
+            if (row == null)
+            {
+                return null;
+            }
+
+            var presenterE = row.FindChildren<DataGridCellsPresenter>(true);
+            if (presenterE == null)
+            {
+                return null;
+            }
+
+            var presenter = presenterE.ToList()[0];
+            var cell = (DataGridCell)presenter.ItemContainerGenerator.ContainerFromIndex(columnIndex);
+            if (cell != null)
+            {
+                return cell;
+            }
+
+            // alternative way - now try to bring into view and retreive the cell
+            this.InstalledAssembliesDataGrid.ScrollIntoView(row, this.InstalledAssembliesDataGrid.Columns[columnIndex]);
+            cell = (DataGridCell)presenter.ItemContainerGenerator.ContainerFromIndex(columnIndex);
+
+            return cell;
+        }
+
+        private int GetCurrentRowIndex(GetPosition pos)
+        {
+            var curIndex = -1;
+            for (var i = 0; i < this.InstalledAssembliesDataGrid.Items.Count; i++)
+            {
+                var row = this.GetRowItem(i);
+                if (row != null)
+                {
+                    var cell = this.GetCell(row);
+                    if (cell != null && this.GetMouseTargetRow(row, pos) && !this.GetMouseTargetRow(cell, pos))
+                    {
+                        curIndex = i;
+                        break;
+                    }
+                }
+            }
+            return curIndex;
+        }
+
+        private bool GetMouseTargetRow(Visual theTarget, GetPosition position)
+        {
+            var rect = VisualTreeHelper.GetDescendantBounds(theTarget);
+            var point = position((IInputElement)theTarget);
+            return rect.Contains(point);
+        }
+
+        private DataGridRow GetRowItem(int index)
+        {
+            if (this.InstalledAssembliesDataGrid.ItemContainerGenerator.Status != GeneratorStatus.ContainersGenerated)
+            {
+                return null;
+            }
+            return this.InstalledAssembliesDataGrid.ItemContainerGenerator.ContainerFromIndex(index) as DataGridRow;
+        }
+
+        private void GithubAssembliesItem_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (this.InstalledAssembliesDataGrid.SelectedItems.Count <= 0)
+            {
+                return;
+            }
+            var selectedAssembly = (LeagueSharpAssembly)this.InstalledAssembliesDataGrid.SelectedItems[0];
+            if (selectedAssembly.SvnUrl != "")
+            {
+                var window = new InstallerWindow { Owner = this };
+                window.ListAssemblies(selectedAssembly.SvnUrl, true);
+                window.ShowDialog();
+            }
+        }
+
+        private void GithubItem_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (this.InstalledAssembliesDataGrid.SelectedItems.Count <= 0)
+            {
+                return;
+            }
+            var selectedAssembly = (LeagueSharpAssembly)this.InstalledAssembliesDataGrid.SelectedItems[0];
+            if (selectedAssembly.SvnUrl != "")
+            {
+                Process.Start(selectedAssembly.SvnUrl);
+            }
+            else if (Directory.Exists(Path.GetDirectoryName(selectedAssembly.PathToProjectFile)))
+            {
+                Process.Start(Path.GetDirectoryName(selectedAssembly.PathToProjectFile));
+            }
+        }
+
+        private void InstallButton_Click(object sender, RoutedEventArgs e)
+        {
+            var window = new InstallerWindow { Owner = this };
+            window.ShowDialog();
+        }
+
+        private void InstalledAssembliesDataGrid_Drop(object sender, DragEventArgs e)
+        {
+            if (this.rowIndex < 0)
+            {
+                return;
+            }
+            var index = this.GetCurrentRowIndex(e.GetPosition);
+            if (index < 0)
+            {
+                return;
+            }
+            if (index == this.rowIndex)
+            {
+                return;
+            }
+            var changedAssembly = this.Config.SelectedProfile.InstalledAssemblies[this.rowIndex];
+            this.Config.SelectedProfile.InstalledAssemblies.RemoveAt(this.rowIndex);
+            this.Config.SelectedProfile.InstalledAssemblies.Insert(index, changedAssembly);
+        }
+
+        private void InstalledAssembliesDataGrid_OnContextMenuOpening(object sender, ContextMenuEventArgs e)
+        {
+            var dataGrid = (DataGrid)sender;
+            if (dataGrid != null)
+            {
+                if (dataGrid.SelectedItems.Count == 0)
+                {
+                    e.Handled = true;
+                }
+            }
+            else
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void InstalledAssembliesDataGrid_OnPreviewDragOver(object sender, DragEventArgs e)
+        {
+            var container = sender as FrameworkElement;
+
+            if (container == null)
+            {
+                return;
+            }
+
+            var scrollViewer = this.FindVisualChild<ScrollViewer>(container);
+
+            if (scrollViewer == null)
+            {
+                return;
+            }
+
+            double tolerance = 15;
+            var verticalPos = e.GetPosition(container).Y;
+            double offset = 1;
+
+            if (verticalPos < tolerance) // Top visible? 
+            {
+                //Scroll up
+                scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset - offset);
+            }
+            else if (verticalPos > container.ActualHeight - tolerance) //Bot visible? 
+            {
+                //Scroll down
+                scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset + offset);
+            }
+        }
+
+        private void InstalledAssembliesDataGrid_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            this.rowIndex = this.GetCurrentRowIndex(e.GetPosition);
+            if (this.rowIndex < 0)
+            {
+                return;
+            }
+            if (this.IsColumnSelected(e))
+            {
+                return;
+            }
+            this.InstalledAssembliesDataGrid.SelectedIndex = this.rowIndex;
+            var selectedAssembly = this.InstalledAssembliesDataGrid.Items[this.rowIndex] as LeagueSharpAssembly;
+            if (selectedAssembly == null)
+            {
+                return;
+            }
+
+            if (DragDrop.DoDragDrop(this.InstalledAssembliesDataGrid, selectedAssembly, DragDropEffects.Move)
+                != DragDropEffects.None)
+            {
+            }
+        }
+
+        private bool IsColumnSelected(MouseEventArgs e)
+        {
+            var dep = (DependencyObject)e.OriginalSource;
+            while ((dep != null) && !(dep is DataGridCell) && !(dep is DataGridColumnHeader))
+            {
+                dep = VisualTreeHelper.GetParent(dep);
+            }
+            if (dep is DataGridColumnHeader)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private void LogItem_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (this.InstalledAssembliesDataGrid.SelectedItems.Count <= 0)
+            {
+                return;
+            }
+
+            var selectedAssembly = (LeagueSharpAssembly)this.InstalledAssembliesDataGrid.SelectedItems[0];
+            var logFile = Path.Combine(
+                Directories.LogsDir,
+                "Error - " + Path.GetFileName(selectedAssembly.Name + ".txt"));
+            if (File.Exists(logFile))
+            {
+                Process.Start(logFile);
+            }
+            else
+            {
+                this.ShowTextMessage("Error", Utility.GetMultiLanguageText("LogNotFound"));
+            }
+        }
+
+        private async void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
+        {
+            await this.Bootstrap();
+        }
+
+        private void NewItem_OnClick(object sender, RoutedEventArgs e)
+        {
+            this.ShowNewAssemblyDialog();
+        }
+
+        private void NewProfileMenuItem_OnClick(object sender, RoutedEventArgs e)
+        {
+            Config.Instance.Profiles.Add(
+                new Profile
+                    {
+                        InstalledAssemblies = new ObservableCollection<LeagueSharpAssembly>(),
+                        Name = Utility.GetMultiLanguageText("NewProfile2")
+                    });
+
+            Config.Instance.SelectedProfile = Config.Instance.Profiles.Last();
+        }
+
+        private void NewsButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            this.MainTabControl.SelectedIndex = 1;
+        }
+
+        private void OnLogin(string username)
+        {
+            Utility.Log(LogStatus.Ok, "Login", string.Format("Succesfully signed in as {0}", username), Logs.MainLog);
+            this.Browser.Visibility = Visibility.Visible;
+            this.TosBrowser.Visibility = Visibility.Visible;
+
+            try
+            {
+                Utility.MapClassToXmlFile(typeof(Config), Config.Instance, Directories.ConfigFilePath);
+            }
+            catch
+            {
+                MessageBox.Show(Utility.GetMultiLanguageText("ConfigWriteError"));
+            }
+
+            if (!PathRandomizer.CopyFiles())
+            {
+            }
+
+            Remoting.Init();
+
+            this.InjectThread = new Thread(
+                () =>
+                    {
+                        while (true)
+                        {
+                            if (Config.Instance.Install)
+                            {
+                                Injection.Pulse();
+                            }
+                            Thread.Sleep(3000);
+                        }
+                    });
+
+            this.InjectThread.SetApartmentState(ApartmentState.STA);
+            this.InjectThread.Start();
+        }
+
+        private void OnPropertyChanged(string propertyName)
+        {
+            if (this.PropertyChanged != null)
+            {
+                this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        private void ProfilesButton_OnMouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            this.ShowProfileNameChangeDialog();
+        }
+
+        private void ProfilesButton_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (e.AddedItems.Count <= 0 || e.RemovedItems.Count <= 0)
+            {
+                return;
+            }
+
+            this.TextBoxBase_OnTextChanged(null, null);
+        }
+
+        private void RemoveMenuItem_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (this.InstalledAssembliesDataGrid.SelectedItems.Count <= 0)
+            {
+                return;
+            }
+
+            var remove = this.InstalledAssembliesDataGrid.SelectedItems.Cast<LeagueSharpAssembly>().ToList();
+            this.DeleteWithConfirmation(remove);
+        }
+
+        private void RemoveProfileMenuItem_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (Config.Instance.Profiles.Count > 1)
+            {
+                Config.Instance.Profiles.RemoveAt(this.ProfilesButton.SelectedIndex);
+                Config.Instance.SelectedProfile = Config.Instance.Profiles.First();
+            }
+            else
+            {
+                Config.Instance.SelectedProfile.InstalledAssemblies = new ObservableCollection<LeagueSharpAssembly>();
+                Config.Instance.SelectedProfile.Name = Utility.GetMultiLanguageText("DefaultProfile");
+            }
+        }
+
+        private void SettingsButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            this.MainTabControl.SelectedIndex = 3;
+        }
+
+        private void ShareItem_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (this.InstalledAssembliesDataGrid.SelectedItems.Count <= 0)
+            {
+                return;
+            }
+
+            var stringToAppend = "";
+            var count = 0;
+            foreach (var selectedAssembly in this.InstalledAssembliesDataGrid.SelectedItems.Cast<LeagueSharpAssembly>())
+            {
+                if (selectedAssembly.SvnUrl.StartsWith(
+                    "https://github.com",
+                    StringComparison.InvariantCultureIgnoreCase))
+                {
+                    var user = selectedAssembly.SvnUrl.Remove(0, 19);
+                    stringToAppend += string.Format("{0}/{1}/", user, selectedAssembly.Name);
+                    count++;
+                }
+            }
+
+            if (count > 0)
+            {
+                var uri = LSUriScheme.FullName + (count == 1 ? "project" : "projectGroup") + "/" + stringToAppend;
+                Clipboard.SetText(uri);
+                this.ShowTextMessage(
+                    Utility.GetMultiLanguageText("MenuShare"),
+                    Utility.GetMultiLanguageText("ShareText"));
+            }
+        }
+
+        private async void ShowAfterLoginDialog(string message, bool showLoginDialog)
+        {
+            await this.ShowMessageAsync("Login", message);
+            if (showLoginDialog)
+            {
+                await this.ShowLoginDialog();
+            }
+        }
+
+        private async Task ShowLoginDialog()
+        {
+            this.MetroDialogOptions.ColorScheme = MetroDialogColorScheme.Theme;
             var result =
                 await
-                    this.ShowLoginAsync(
-                        "LeagueSharp", "Sign in",
-                        new LoginDialogSettings
+                this.ShowLoginAsync(
+                    "LeagueSharp",
+                    "Sign in",
+                    new LoginDialogSettings
                         {
-                            ColorScheme = MetroDialogOptions.ColorScheme,
+                            ColorScheme = this.MetroDialogOptions.ColorScheme,
                             NegativeButtonVisibility = Visibility.Visible
                         });
 
@@ -315,307 +997,29 @@ namespace LeagueSharp.Loader.Views
                 Config.Instance.Username = result.Username;
                 Config.Instance.Password = Auth.Hash(result.Password);
 
-                OnLogin(result.Username);
+                this.OnLogin(result.Username);
             }
             else
             {
                 if (result == null)
                 {
-                    MainWindow_OnClosing(null, null);
+                    this.MainWindow_OnClosing(null, null);
                     Environment.Exit(0);
                 }
 
-                ShowAfterLoginDialog(
-                    string.Format(Utility.GetMultiLanguageText("FailedToLogin"), loginResult.Item2), true);
+                this.ShowAfterLoginDialog(
+                    string.Format(Utility.GetMultiLanguageText("FailedToLogin"), loginResult.Item2),
+                    true);
+
                 Utility.Log(
-                    LogStatus.Error, Utility.GetMultiLanguageText("Login"),
+                    LogStatus.Error,
+                    Utility.GetMultiLanguageText("Login"),
                     string.Format(
-                        Utility.GetMultiLanguageText("LoginError"), (result != null ? result.Username : "null"),
-                        loginResult.Item2), Logs.MainLog);
+                        Utility.GetMultiLanguageText("LoginError"),
+                        (result != null ? result.Username : "null"),
+                        loginResult.Item2),
+                    Logs.MainLog);
             }
-        }
-
-        private async void ShowAfterLoginDialog(string message, bool showLoginDialog)
-        {
-            await this.ShowMessageAsync("Login", message);
-            if (showLoginDialog)
-            {
-                ShowLoginDialog();
-            }
-        }
-
-        public async void ShowTextMessage(string title, string message)
-        {
-            var visibility = Browser.Visibility;
-            Browser.Visibility = Visibility.Hidden;
-            await this.ShowMessageAsync(title, message);
-            Browser.Visibility = (visibility == Visibility.Hidden) ? Visibility.Hidden : Visibility.Visible;
-        }
-
-        private void OnLogin(string username)
-        {
-            Utility.Log(LogStatus.Ok, "Login", string.Format("Succesfully signed in as {0}", username), Logs.MainLog);
-            Browser.Visibility = Visibility.Visible;
-            TosBrowser.Visibility = Visibility.Visible;
-            try
-            {
-                Utility.MapClassToXmlFile(typeof(Config), Config.Instance, Directories.ConfigFilePath);
-            }
-            catch
-            {
-                MessageBox.Show(Utility.GetMultiLanguageText("ConfigWriteError"));
-            }
-
-            if (!PathRandomizer.CopyFiles()) {}
-
-            Remoting.Init();
-
-            InjectThread = new Thread(
-                () =>
-                {
-                    while (true)
-                    {
-                        if (Config.Instance.Install)
-                        {
-                            Injection.Pulse();
-                        }
-                        Thread.Sleep(3000);
-                    }
-                });
-
-            InjectThread.SetApartmentState(ApartmentState.STA);
-            InjectThread.Start();
-        }
-
-        private void InstallButton_Click(object sender, RoutedEventArgs e)
-        {
-            var window = new InstallerWindow { Owner = this };
-            window.ShowDialog();
-        }
-
-        public void MainWindow_OnClosing(object sender, CancelEventArgs e)
-        {
-            if (AssembliesWorker.IsBusy && e != null)
-            {
-                AssembliesWorker.CancelAsync();
-                e.Cancel = true;
-                Hide();
-                return;
-            }
-
-            try
-            {
-                Utility.MapClassToXmlFile(typeof(Config), Config.Instance, Directories.ConfigFilePath);
-            }
-            catch
-            {
-                MessageBox.Show(Utility.GetMultiLanguageText("ConfigWriteError"));
-            }
-
-            if (InjectThread != null)
-            {
-                InjectThread.Abort();
-            }
-
-            var allAssemblies = new List<LeagueSharpAssembly>();
-            foreach (var profile in Config.Instance.Profiles)
-            {
-                allAssemblies.AddRange(profile.InstalledAssemblies.ToList());
-            }
-
-            Utility.ClearDirectory(Directories.AssembliesDir);
-            Utility.ClearDirectory(Directories.LogsDir);
-            GitUpdater.ClearUnusedRepos(allAssemblies);
-        }
-
-        private void InstalledAssembliesDataGrid_OnContextMenuOpening(object sender, ContextMenuEventArgs e)
-        {
-            var dataGrid = (DataGrid) sender;
-            if (dataGrid != null)
-            {
-                if (dataGrid.SelectedItems.Count == 0)
-                {
-                    e.Handled = true;
-                }
-            }
-            else
-            {
-                e.Handled = true;
-            }
-        }
-
-        private void UpdateAndCompileMenuItem_OnClick(object sender, RoutedEventArgs e)
-        {
-            if (InstalledAssembliesDataGrid.SelectedItems.Count == 0)
-            {
-                return;
-            }
-
-            PrepareAssemblies(InstalledAssembliesDataGrid.SelectedItems.Cast<LeagueSharpAssembly>(), true, true);
-        }
-
-        public void PrepareAssemblies(IEnumerable<LeagueSharpAssembly> assemblies,
-            bool update,
-            bool compile,
-            bool updateCommonLibOnly = false)
-        {
-            if (Working)
-            {
-                return;
-            }
-
-            Working = true;
-            var leagueSharpAssemblies = assemblies as IList<LeagueSharpAssembly> ?? assemblies.ToList();
-
-            AssembliesWorker = new BackgroundWorker();
-            AssembliesWorker.WorkerSupportsCancellation = true;
-            AssembliesWorker.DoWork += delegate
-            {
-                if (update || updateCommonLibOnly)
-                {
-                    var updateList = leagueSharpAssemblies.GroupBy(a => a.SvnUrl).Select(g => g.First());
-
-                    Parallel.ForEach(
-                        updateList.Where(
-                            a => !updateCommonLibOnly || a.SvnUrl == "https://github.com/LeagueSharp/LeagueSharpCommon"),
-                        new ParallelOptions { MaxDegreeOfParallelism = 5 }, (assembly, state) =>
-                        {
-                            assembly.Update();
-                            if (AssembliesWorker.CancellationPending)
-                            {
-                                AssembliesWorkerCancelled = true;
-                                state.Break();
-                            }
-                        });
-                }
-
-                if (compile)
-                {
-                    foreach (var assembly in leagueSharpAssemblies.OrderBy(a => a.Type))
-                    {
-                        assembly.Compile();
-
-                        if (AssembliesWorker.CancellationPending)
-                        {
-                            AssembliesWorkerCancelled = true;
-                            break;
-                        }
-                    }
-                }
-
-                Injection.PrepareDone = true;
-            };
-
-            AssembliesWorker.RunWorkerCompleted += delegate
-            {
-                ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
-                Working = false;
-                if (AssembliesWorkerCancelled)
-                {
-                    Close();
-                }
-            };
-            AssembliesWorker.RunWorkerAsync();
-        }
-
-        private void RemoveMenuItem_OnClick(object sender, RoutedEventArgs e)
-        {
-            if (InstalledAssembliesDataGrid.SelectedItems.Count <= 0)
-            {
-                return;
-            }
-
-            var remove = InstalledAssembliesDataGrid.SelectedItems.Cast<LeagueSharpAssembly>().ToList();
-            DeleteWithConfirmation(remove);
-        }
-
-        private async void DeleteWithConfirmation(IEnumerable<LeagueSharpAssembly> asemblies)
-        {
-            var result =
-                await
-                    this.ShowMessageAsync(
-                        Utility.GetMultiLanguageText("Uninstall"), Utility.GetMultiLanguageText("UninstallConfirm"),
-                        MessageDialogStyle.AffirmativeAndNegative);
-
-            if (result == MessageDialogResult.Negative)
-            {
-                return;
-            }
-
-            foreach (var ee in asemblies)
-            {
-                Config.Instance.SelectedProfile.InstalledAssemblies.Remove(ee);
-            }
-        }
-
-        private void GithubItem_OnClick(object sender, RoutedEventArgs e)
-        {
-            if (InstalledAssembliesDataGrid.SelectedItems.Count <= 0)
-            {
-                return;
-            }
-            var selectedAssembly = (LeagueSharpAssembly) InstalledAssembliesDataGrid.SelectedItems[0];
-            if (selectedAssembly.SvnUrl != "")
-            {
-                Process.Start(selectedAssembly.SvnUrl);
-            }
-            else if (Directory.Exists(Path.GetDirectoryName(selectedAssembly.PathToProjectFile)))
-            {
-                Process.Start(Path.GetDirectoryName(selectedAssembly.PathToProjectFile));
-            }
-        }
-
-        private void ShareItem_OnClick(object sender, RoutedEventArgs e)
-        {
-            if (InstalledAssembliesDataGrid.SelectedItems.Count <= 0)
-            {
-                return;
-            }
-
-            var stringToAppend = "";
-            var count = 0;
-            foreach (var selectedAssembly in InstalledAssembliesDataGrid.SelectedItems.Cast<LeagueSharpAssembly>())
-            {
-                if (selectedAssembly.SvnUrl.StartsWith(
-                    "https://github.com", StringComparison.InvariantCultureIgnoreCase))
-                {
-                    var user = selectedAssembly.SvnUrl.Remove(0, 19);
-                    stringToAppend += string.Format("{0}/{1}/", user, selectedAssembly.Name);
-                    count++;
-                }
-            }
-
-            if (count > 0)
-            {
-                var uri = LSUriScheme.FullName + (count == 1 ? "project" : "projectGroup") + "/" + stringToAppend;
-                Clipboard.SetText(uri);
-                ShowTextMessage(Utility.GetMultiLanguageText("MenuShare"), Utility.GetMultiLanguageText("ShareText"));
-            }
-        }
-
-        private void LogItem_OnClick(object sender, RoutedEventArgs e)
-        {
-            if (InstalledAssembliesDataGrid.SelectedItems.Count <= 0)
-            {
-                return;
-            }
-
-            var selectedAssembly = (LeagueSharpAssembly) InstalledAssembliesDataGrid.SelectedItems[0];
-            var logFile = Path.Combine(
-                Directories.LogsDir, "Error - " + Path.GetFileName(selectedAssembly.Name + ".txt"));
-            if (File.Exists(logFile))
-            {
-                Process.Start(logFile);
-            }
-            else
-            {
-                ShowTextMessage("Error", Utility.GetMultiLanguageText("LogNotFound"));
-            }
-        }
-
-        private void NewItem_OnClick(object sender, RoutedEventArgs e)
-        {
-            ShowNewAssemblyDialog();
         }
 
         private async void ShowNewAssemblyDialog()
@@ -633,201 +1037,19 @@ namespace LeagueSharp.Loader.Views
                 if (leagueSharpAssembly != null)
                 {
                     leagueSharpAssembly.Compile();
-                    Config.SelectedProfile.InstalledAssemblies.Add(leagueSharpAssembly);
+                    this.Config.SelectedProfile.InstalledAssemblies.Add(leagueSharpAssembly);
                 }
             }
-        }
-
-        private void EditItem_OnClick(object sender, RoutedEventArgs e)
-        {
-            if (InstalledAssembliesDataGrid.SelectedItems.Count <= 0)
-            {
-                return;
-            }
-
-            var selectedAssembly = (LeagueSharpAssembly) InstalledAssembliesDataGrid.SelectedItems[0];
-            if (File.Exists(selectedAssembly.PathToProjectFile))
-            {
-                Process.Start(selectedAssembly.PathToProjectFile);
-            }
-        }
-
-        private void CloneItem_OnClick(object sender, RoutedEventArgs e)
-        {
-            if (InstalledAssembliesDataGrid.SelectedItems.Count <= 0)
-            {
-                return;
-            }
-            var selectedAssembly = (LeagueSharpAssembly) InstalledAssembliesDataGrid.SelectedItems[0];
-            try
-            {
-                var source = Path.GetDirectoryName(selectedAssembly.PathToProjectFile);
-                var destination = Path.Combine(Directories.LocalRepoDir, selectedAssembly.Name) + "_clone_" +
-                                  Environment.TickCount.GetHashCode().ToString("X");
-                Utility.CopyDirectory(source, destination);
-                var leagueSharpAssembly = new LeagueSharpAssembly(
-                    selectedAssembly.Name + "_clone",
-                    Path.Combine(destination, Path.GetFileName(selectedAssembly.PathToProjectFile)), "");
-                leagueSharpAssembly.Compile();
-                Config.SelectedProfile.InstalledAssemblies.Add(leagueSharpAssembly);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-            }
-        }
-
-        private void TrayIcon_OnTrayMouseDoubleClick(object sender, RoutedEventArgs e)
-        {
-            if (Visibility == Visibility.Hidden)
-            {
-                Show();
-                Activate();
-                WindowState = WindowState.Normal;
-                MenuItemLabelHide.Header = "Hide";
-            }
-        }
-
-        private void TrayMenuClose_OnClick(object sender, RoutedEventArgs e)
-        {
-            Close();
-        }
-
-        private void TrayMenuHide_OnClick(object sender, RoutedEventArgs e)
-        {
-            if (Visibility == Visibility.Visible)
-            {
-                Hide();
-                MenuItemLabelHide.Header = "Show";
-            }
-            else
-            {
-                Show();
-                MenuItemLabelHide.Header = "Hide";
-            }
-        }
-
-        private void TrayIcon_OnTrayLeftMouseUp(object sender, RoutedEventArgs e)
-        {
-            if (Visibility == Visibility.Visible)
-            {
-                Hide();
-                MenuItemLabelHide.Header = "Show";
-            }
-        }
-
-        private void TextBoxBase_OnTextChanged(object sender, TextChangedEventArgs e)
-        {
-            var searchText = SearchTextBox.Text;
-            var view = CollectionViewSource.GetDefaultView(Config.Instance.SelectedProfile.InstalledAssemblies);
-            searchText = searchText.Replace("*", "(.*)");
-            view.Filter = obj =>
-            {
-                try
-                {
-                    var assembly = obj as LeagueSharpAssembly;
-
-                    if (searchText == "checked")
-                    {
-                        return assembly.InjectChecked;
-                    }
-
-                    var nameMatch = Regex.Match(assembly.Name, searchText, RegexOptions.IgnoreCase);
-                    var displayNameMatch = Regex.Match(assembly.DisplayName, searchText, RegexOptions.IgnoreCase);
-                    var svnNameMatch = Regex.Match(assembly.SvnUrl, searchText, RegexOptions.IgnoreCase);
-                    var descNameMatch = Regex.Match(assembly.Description, searchText, RegexOptions.IgnoreCase);
-
-                    return displayNameMatch.Success || nameMatch.Success || svnNameMatch.Success || descNameMatch.Success;
-                }
-                catch (Exception)
-                {
-                    return true;
-                }
-            };
-        }
-
-        private void Activate()
-        {
-            if (FirstTimeActivated)
-            {
-                FirstTimeActivated = false;
-
-                //Try to login with the saved credentials.
-                if (!Auth.Login(Config.Instance.Username, Config.Instance.Password).Item1)
-                {
-                    ShowLoginDialog();
-                }
-                else
-                {
-                    OnLogin(Config.Instance.Username);
-                }
-
-                var allAssemblies = new List<LeagueSharpAssembly>();
-                foreach (var profile in Config.Instance.Profiles)
-                {
-                    allAssemblies.AddRange(profile.InstalledAssemblies);
-                }
-
-                allAssemblies = allAssemblies.Distinct().ToList();
-
-                GitUpdater.ClearUnusedRepos(allAssemblies);
-                PrepareAssemblies(allAssemblies, Config.Instance.FirstRun || Config.Instance.UpdateOnLoad, true);
-            }
-
-            var text = Clipboard.GetText();
-            if (text.StartsWith(LSUriScheme.FullName))
-            {
-                Clipboard.SetText("");
-                LSUriScheme.HandleUrl(text, this);
-            }
-        }
-
-        private void MainWindow_OnActivated(object sender, EventArgs e)
-        {
-            //Activate();
-        }
-
-        private void OnPropertyChanged(string propertyName)
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
-        }
-
-        private void RemoveProfileMenuItem_OnClick(object sender, RoutedEventArgs e)
-        {
-            if (Config.Instance.Profiles.Count > 1)
-            {
-                Config.Instance.Profiles.RemoveAt(ProfilesButton.SelectedIndex);
-                Config.Instance.SelectedProfile = Config.Instance.Profiles.First();
-            }
-            else
-            {
-                Config.Instance.SelectedProfile.InstalledAssemblies = new ObservableCollection<LeagueSharpAssembly>();
-                Config.Instance.SelectedProfile.Name = Utility.GetMultiLanguageText("DefaultProfile");
-            }
-        }
-
-        private void NewProfileMenuItem_OnClick(object sender, RoutedEventArgs e)
-        {
-            Config.Instance.Profiles.Add(
-                new Profile
-                {
-                    InstalledAssemblies = new ObservableCollection<LeagueSharpAssembly>(),
-                    Name = Utility.GetMultiLanguageText("NewProfile2")
-                });
-
-            Config.Instance.SelectedProfile = Config.Instance.Profiles.Last();
         }
 
         private async void ShowProfileNameChangeDialog()
         {
             var result =
                 await
-                    this.ShowInputAsync(
-                        Utility.GetMultiLanguageText("Rename"), Utility.GetMultiLanguageText("RenameText"),
-                        new MetroDialogSettings { DefaultText = Config.Instance.SelectedProfile.Name, });
+                this.ShowInputAsync(
+                    Utility.GetMultiLanguageText("Rename"),
+                    Utility.GetMultiLanguageText("RenameText"),
+                    new MetroDialogSettings { DefaultText = Config.Instance.SelectedProfile.Name, });
 
             if (!string.IsNullOrEmpty(result))
             {
@@ -835,277 +1057,119 @@ namespace LeagueSharp.Loader.Views
             }
         }
 
-        private void ProfilesButton_OnMouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            ShowProfileNameChangeDialog();
-        }
-
-        private void EditProfileMenuItem_OnClick(object sender, RoutedEventArgs e)
-        {
-            ShowProfileNameChangeDialog();
-        }
-
-        private void ProfilesButton_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (e.AddedItems.Count <= 0 || e.RemovedItems.Count <= 0)
-            {
-                return;
-            }
-
-            TextBoxBase_OnTextChanged(null, null);
-        }
-
-        private void TreeView_OnSelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
-        {
-            var name = ((TreeViewItem) ((TreeView) sender).SelectedItem).Uid;
-            SettingsFrame.Content = Activator.CreateInstance(null, "LeagueSharp.Loader.Views.Settings." + name).Unwrap();
-        }
-
-        private void UpdateAll_OnClick(object sender, RoutedEventArgs e)
-        {
-            PrepareAssemblies(Config.Instance.SelectedProfile.InstalledAssemblies, true, true);
-        }
-
-        private void CompileAll_OnClick(object sender, RoutedEventArgs e)
-        {
-            PrepareAssemblies(Config.Instance.SelectedProfile.InstalledAssemblies, false, true);
-        }
-
-        private void NewsButton_OnClick(object sender, RoutedEventArgs e)
-        {
-            MainTabControl.SelectedIndex = 1;
-        }
-
-        private void AssemblyButton_OnClick(object sender, RoutedEventArgs e)
-        {
-            MainTabControl.SelectedIndex = 2;
-        }
-
-        private void SettingsButton_OnClick(object sender, RoutedEventArgs e)
-        {
-            MainTabControl.SelectedIndex = 3;
-        }
-
         private async void StatusButton_OnClick(object sender, RoutedEventArgs e)
         {
-            await CheckForUpdates(true, true, true);
+            await this.CheckForUpdates(true, true, true);
         }
 
-        private void GithubAssembliesItem_OnClick(object sender, RoutedEventArgs e)
+        private void TextBoxBase_OnTextChanged(object sender, TextChangedEventArgs e)
         {
-            if (InstalledAssembliesDataGrid.SelectedItems.Count <= 0)
-            {
-                return;
-            }
-            var selectedAssembly = (LeagueSharpAssembly) InstalledAssembliesDataGrid.SelectedItems[0];
-            if (selectedAssembly.SvnUrl != "")
-            {
-                var window = new InstallerWindow { Owner = this };
-                window.ListAssemblies(selectedAssembly.SvnUrl, true);
-                window.ShowDialog();
-            }
+            var searchText = this.SearchTextBox.Text;
+            var view = CollectionViewSource.GetDefaultView(Config.Instance.SelectedProfile.InstalledAssemblies);
+            searchText = searchText.Replace("*", "(.*)");
+            view.Filter = obj =>
+                {
+                    try
+                    {
+                        var assembly = obj as LeagueSharpAssembly;
+
+                        if (searchText == "checked")
+                        {
+                            return assembly.InjectChecked;
+                        }
+
+                        var nameMatch = Regex.Match(assembly.Name, searchText, RegexOptions.IgnoreCase);
+                        var displayNameMatch = Regex.Match(assembly.DisplayName, searchText, RegexOptions.IgnoreCase);
+                        var svnNameMatch = Regex.Match(assembly.SvnUrl, searchText, RegexOptions.IgnoreCase);
+                        var descNameMatch = Regex.Match(assembly.Description, searchText, RegexOptions.IgnoreCase);
+
+                        return displayNameMatch.Success || nameMatch.Success || svnNameMatch.Success
+                               || descNameMatch.Success;
+                    }
+                    catch (Exception)
+                    {
+                        return true;
+                    }
+                };
         }
 
         private void TosAccept_Click(object sender, RoutedEventArgs e)
         {
             Config.Instance.TosAccepted = true;
-            MainTabControl.SelectedIndex = 1;
-            RightWindowCommands.Visibility = Visibility.Visible;
-            TosBrowser.Visibility = Visibility.Collapsed;
+            this.MainTabControl.SelectedIndex = 1;
+            this.RightWindowCommands.Visibility = Visibility.Visible;
+            this.TosBrowser.Visibility = Visibility.Collapsed;
         }
 
         private void TosDecline_Click(object sender, RoutedEventArgs e)
         {
-            MainWindow_OnClosing(null, null);
+            this.MainWindow_OnClosing(null, null);
             Environment.Exit(0);
         }
 
-        private void InstalledAssembliesDataGrid_Drop(object sender, DragEventArgs e)
+        private void TrayIcon_OnTrayLeftMouseUp(object sender, RoutedEventArgs e)
         {
-            if (rowIndex < 0)
+            if (this.Visibility == Visibility.Visible)
             {
-                return;
-            }
-            int index = GetCurrentRowIndex(e.GetPosition);
-            if (index < 0)
-            {
-                return;
-            }
-            if (index == rowIndex)
-            {
-                return;
-            }
-            LeagueSharpAssembly changedAssembly = Config.SelectedProfile.InstalledAssemblies[rowIndex];
-            Config.SelectedProfile.InstalledAssemblies.RemoveAt(rowIndex);
-            Config.SelectedProfile.InstalledAssemblies.Insert(index, changedAssembly);
-        }
-
-        private bool IsColumnSelected(MouseEventArgs e)
-        {
-            DependencyObject dep = (DependencyObject)e.OriginalSource;
-            while ((dep != null) && !(dep is DataGridCell) && !(dep is DataGridColumnHeader))
-            {
-                dep = VisualTreeHelper.GetParent(dep);
-            }
-            if (dep is DataGridColumnHeader)
-            {
-                return true;
-            }
-            return false;
-        }
-
-        private void InstalledAssembliesDataGrid_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            rowIndex = GetCurrentRowIndex(e.GetPosition);
-            if (rowIndex < 0)
-            {
-                return;
-            }
-            if (IsColumnSelected(e))
-            {
-                return;
-            }
-            InstalledAssembliesDataGrid.SelectedIndex = rowIndex;
-            LeagueSharpAssembly selectedAssembly = InstalledAssembliesDataGrid.Items[rowIndex] as LeagueSharpAssembly;
-            if (selectedAssembly == null)
-            {
-                return;
-            }
-
-            if (DragDrop.DoDragDrop(InstalledAssembliesDataGrid, selectedAssembly, DragDropEffects.Move) !=
-                DragDropEffects.None)
-            {
-
+                this.Hide();
+                this.MenuItemLabelHide.Header = "Show";
             }
         }
 
-        private void InstalledAssembliesDataGrid_OnPreviewDragOver(object sender, DragEventArgs e)
+        private void TrayIcon_OnTrayMouseDoubleClick(object sender, RoutedEventArgs e)
         {
-            FrameworkElement container = sender as FrameworkElement;
+            if (this.Visibility == Visibility.Hidden)
+            {
+                this.Show();
+                this.Focus();
+                this.WindowState = WindowState.Normal;
+                this.MenuItemLabelHide.Header = "Hide";
+            }
+        }
 
-            if (container == null)
+        private void TrayMenuClose_OnClick(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
+        private void TrayMenuHide_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (this.Visibility == Visibility.Visible)
+            {
+                this.Hide();
+                this.MenuItemLabelHide.Header = "Show";
+            }
+            else
+            {
+                this.Show();
+                this.MenuItemLabelHide.Header = "Hide";
+            }
+        }
+
+        private void TreeView_OnSelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            var name = ((TreeViewItem)((TreeView)sender).SelectedItem).Uid;
+            this.SettingsFrame.Content =
+                Activator.CreateInstance(null, "LeagueSharp.Loader.Views.Settings." + name).Unwrap();
+        }
+
+        private async void UpdateAll_OnClick(object sender, RoutedEventArgs e)
+        {
+            await this.PrepareAssemblies(Config.Instance.SelectedProfile.InstalledAssemblies, true, true);
+        }
+
+        private async void UpdateAndCompileMenuItem_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (this.InstalledAssembliesDataGrid.SelectedItems.Count == 0)
             {
                 return;
             }
 
-            ScrollViewer scrollViewer = FindVisualChild<ScrollViewer>(container);
-
-            if (scrollViewer == null)
-            {
-                return;
-            }
-
-            double tolerance = 15;
-            double verticalPos = e.GetPosition(container).Y;
-            double offset = 1;
-
-            if (verticalPos < tolerance) // Top visible? 
-            {
-                //Scroll up
-                scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset - offset);
-            }
-            else if (verticalPos > container.ActualHeight - tolerance) //Bot visible? 
-            {
-                //Scroll down
-                scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset + offset);
-            }
-        }
-
-        private TChildItem FindVisualChild<TChildItem>(DependencyObject obj) where TChildItem : DependencyObject
-        {
-            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(obj); i++)
-            {
-                DependencyObject child = VisualTreeHelper.GetChild(obj, i);
-                if (child != null && child is TChildItem)
-                {
-                    return (TChildItem)child;
-                }
-                else
-                {
-                    TChildItem childOfChild = FindVisualChild<TChildItem>(child);
-                    if (childOfChild != null)
-                    {
-                        return childOfChild;
-                    }
-                }
-            }
-            return null;
-        }
-
-        private bool GetMouseTargetRow(Visual theTarget, GetPosition position)
-        {
-            Rect rect = VisualTreeHelper.GetDescendantBounds(theTarget);
-            Point point = position((IInputElement) theTarget);
-            return rect.Contains(point);
-        }
-
-        private DataGridCell GetCell(DataGridRow row, int columnIndex = 0)
-        {
-            if (row == null) return null;
-
-            var presenterE = row.FindChildren<DataGridCellsPresenter>(true);
-            if (presenterE == null) return null;
-
-            var presenter = presenterE.ToList()[0];
-            var cell = (DataGridCell)presenter.ItemContainerGenerator.ContainerFromIndex(columnIndex);
-            if (cell != null) return cell;
-
-            // alternative way - now try to bring into view and retreive the cell
-            InstalledAssembliesDataGrid.ScrollIntoView(row, InstalledAssembliesDataGrid.Columns[columnIndex]);
-            cell = (DataGridCell)presenter.ItemContainerGenerator.ContainerFromIndex(columnIndex);
-
-            return cell;
-        }
-
-        private DataGridRow GetRowItem(int index)
-        {
-            if (InstalledAssembliesDataGrid.ItemContainerGenerator.Status != GeneratorStatus.ContainersGenerated)
-            {
-                return null;
-            }
-            return InstalledAssembliesDataGrid.ItemContainerGenerator.ContainerFromIndex(index) as DataGridRow;
-        }
-
-        private int GetCurrentRowIndex(GetPosition pos)
-        {
-            int curIndex = -1;
-            for (int i = 0; i < InstalledAssembliesDataGrid.Items.Count; i++)
-            {
-                DataGridRow row = GetRowItem(i);
-                if (row != null)
-                {
-                    DataGridCell cell = GetCell(row);
-                    if (cell != null &&
-                        GetMouseTargetRow(row, pos) && !GetMouseTargetRow(cell, pos))
-                    {
-                        curIndex = i;
-                        break;
-                    }
-                }
-            }
-            return curIndex;
-        }
-
-        private void ColumnWidthPropertyChanged(object sender, EventArgs e)
-        {
-            // listen for when the mouse is released
-            _columnWidthChanging = true;
-            if (sender != null)
-                Mouse.AddPreviewMouseUpHandler(this, BaseDataGrid_MouseLeftButtonUp);
-        }
-
-        void BaseDataGrid_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            if (_columnWidthChanging)
-            {
-                _columnWidthChanging = false;
-
-                Config.Instance.ColumnCheckWidth = ColumnCheck.Width.DesiredValue;
-                Config.Instance.ColumnNameWidth = ColumnName.Width.DesiredValue;
-                Config.Instance.ColumnTypeWidth = ColumnType.Width.DesiredValue;
-                Config.Instance.ColumnVersionWidth = ColumnVersion.Width.DesiredValue;
-                Config.Instance.ColumnLocationWidth = ColumnLocation.Width.DesiredValue;
-            }
+            await
+                this.PrepareAssemblies(
+                    this.InstalledAssembliesDataGrid.SelectedItems.Cast<LeagueSharpAssembly>(),
+                    true,
+                    true);
         }
     }
 }

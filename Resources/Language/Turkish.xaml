@@ -1,6 +1,6 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:system="clr-namespace:System;assembly=mscorlib">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib">
 
     <!-- MainWindow TopBar -->
     <system:String x:Key="Website">Web Sitesi</system:String>
@@ -28,11 +28,11 @@
     <system:String x:Key="MenuShare">Paylaş</system:String>
     <system:String x:Key="MenuViewLog">Kayıtları Görüntüle</system:String>
 
-	<!-- MainWindow Profiles Menu -->
+    <!-- MainWindow Profiles Menu -->
     <system:String x:Key="NewProfile">Yeni Profil</system:String>
     <system:String x:Key="ChangeName">Profili Yeniden Adlandır</system:String>
     <system:String x:Key="DeleteProfile">Profili Sil</system:String>
-	
+
     <!-- MainWindow Buttons -->
     <system:String x:Key="AcceptTosButton">Kabul Ediyorum</system:String>
     <system:String x:Key="DeclineTosButton">Reddediyorum</system:String>
@@ -71,9 +71,9 @@
     <system:String x:Key="Inject">Enjekte Et</system:String>
     <system:String x:Key="Logout">Çıkış</system:String>
     <system:String x:Key="DefaultHotkeys">Kısayolları Geri Yükle</system:String>
-	<system:String x:Key="Language">Dil</system:String>
+    <system:String x:Key="Language">Dil</system:String>
     <system:String x:Key="Color">Renk</system:String>
-	
+
     <!-- Settings Hotkeys -->
     <system:String x:Key="Hotkeys">Kısayollar</system:String>
     <system:String x:Key="Hotkey">Kısayol</system:String>

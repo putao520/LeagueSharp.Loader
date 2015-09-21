@@ -1,6 +1,6 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:system="clr-namespace:System;assembly=mscorlib">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib">
 
     <!-- MainWindow TopBar -->
     <system:String x:Key="Website">Web stránka</system:String>
@@ -28,11 +28,11 @@
     <system:String x:Key="MenuShare">Sdílet</system:String>
     <system:String x:Key="MenuViewLog">Ukázat Log</system:String>
 
-	<!-- MainWindow Profiles Menu -->
+    <!-- MainWindow Profiles Menu -->
     <system:String x:Key="NewProfile">Pøidat</system:String>
     <system:String x:Key="ChangeName">Zmìnit jméno</system:String>
     <system:String x:Key="DeleteProfile">Smazat</system:String>
-	
+
     <!-- MainWindow Buttons -->
     <system:String x:Key="AcceptTosButton">Souhlasím</system:String>
     <system:String x:Key="DeclineTosButton">Nesouhlasím</system:String>
@@ -75,9 +75,9 @@
     <system:String x:Key="Inject">Inject</system:String>
     <system:String x:Key="Logout">Odhlásit se</system:String>
     <system:String x:Key="DefaultHotkeys">Obnovit</system:String>
-	<system:String x:Key="Language">Jazyk</system:String>
+    <system:String x:Key="Language">Jazyk</system:String>
     <system:String x:Key="Color">Barva</system:String>
-	
+
     <!-- Settings Hotkeys -->
     <system:String x:Key="Hotkeys">Kláv. zkratky</system:String>
     <system:String x:Key="Hotkey">Kláv. zkratky</system:String>
@@ -126,18 +126,18 @@
     <system:String x:Key="New">Nový</system:String>
     <system:String x:Key="Edit">Upravit</system:String>
     <system:String x:Key="Clone">Klonovat</system:String>
-    
-	<system:String x:Key="Checking">Ovìøování...</system:String>
+
+    <system:String x:Key="Checking">Ovìøování...</system:String>
     <system:String x:Key="Updated">Aktualizováno</system:String>
     <system:String x:Key="OUTDATED">OUTDATED</system:String>
-	<system:String x:Key="Unknown">Neznámý</system:String>
-	<system:String x:Key="UpdateStatus">Status</system:String>
-	
-	<system:String x:Key="LoaderUpdateFailed">Nelze stáhnout update, prosím aktualizujte ruènì. Error: </system:String>
+    <system:String x:Key="Unknown">Neznámý</system:String>
+    <system:String x:Key="UpdateStatus">Status</system:String>
+
+    <system:String x:Key="LoaderUpdateFailed">Nelze stáhnout update, prosím aktualizujte ruènì. Error: </system:String>
     <system:String x:Key="LeagueNotFound">Nenalezeno umístìní "League of legends.exe", zapnìte prosím Custom hru.</system:String>
     <system:String x:Key="UpdateSuccess">LeagueSharp úspìšnì aktualizován na verzi stejnou jako League of Legends.</system:String>
     <system:String x:Key="UpdateUnknown">Nelze urèit, zda je LeagueSharp aktualizován na nejnovìjší verzi League of Legends, což obvykle znamená, že joduska.me není dostupná.</system:String>
-	<system:String x:Key="NotUpdateNeeded">LeagueSharp je aktualizován pro nynìjší League of Legends verzi.</system:String>
+    <system:String x:Key="NotUpdateNeeded">LeagueSharp je aktualizován pro nynìjší League of Legends verzi.</system:String>
     <system:String x:Key="RandomizationFailed">Nelze randomizovat dll.</system:String>
-    
+
 </ResourceDictionary>

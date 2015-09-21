@@ -1,6 +1,6 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:system="clr-namespace:System;assembly=mscorlib">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib">
 
     <!-- MainWindow TopBar -->
     <system:String x:Key="Website">Website</system:String>
@@ -27,11 +27,11 @@
     <system:String x:Key="MenuShare">แชร์</system:String>
     <system:String x:Key="MenuViewLog">แสดง log</system:String>
 
-	<!-- MainWindow Profiles Menu -->
+    <!-- MainWindow Profiles Menu -->
     <system:String x:Key="NewProfile">ใหม่</system:String>
     <system:String x:Key="ChangeName">เปลี่ยนชื่อ</system:String>
     <system:String x:Key="DeleteProfile">ลบ</system:String>
-	
+
     <!-- MainWindow Buttons -->
     <system:String x:Key="UpdateAll">อัพเดททั้งหมด</system:String>
     <system:String x:Key="CompileAll">คอมไพล์ทั้งหมด</system:String>
@@ -70,7 +70,7 @@
     <system:String x:Key="DefaultHotkeys">คืนค่าเริ่มต้น</system:String>
     <system:String x:Key="Language">ภาษา</system:String>
     <system:String x:Key="Color">Color</system:String>
-	
+
     <!-- Settings Hotkeys -->
     <system:String x:Key="Hotkeys">ปุ่มคีย์ลัด</system:String>
     <system:String x:Key="Hotkey">ปุ่มคีย์ลัด</system:String>
@@ -112,23 +112,23 @@
     <system:String x:Key="Installer">ตัวติดตั้ง</system:String>
     <system:String x:Key="SuccessfullyInstalled">ติดตั้ง assemblies ที่เลือกสำเร็จ.</system:String>
     <system:String x:Key="ErrorInstalling">There was an error while trying to install some of the assemblies, check the log for more details.</system:String>
-	
-	<system:String x:Key="EnableDeveloper">เปิดใช้งานตัวเลือกผู้พัฒนา</system:String>
+
+    <system:String x:Key="EnableDeveloper">เปิดใช้งานตัวเลือกผู้พัฒนา</system:String>
     <system:String x:Key="Developer">ผู้พัฒนา</system:String>
     <system:String x:Key="New">ใหม่</system:String>
     <system:String x:Key="Edit">แก้ไข</system:String>
     <system:String x:Key="Clone">โคลน</system:String>
-	
-	<system:String x:Key="Checking">กำลังตรวจสอบ...</system:String>
+
+    <system:String x:Key="Checking">กำลังตรวจสอบ...</system:String>
     <system:String x:Key="Updated">เวอร์ชั่นล่าสุด</system:String>
     <system:String x:Key="OUTDATED">เวอร์ชั่นเก่า</system:String>
-	<system:String x:Key="Unknown">ไม่ทราบเวอร์ชั่น</system:String>
-	<system:String x:Key="UpdateStatus">สถานะ</system:String>
-	
-	<system:String x:Key="LoaderUpdateFailed">ไม่สามารถดาวน์โหลดอัพเดทได้, โปรดอัพพเดทด้วยตนเอง. ผิดพลาด: </system:String>
+    <system:String x:Key="Unknown">ไม่ทราบเวอร์ชั่น</system:String>
+    <system:String x:Key="UpdateStatus">สถานะ</system:String>
+
+    <system:String x:Key="LoaderUpdateFailed">ไม่สามารถดาวน์โหลดอัพเดทได้, โปรดอัพพเดทด้วยตนเอง. ผิดพลาด: </system:String>
     <system:String x:Key="LeagueNotFound">ไม่พบที่ตั้งของ "League of Legends.exe", กรุณาลองเริ่มคัสต้อมเกม</system:String>
     <system:String x:Key="UpdateSuccess">ลีกชาปอัพเดทสำเร็จสำหรับ League of Legends เวอร์ชั่น</system:String>
     <system:String x:Key="UpdateUnknown">Couldn't determine if LeagueSharp is updated for the local League Of Legends version, this usually means that www.joduska.me is inaccessible.</system:String>
-	<system:String x:Key="NotUpdateNeeded">ลีกชาปอัพเดทแล้วสำหรับ League of Legends เวอร์ชั่น</system:String>
+    <system:String x:Key="NotUpdateNeeded">ลีกชาปอัพเดทแล้วสำหรับ League of Legends เวอร์ชั่น</system:String>
     <system:String x:Key="RandomizationFailed">Could not randomize the dll names.</system:String>
 </ResourceDictionary>

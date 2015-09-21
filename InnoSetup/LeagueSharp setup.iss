@@ -39,6 +39,7 @@ Name: "de"; MessagesFile: "compiler:Languages\German.isl"
 
 ;Dependencies
 #include "Scripts\products.iss"
+#include "Scripts\products\msiproduct.iss"
 #include "Scripts\products\stringversion.iss"
 #include "Scripts\products\winversion.iss"
 #include "Scripts\products\fileversion.iss"
@@ -47,6 +48,7 @@ Name: "de"; MessagesFile: "compiler:Languages\German.isl"
 #include "Scripts\products\dotnetfx45.iss"
 #include "Scripts\products\vcredist2010.iss"
 #include "Scripts\products\vcredist2013.iss"
+#include "Scripts\products\vcredist2015.iss"
 #include "scripts\products\detectDirectX.iss"
 
 [Registry]
@@ -66,6 +68,7 @@ begin
 	dotnetfx45(1);
 	vcredist2010();
 	vcredist2013();
+	vcredist2015();
 	directX();
 	Result := true;
 end;

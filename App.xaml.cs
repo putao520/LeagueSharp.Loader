@@ -340,6 +340,10 @@ namespace LeagueSharp.Loader
                 {
                     try
                     {
+                        Injection.Unload();
+                        Utility.ClearDirectory(Directories.AssembliesDir);
+                        Utility.ClearDirectory(Directories.LogsDir);
+
                         if (this._mutex != null && this.createdNew)
                         {
                             this._mutex.ReleaseMutex();

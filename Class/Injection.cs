@@ -40,6 +40,8 @@ namespace LeagueSharp.Loader.Class
 
         private static InjectDLLDelegate injectDLL;
 
+        private static IntPtr bootstrapper;
+
         public delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
 
         public delegate void OnInjectDelegate(IntPtr hwnd);
@@ -56,6 +58,21 @@ namespace LeagueSharp.Loader.Class
         public static event OnInjectDelegate OnInject;
 
         public static bool InjectedAssembliesChanged { get; set; }
+
+        public static void Unload()
+        {
+            if (bootstrapper != IntPtr.Zero)
+            {
+                try
+                {
+                    Win32Imports.FreeLibrary(bootstrapper);
+                }
+                catch
+                {
+                    // ignored
+                }
+            }
+        }
 
         public static bool IsInjected
         {
@@ -242,13 +259,13 @@ namespace LeagueSharp.Loader.Class
                     writer.WriteArray(0, arr, 0, arr.Length);
                 }
 
-                var hModule = Win32Imports.LoadLibrary(PathRandomizer.LeagueSharpBootstrapDllPath);
-                if (!(hModule != IntPtr.Zero))
+                bootstrapper = Win32Imports.LoadLibrary(PathRandomizer.LeagueSharpBootstrapDllPath);
+                if (!(bootstrapper != IntPtr.Zero))
                 {
                     return;
                 }
 
-                var procAddress = Win32Imports.GetProcAddress(hModule, "InjectModule");
+                var procAddress = Win32Imports.GetProcAddress(bootstrapper, "InjectModule");
                 if (!(procAddress != IntPtr.Zero))
                 {
                     return;
@@ -257,7 +274,7 @@ namespace LeagueSharp.Loader.Class
                 injectDLL =
                     Marshal.GetDelegateForFunctionPointer(procAddress, typeof(InjectDLLDelegate)) as InjectDLLDelegate;
 
-                procAddress = Win32Imports.GetProcAddress(hModule, "HasModule");
+                procAddress = Win32Imports.GetProcAddress(bootstrapper, "HasModule");
                 if (!(procAddress != IntPtr.Zero))
                 {
                     return;
@@ -266,7 +283,7 @@ namespace LeagueSharp.Loader.Class
                 hasModule =
                     Marshal.GetDelegateForFunctionPointer(procAddress, typeof(HasModuleDelegate)) as HasModuleDelegate;
 
-                procAddress = Win32Imports.GetProcAddress(hModule, "GetFilePath");
+                procAddress = Win32Imports.GetProcAddress(bootstrapper, "GetFilePath");
                 if (!(procAddress != IntPtr.Zero))
                 {
                     return;

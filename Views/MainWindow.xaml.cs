@@ -159,8 +159,6 @@ namespace LeagueSharp.Loader.Views
                 allAssemblies.AddRange(profile.InstalledAssemblies.ToList());
             }
 
-            Utility.ClearDirectory(Directories.AssembliesDir);
-            Utility.ClearDirectory(Directories.LogsDir);
             GitUpdater.ClearUnusedRepos(allAssemblies);
         }
 
@@ -312,19 +310,6 @@ namespace LeagueSharp.Loader.Views
 
             #endregion
 
-            #region ToS
-
-            if (!Config.Instance.TosAccepted)
-            {
-                this.RightWindowCommands.Visibility = Visibility.Collapsed;
-            }
-            else
-            {
-                this.MainTabControl.SelectedIndex = 1;
-            }
-
-            #endregion
-
             Updater.MainWindow = this;
 
             await this.CheckForUpdates(true, true, false);
@@ -353,6 +338,19 @@ namespace LeagueSharp.Loader.Views
             {
                 this.OnLogin(Config.Instance.Username);
             }
+
+            #region ToS
+
+            if (!Config.Instance.TosAccepted)
+            {
+                this.RightWindowCommands.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                this.MainTabControl.SelectedIndex = 1;
+            }
+
+            #endregion
 
             // wait for tos accept
             await Task.Factory.StartNew(

@@ -1,8 +1,8 @@
 #dim Version[4]
-#expr ParseVersion("..\bin\Release\LeagueSharp.Loader.exe", Version[0], Version[1], Version[2], Version[3])
+#expr ParseVersion("..\bin\Release\loader.exe", Version[0], Version[1], Version[2], Version[3])
 #define MyAppVersion Str(Version[0]) + "." + Str(Version[1]) + "." + Str(Version[2]) + "." + Str(Version[3])
 #define MyAppName "LeagueSharp"
-#define MyAppExeName "Loader.exe"
+#define MyAppExeName "loader.exe"
 
 [Setup]
 AppName={#MyAppName}

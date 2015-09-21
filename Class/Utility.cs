@@ -47,14 +47,28 @@ namespace LeagueSharp.Loader.Class
                 var dir = new DirectoryInfo(directory);
                 foreach (var fi in dir.GetFiles())
                 {
-                    fi.Attributes = FileAttributes.Normal;
-                    fi.Delete();
+                    try
+                    {
+                        fi.Attributes = FileAttributes.Normal;
+                        fi.Delete();
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
                 }
                 foreach (var di in dir.GetDirectories())
                 {
-                    di.Attributes = FileAttributes.Normal;
-                    ClearDirectory(di.FullName);
-                    di.Delete();
+                    try
+                    {
+                        di.Attributes = FileAttributes.Normal;
+                        ClearDirectory(di.FullName);
+                        di.Delete();
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
                 }
             }
             catch

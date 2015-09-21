@@ -27,97 +27,129 @@ namespace LeagueSharp.Loader.Views
     using System;
     using System.ComponentModel;
     using System.Diagnostics;
+    using System.IO;
+    using System.IO.Compression;
     using System.Net;
+    using System.Runtime.CompilerServices;
+    using System.Threading;
+    using System.Threading.Tasks;
     using System.Windows;
+
     using LeagueSharp.Loader.Class;
     using LeagueSharp.Loader.Data;
-    using MahApps.Metro.Controls;
 
     #endregion
+
+    public enum UpdateAction
+    {
+        Core,
+
+        Loader
+    }
 
     /// <summary>
     ///     Interaction logic for UpdateWindow.xaml
     /// </summary>
-    public partial class UpdateWindow : MetroWindow
+    public partial class UpdateWindow : INotifyPropertyChanged
     {
-        public bool AlreadyActivated = false;
-        public string UpdateUrl;
-        public string ProgressText;
+        public UpdateWindow(UpdateAction action, string url)
+        {
+            this.InitializeComponent();
+            this.DataContext = this;
+            this.Action = action;
+            this.UpdateUrl = url;
+        }
 
         public UpdateWindow()
         {
-            InitializeComponent();
-        }
+            this.InitializeComponent();
+            this.DataContext = this;
 
-        private void UpdateWindow_OnActivated(object sender, EventArgs e)
-        {
-            if (AlreadyActivated)
+            if (DesignerProperties.GetIsInDesignMode(this))
             {
-                return;
-            }
-
-            AlreadyActivated = true;
-
-            try
-            {
-                var webClient = new WebClient();
-                ProgressText = (string) ProgressLabel.Content;
-                UpdateProgressBar.Maximum = 100;
-                try
-                {
-                    webClient.DownloadProgressChanged += WebClientOnDownloadProgressChanged;
-                    webClient.DownloadFileCompleted += webClient_DownloadFileCompleted;
-                    webClient.DownloadFileAsync(new Uri(UpdateUrl), Updater.SetupFile);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(Utility.GetMultiLanguageText("LoaderUpdateFailed") + ex);
-                    Environment.Exit(0);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(Utility.GetMultiLanguageText("LoaderUpdateFailed") + ex);
-                Environment.Exit(0);
+                this.UpdateMessage = this.FindResource("Updating").ToString();
+                this.ProgressText = this.FindResource("UpdateText").ToString();
             }
         }
 
-        private void WebClientOnDownloadProgressChanged(object sender,
-            DownloadProgressChangedEventArgs downloadProgressChangedEventArgs)
-        {
-            Application.Current.Dispatcher.Invoke(
-                delegate
-                {
-                    UpdateProgressBar.Value = downloadProgressChangedEventArgs.ProgressPercentage;
+        private string progressText;
 
-                    if (ProgressText == (String)FindResource("UpdateWaiting"))
+        private string updateMessage;
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public string ProgressText
+        {
+            get
+            {
+                return this.progressText;
+            }
+            set
+            {
+                if (Equals(value, this.progressText))
+                {
+                    return;
+                }
+                this.progressText = value;
+                this.OnPropertyChanged();
+            }
+        }
+
+        public string UpdateMessage
+        {
+            get
+            {
+                return this.updateMessage;
+            }
+            set
+            {
+                if (Equals(value, this.updateMessage))
+                {
+                    return;
+                }
+                this.updateMessage = value;
+                this.OnPropertyChanged();
+            }
+        }
+
+        private UpdateAction Action { get; set; }
+
+        private string UpdateUrl { get; set; }
+
+        public async Task<bool> Update()
+        {
+            this.Focus();
+            var result = false;
+            this.UpdateProgressBar.Value = 0;
+            this.UpdateProgressBar.Maximum = 100;
+
+            switch (this.Action)
+            {
+                case UpdateAction.Loader:
+                    result = await this.UpdateLoader();
+                    break;
+                case UpdateAction.Core:
+                    result = await this.UpdateCore();
+                    break;
+            }
+
+            Application.Current.Dispatcher.InvokeAsync(
+                async () =>
                     {
-                        ProgressText = (String)FindResource("UpdateText");
-                    }
+                        await Task.Delay(250);
+                        this.Close();
+                    });
 
-                    ProgressLabel.Content = string.Format(
-                        ProgressText, downloadProgressChangedEventArgs.BytesReceived / 1024,
-                        downloadProgressChangedEventArgs.TotalBytesToReceive / 1024);
-                });
+            return result;
         }
 
-        private void webClient_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            if (Parent != null)
-            {
-                ((MainWindow) Parent).MainWindow_OnClosing(null, null);
-            }
-            new Process
-            {
-                StartInfo =
-                {
-                    FileName = Updater.SetupFile,
-                    Arguments = "/VERYSILENT /DIR=\"" + Directories.CurrentDirectory + "\""
-                }
-            }.Start();
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
 
-            Config.Instance.TosAccepted = false;
-
+        private void SaveAndRestart()
+        {
             try
             {
                 Utility.MapClassToXmlFile(typeof(Config), Config.Instance, Directories.ConfigFilePath);
@@ -127,7 +159,102 @@ namespace LeagueSharp.Loader.Views
                 MessageBox.Show(Utility.GetMultiLanguageText("ConfigWriteError"));
             }
 
+            new Process
+                {
+                    StartInfo =
+                        {
+                            FileName = Updater.SetupFile,
+                            Arguments = "/VERYSILENT /DIR=\"" + Directories.CurrentDirectory + "\""
+                        }
+                }.Start();
+
+            Config.Instance.TosAccepted = false;
             Environment.Exit(0);
+        }
+
+        private async Task<bool> UpdateCore()
+        {
+            this.UpdateMessage = "Core " + this.FindResource("Updating");
+
+            using (var client = new WebClient())
+            {
+                client.DownloadProgressChanged += this.WebClientOnDownloadProgressChanged;
+
+                try
+                {
+                    if (File.Exists(Updater.UpdateZip))
+                    {
+                        File.Delete(Updater.UpdateZip);
+                        Thread.Sleep(500);
+                    }
+
+                    await client.DownloadFileTaskAsync(this.UpdateUrl, Updater.UpdateZip);
+
+                    using (var archive = ZipFile.OpenRead(Updater.UpdateZip))
+                    {
+                        foreach (var entry in archive.Entries)
+                        {
+                            try
+                            {
+                                File.Delete(Path.Combine(Directories.CoreDirectory, entry.FullName));
+                                entry.ExtractToFile(Path.Combine(Directories.CoreDirectory, entry.FullName), true);
+                            }
+                            catch
+                            {
+                                File.WriteAllText(Directories.CoreFilePath, "-"); // force an update
+                                return false;
+                            }
+                        }
+                    }
+
+                    PathRandomizer.CopyFiles();
+                    Config.Instance.TosAccepted = false;
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show(Utility.GetMultiLanguageText("FailedToDownload") + e);
+                }
+            }
+
+            return true;
+        }
+
+        private async Task<bool> UpdateLoader()
+        {
+            this.UpdateMessage = "Loader " + this.FindResource("Updating");
+
+            using (var client = new WebClient())
+            {
+                client.DownloadProgressChanged += this.WebClientOnDownloadProgressChanged;
+
+                try
+                {
+                    await client.DownloadFileTaskAsync(this.UpdateUrl, Updater.SetupFile);
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show(Utility.GetMultiLanguageText("LoaderUpdateFailed") + e);
+                    Environment.Exit(0);
+                }
+            }
+
+            this.SaveAndRestart();
+
+            return true;
+        }
+
+        private void WebClientOnDownloadProgressChanged(object sender, DownloadProgressChangedEventArgs args)
+        {
+            Application.Current.Dispatcher.InvokeAsync(
+                () =>
+                    {
+                        this.UpdateProgressBar.Value = args.ProgressPercentage;
+
+                        this.ProgressText = string.Format(
+                            this.FindResource("UpdateText").ToString(),
+                            args.BytesReceived / 1024,
+                            args.TotalBytesToReceive / 1024);
+                    });
         }
     }
 }

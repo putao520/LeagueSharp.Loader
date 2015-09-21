@@ -25,15 +25,14 @@ namespace LeagueSharp.Loader.Class
     using System;
     using System.Collections.Generic;
     using System.IO;
-    using System.IO.Compression;
     using System.Net;
     using System.Reflection;
     using System.Runtime.Serialization;
     using System.Runtime.Serialization.Json;
     using System.Text.RegularExpressions;
-    using System.Threading;
+    using System.Threading.Tasks;
     using System.Windows;
-    using Hardcodet.Wpf.TaskbarNotification;
+
     using LeagueSharp.Loader.Data;
     using LeagueSharp.Loader.Views;
 
@@ -41,25 +40,21 @@ namespace LeagueSharp.Loader.Class
 
     internal class Updater
     {
-        public delegate void RepositoriesUpdateDelegate(List<string> list);
+        public const string CoreVersionCheckURL = "http://api.joduska.me/public/deploy/kernel/{0}";
 
         public const string VersionCheckURL = "http://api.joduska.me/public/deploy/loader/version";
-        public const string CoreVersionCheckURL = "http://api.joduska.me/public/deploy/kernel/{0}";
-        public static string UpdateZip = Path.Combine(Directories.CoreDirectory, "update.zip");
-        public static string SetupFile = Path.Combine(Directories.CurrentDirectory, "LeagueSharp-update.exe");
-        public static MainWindow MainWindow;
-        public static bool Updating = false;
+
         public static bool CheckedForUpdates = false;
 
-        [DataContract]
-        internal class UpdateInfo
-        {
-            [DataMember] internal bool valid;
+        public static MainWindow MainWindow;
 
-            [DataMember] internal string url;
+        public static string SetupFile = Path.Combine(Directories.CurrentDirectory, "LeagueSharp-update.exe");
 
-            [DataMember] internal string version;
-        }
+        public static string UpdateZip = Path.Combine(Directories.CoreDirectory, "update.zip");
+
+        public static bool Updating = false;
+
+        public delegate void RepositoriesUpdateDelegate(List<string> list);
 
         public static Tuple<bool, string> CheckLoaderVersion()
         {
@@ -69,7 +64,7 @@ namespace LeagueSharp.Loader.Class
                 {
                     var data = client.DownloadData(VersionCheckURL);
                     var ser = new DataContractJsonSerializer(typeof(UpdateInfo));
-                    var updateInfo = (UpdateInfo) ser.ReadObject(new MemoryStream(data));
+                    var updateInfo = (UpdateInfo)ser.ReadObject(new MemoryStream(data));
                     var v = Version.Parse(updateInfo.version);
                     if (Utility.VersionToInt(Assembly.GetEntryAssembly().GetName().Version) < Utility.VersionToInt(v))
                     {
@@ -85,17 +80,33 @@ namespace LeagueSharp.Loader.Class
             return new Tuple<bool, string>(false, "");
         }
 
-        public static void UpdateLoader(Tuple<bool, string> versionCheckResult)
+        public static void GetRepositories(RepositoriesUpdateDelegate del)
         {
-            if (versionCheckResult.Item1 && (versionCheckResult.Item2.StartsWith("https://github.com/LeagueSharp/") || versionCheckResult.Item2.StartsWith("https://github.com/joduskame/") || versionCheckResult.Item2.StartsWith("https://github.com/Esk0r/")))
-            {
-                var window = new UpdateWindow();
-                window.UpdateUrl = versionCheckResult.Item2;
-                window.ShowDialog();
-            }
+            var wb = new WebClient();
+
+            wb.DownloadStringCompleted += delegate(object sender, DownloadStringCompletedEventArgs args)
+                {
+                    var result = new List<string>();
+                    try
+                    {
+                        var matches = Regex.Matches(args.Result, "<repo>(.*)</repo>");
+                        foreach (Match match in matches)
+                        {
+                            result.Add(match.Groups[1].ToString());
+                        }
+                    }
+                    catch (Exception)
+                    {
+                    }
+                    del(result);
+                };
+
+            wb.DownloadStringAsync(new Uri("https://loader.joduska.me/repositories.txt"));
         }
 
-        public static Tuple<bool, bool?, string> UpdateCore(string LeagueOfLegendsFilePath, bool showMessages)
+        public static async Task<Tuple<bool, bool?, string>> UpdateCore(
+            string leagueOfLegendsFilePath,
+            bool showMessages)
         {
             if (Directory.Exists(Path.Combine(Directories.CurrentDirectory, "iwanttogetbanned")))
             {
@@ -104,7 +115,7 @@ namespace LeagueSharp.Loader.Class
 
             try
             {
-                var leagueMd5 = Utility.Md5Checksum(LeagueOfLegendsFilePath);
+                var leagueMd5 = Utility.Md5Checksum(leagueOfLegendsFilePath);
                 var wr = WebRequest.Create(string.Format(CoreVersionCheckURL, leagueMd5));
                 wr.Timeout = 4000;
                 wr.Method = "GET";
@@ -115,7 +126,7 @@ namespace LeagueSharp.Loader.Class
                     if (stream != null)
                     {
                         var ser = new DataContractJsonSerializer(typeof(UpdateInfo));
-                        var updateInfo = (UpdateInfo) ser.ReadObject(stream);
+                        var updateInfo = (UpdateInfo)ser.ReadObject(stream);
 
                         if (updateInfo.version == "0")
                         {
@@ -129,47 +140,31 @@ namespace LeagueSharp.Loader.Class
                             return new Tuple<bool, bool?, string>(false, false, message);
                         }
 
-                        if (updateInfo.version != Utility.Md5Checksum(Directories.CoreFilePath) )//&& updateInfo.url.StartsWith("https://github.com/joduskame/")) //Update needed
+                        if (updateInfo.version != Utility.Md5Checksum(Directories.CoreFilePath)
+                            && updateInfo.url.StartsWith("https://github.com/joduskame/"))
                         {
-                            if (MainWindow != null)
-                            {
-                                MainWindow.TrayIcon.ShowBalloonTip(
-                                    Utility.GetMultiLanguageText("Updating"),
-                                    "LeagueSharp.Core: " + Utility.GetMultiLanguageText("Updating"), BalloonIcon.Info);
-                            }
+                            //if (MainWindow != null)
+                            //{
+                            //    MainWindow.TrayIcon.ShowBalloonTip(
+                            //        Utility.GetMultiLanguageText("Updating"),
+                            //        "LeagueSharp.Core: " + Utility.GetMultiLanguageText("Updating"),
+                            //        BalloonIcon.Info);
+                            //}
 
                             try
                             {
-                                if (File.Exists(UpdateZip))
-                                {
-                                    File.Delete(UpdateZip);
-                                    Thread.Sleep(500);
-                                }
-
-                                using (var webClient = new WebClient())
-                                {
-                                    webClient.DownloadFile(updateInfo.url, UpdateZip);
-                                    using (var archive = ZipFile.OpenRead(UpdateZip))
-                                    {
-                                        foreach (var entry in archive.Entries)
+                                await Application.Current.Dispatcher.Invoke(
+                                    async () =>
                                         {
-                                            try
-                                            {
-                                                File.Delete(Path.Combine(Directories.CoreDirectory, entry.FullName));
-                                                entry.ExtractToFile(Path.Combine(Directories.CoreDirectory, entry.FullName), true);
-                                            }
-                                            catch (Exception ex)
-                                            {
-                                                File.WriteAllText(Directories.CoreFilePath, "-"); // force an update
-                                                return new Tuple<bool, bool?, string>(false, false, ex.ToString());
-                                            }
-                                        }
-                                    }
-                                }
-                                PathRandomizer.CopyFiles();
-                                Config.Instance.TosAccepted = false;
+                                            var window = new UpdateWindow(UpdateAction.Core, updateInfo.url);
+                                            window.Show();
+                                            var result = await window.Update();
+                                        });
+
                                 return new Tuple<bool, bool?, string>(
-                                    true, true, Utility.GetMultiLanguageText("UpdateSuccess"));
+                                    true,
+                                    true,
+                                    Utility.GetMultiLanguageText("UpdateSuccess"));
                             }
                             catch (Exception e)
                             {
@@ -197,35 +192,41 @@ namespace LeagueSharp.Loader.Class
             {
                 //MessageBox.Show(e.ToString());
                 return new Tuple<bool, bool?, string>(
-                    File.Exists(Directories.CoreFilePath), null, Utility.GetMultiLanguageText("UpdateUnknown"));
+                    File.Exists(Directories.CoreFilePath),
+                    null,
+                    Utility.GetMultiLanguageText("UpdateUnknown"));
             }
 
             return new Tuple<bool, bool?, string>(
-                File.Exists(Directories.CoreFilePath), true, Utility.GetMultiLanguageText("NotUpdateNeeded"));
+                File.Exists(Directories.CoreFilePath),
+                true,
+                Utility.GetMultiLanguageText("NotUpdateNeeded"));
         }
 
-        public static void GetRepositories(RepositoriesUpdateDelegate del)
+        public static async Task UpdateLoader(Tuple<bool, string> versionCheckResult)
         {
-            var wb = new WebClient();
-
-            wb.DownloadStringCompleted += delegate(object sender, DownloadStringCompletedEventArgs args)
+            if (versionCheckResult.Item1
+                && (versionCheckResult.Item2.StartsWith("https://github.com/LeagueSharp/")
+                    || versionCheckResult.Item2.StartsWith("https://github.com/joduskame/")
+                    || versionCheckResult.Item2.StartsWith("https://github.com/Esk0r/")))
             {
-                var result = new List<string>();
-                try
-                {
-                    var matches = Regex.Matches(args.Result, "<repo>(.*)</repo>");
-                    foreach (Match match in matches)
-                    {
-                        result.Add(match.Groups[1].ToString());
-                    }
-                }
-               catch (Exception) { }
-               del(result);
-            };
+                var window = new UpdateWindow(UpdateAction.Loader, versionCheckResult.Item2);
+                window.Show();
+                await window.Update();
+            }
+        }
 
-            wb.DownloadStringAsync(
-                new Uri(
-                    "https://loader.joduska.me/repositories.txt"));
+        [DataContract]
+        internal class UpdateInfo
+        {
+            [DataMember]
+            internal string url;
+
+            [DataMember]
+            internal bool valid;
+
+            [DataMember]
+            internal string version;
         }
     }
 }

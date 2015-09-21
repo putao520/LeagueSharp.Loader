@@ -105,11 +105,39 @@ namespace LeagueSharp.Loader.Views
         public Thread InjectThread { get; set; }
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
+        private async void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
         {
             Browser.Visibility = Visibility.Hidden;
             TosBrowser.Visibility = Visibility.Hidden;
             GeneralSettingsItem.IsSelected = true;
+
+            foreach (var gameSetting in Config.Instance.Settings.GameSettings)
+            {
+                gameSetting.PropertyChanged += GameSettingOnPropertyChanged;
+            }
+
+            #region ColumnWidth
+
+            PropertyDescriptor pd = DependencyPropertyDescriptor.FromProperty(DataGridColumn.ActualWidthProperty, typeof(DataGridColumn));
+
+            foreach (DataGridColumn column in InstalledAssembliesDataGrid.Columns)
+            {
+                //Add a listener for this column's width
+                pd.AddValueChanged(column, new EventHandler(ColumnWidthPropertyChanged));
+            }
+
+            ColumnCheck.Width = Config.Instance.ColumnCheckWidth;
+            ColumnName.Width = Config.Instance.ColumnNameWidth;
+            ColumnType.Width = Config.Instance.ColumnTypeWidth;
+            ColumnVersion.Width = Config.Instance.ColumnVersionWidth;
+            ColumnLocation.Width = Config.Instance.ColumnLocationWidth;
+
+            #endregion
+
+            NewsTabItem.Visibility = Visibility.Hidden;
+            AssembliesTabItem.Visibility = Visibility.Hidden;
+            SettingsTabItem.Visibility = Visibility.Hidden;
+            DataContext = this;
 
             #region ContextMenu.DevMenu
 
@@ -144,7 +172,7 @@ namespace LeagueSharp.Loader.Views
             }
 
             Updater.MainWindow = this;
-            CheckForUpdates(true, true, false);
+            await this.CheckForUpdates(true, true, false);
 
             Updater.GetRepositories(
                 delegate(List<string> list)
@@ -161,51 +189,52 @@ namespace LeagueSharp.Loader.Views
 
             Config.Instance.FirstRun = false;
 
-            foreach (var gameSetting in Config.Instance.Settings.GameSettings)
-            {
-                gameSetting.PropertyChanged += GameSettingOnPropertyChanged;
-            }
-
-            #region ColumnWidth
-
-            PropertyDescriptor pd = DependencyPropertyDescriptor.FromProperty(DataGridColumn.ActualWidthProperty, typeof(DataGridColumn));
-
-            foreach (DataGridColumn column in InstalledAssembliesDataGrid.Columns)
-            {
-                //Add a listener for this column's width
-                pd.AddValueChanged(column, new EventHandler(ColumnWidthPropertyChanged));
-            }
-
-            ColumnCheck.Width = Config.Instance.ColumnCheckWidth;
-            ColumnName.Width = Config.Instance.ColumnNameWidth;
-            ColumnType.Width = Config.Instance.ColumnTypeWidth;
-            ColumnVersion.Width = Config.Instance.ColumnVersionWidth;
-            ColumnLocation.Width = Config.Instance.ColumnLocationWidth;
-
-            #endregion
-
-            NewsTabItem.Visibility = Visibility.Hidden;
-            AssembliesTabItem.Visibility = Visibility.Hidden;
-            SettingsTabItem.Visibility = Visibility.Hidden;
-            DataContext = this;
+            this.Activate();
         }
 
-        private void CheckForUpdates(bool loader, bool core, bool showDialogOnFinish)
+        private async Task CheckForUpdates(bool loader, bool core, bool showDialogOnFinish)
         {
-            if (CheckingForUpdates)
+            try
             {
-                return;
-            }
-            StatusString = Utility.GetMultiLanguageText("Checking");
-            _updateMessage = "";
-            CheckingForUpdates = true;
-            UpdaterWorker = new BackgroundWorker();
+                if (this.CheckingForUpdates)
+                {
+                    return;
+                }
 
-            UpdaterWorker.DoWork += delegate
-            {
+                Console.WriteLine("Checking");
+
+                this.StatusString = Utility.GetMultiLanguageText("Checking");
+                this._updateMessage = "";
+                this.CheckingForUpdates = true;
+
                 if (loader)
                 {
-                    _loaderVersionCheckResult = Updater.CheckLoaderVersion();
+                    this._loaderVersionCheckResult = Updater.CheckLoaderVersion();
+
+                    try
+                    {
+                        if (File.Exists(Updater.SetupFile))
+                        {
+                            Thread.Sleep(1000);
+                            File.Delete(Updater.SetupFile);
+                        }
+                    }
+                    catch
+                    {
+                        MessageBox.Show(Utility.GetMultiLanguageText("FailedToDelete"));
+                        Environment.Exit(0);
+                    }
+
+                    if (this._loaderVersionCheckResult != null && this._loaderVersionCheckResult.Item1)
+                    {
+                        //Update the loader only when we are not injected to be able to replace the core files.
+                        if (!Injection.IsInjected)
+                        {
+                            Console.WriteLine("Update Loader");
+                            Updater.Updating = true;
+                            await Updater.UpdateLoader(this._loaderVersionCheckResult);
+                        }
+                    }
                 }
 
                 if (core)
@@ -215,64 +244,40 @@ namespace LeagueSharp.Loader.Views
                         var exe = Utility.GetLatestLeagueOfLegendsExePath(Config.Instance.LeagueOfLegendsExePath);
                         if (exe != null)
                         {
-                            var updateResult = Updater.UpdateCore(exe, !showDialogOnFinish);
-                            _updateMessage = updateResult.Item3;
+                            Console.WriteLine("Update Core");
+                            var updateResult = await Updater.UpdateCore(exe, !showDialogOnFinish);
+                            this._updateMessage = updateResult.Item3;
+
                             switch (updateResult.Item2)
                             {
                                 case true:
-                                    StatusString = Utility.GetMultiLanguageText("Updated");
+                                    this.StatusString = Utility.GetMultiLanguageText("Updated");
                                     break;
                                 case false:
-                                    StatusString = Utility.GetMultiLanguageText("OUTDATED");
+                                    this.StatusString = Utility.GetMultiLanguageText("OUTDATED");
                                     break;
                                 default:
-                                    StatusString = Utility.GetMultiLanguageText("Unknown");
+                                    this.StatusString = Utility.GetMultiLanguageText("Unknown");
                                     break;
                             }
 
                             return;
                         }
                     }
-                    StatusString = Utility.GetMultiLanguageText("Unknown");
-                    _updateMessage = Utility.GetMultiLanguageText("LeagueNotFound");
+                    this.StatusString = Utility.GetMultiLanguageText("Unknown");
+                    this._updateMessage = Utility.GetMultiLanguageText("LeagueNotFound");
                 }
-            };
-
-            UpdaterWorker.RunWorkerCompleted += delegate
+            }
+            finally
             {
-                try
-                {
-                    if (File.Exists(Updater.SetupFile))
-                    {
-                        Thread.Sleep(1000);
-                        File.Delete(Updater.SetupFile);
-                    }
-                }
-                catch
-                {
-                    MessageBox.Show(Utility.GetMultiLanguageText("FailedToDelete"));
-                    Environment.Exit(0);
-                }
-
-                if (_loaderVersionCheckResult != null && _loaderVersionCheckResult.Item1)
-                {
-                    //Update the loader only when we are not injected to be able to replace the core files.
-                    if (!Injection.IsInjected)
-                    {
-                        Updater.Updating = true;
-                        Updater.UpdateLoader(_loaderVersionCheckResult);
-                    }
-                }
-
+                this.CheckingForUpdates = false;
                 Updater.CheckedForUpdates = true;
-                CheckingForUpdates = false;
+
                 if (showDialogOnFinish)
                 {
-                    ShowTextMessage(Utility.GetMultiLanguageText("UpdateStatus"), _updateMessage);
+                    this.ShowTextMessage(Utility.GetMultiLanguageText("UpdateStatus"), this._updateMessage);
                 }
-            };
-
-            UpdaterWorker.RunWorkerAsync();
+            }
         }
 
         private void GameSettingOnPropertyChanged(object sender, PropertyChangedEventArgs propertyChangedEventArgs)
@@ -363,6 +368,8 @@ namespace LeagueSharp.Loader.Views
 
             if (!PathRandomizer.CopyFiles()) {}
 
+            Remoting.Init();
+
             InjectThread = new Thread(
                 () =>
                 {
@@ -376,6 +383,7 @@ namespace LeagueSharp.Loader.Views
                     }
                 });
 
+            InjectThread.SetApartmentState(ApartmentState.STA);
             InjectThread.Start();
         }
 
@@ -494,6 +502,8 @@ namespace LeagueSharp.Loader.Views
                         }
                     }
                 }
+
+                Injection.PrepareDone = true;
             };
 
             AssembliesWorker.RunWorkerCompleted += delegate
@@ -736,7 +746,7 @@ namespace LeagueSharp.Loader.Views
             };
         }
 
-        private void MainWindow_OnActivated(object sender, EventArgs e)
+        private void Activate()
         {
             if (FirstTimeActivated)
             {
@@ -762,7 +772,6 @@ namespace LeagueSharp.Loader.Views
 
                 GitUpdater.ClearUnusedRepos(allAssemblies);
                 PrepareAssemblies(allAssemblies, Config.Instance.FirstRun || Config.Instance.UpdateOnLoad, true);
-                Remoting.Init();
             }
 
             var text = Clipboard.GetText();
@@ -771,6 +780,11 @@ namespace LeagueSharp.Loader.Views
                 Clipboard.SetText("");
                 LSUriScheme.HandleUrl(text, this);
             }
+        }
+
+        private void MainWindow_OnActivated(object sender, EventArgs e)
+        {
+            //Activate();
         }
 
         private void OnPropertyChanged(string propertyName)
@@ -872,9 +886,9 @@ namespace LeagueSharp.Loader.Views
             MainTabControl.SelectedIndex = 3;
         }
 
-        private void StatusButton_OnClick(object sender, RoutedEventArgs e)
+        private async void StatusButton_OnClick(object sender, RoutedEventArgs e)
         {
-            CheckForUpdates(true, true, true);
+            await CheckForUpdates(true, true, true);
         }
 
         private void GithubAssembliesItem_OnClick(object sender, RoutedEventArgs e)

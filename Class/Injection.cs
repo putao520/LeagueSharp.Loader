@@ -208,7 +208,9 @@ namespace LeagueSharp.Loader.Class
 			}
 		}
 
-		private static String GetFilePath(Process process)
+	    public static bool PrepareDone { get; set; }
+
+	    private static String GetFilePath(Process process)
 		{
 			StringBuilder sb = new StringBuilder(255);
 			getFilePath(process.Id, sb, sb.Capacity);
@@ -217,8 +219,6 @@ namespace LeagueSharp.Loader.Class
 
 		public static void Pulse()
 		{
-
-
 			if (injectDLL == null || hasModule == null)
 			{
 				ResolveInjectDLL();
@@ -231,7 +231,7 @@ namespace LeagueSharp.Loader.Class
 			}
 
 			//Don't inject untill we checked that there are not updates for the loader.
-			if (Updater.Updating || !Updater.CheckedForUpdates)
+			if (Updater.Updating || !Updater.CheckedForUpdates || !PrepareDone)
 			{
 				return;
 			}
@@ -242,8 +242,9 @@ namespace LeagueSharp.Loader.Class
 				{
 
 					Config.Instance.LeagueOfLegendsExePath = GetFilePath(instance);
+				    var updateCheck = Updater.UpdateCore(GetFilePath(instance), true).Result;
 
-					if (!IsProcessInjected(instance) && Updater.UpdateCore(GetFilePath(instance), true).Item1)
+                    if (!IsProcessInjected(instance) && updateCheck.Item1)
 					{
 						if (injectDLL != null)
 						{

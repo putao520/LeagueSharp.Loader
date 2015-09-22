@@ -207,6 +207,8 @@ namespace LeagueSharp.Loader.Views
 
                     PathRandomizer.CopyFiles();
                     Config.Instance.TosAccepted = false;
+
+                    return true;
                 }
                 catch (Exception e)
                 {
@@ -214,7 +216,7 @@ namespace LeagueSharp.Loader.Views
                 }
             }
 
-            return true;
+            return false;
         }
 
         private async Task<bool> UpdateLoader()

@@ -118,19 +118,6 @@ namespace LeagueSharp.Loader.Class
                     }
                 }
 
-                var targetFramework = this.Project.GetProperty("TargetFrameworkVersion").EvaluatedValue;
-
-                switch (targetFramework)
-                {
-                    case "v4.5":
-                    case "v4.5.1":
-                        this.Project.SetProperty("TargetFrameworkVersion", "v4.5.2");
-                        break;
-
-                    case "v4.6":
-                        break;
-                }
-
                 this.Project.Save();
                 Utility.Log(
                     LogStatus.Ok,

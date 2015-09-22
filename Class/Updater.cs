@@ -56,6 +56,15 @@ namespace LeagueSharp.Loader.Class
 
         public delegate void RepositoriesUpdateDelegate(List<string> list);
 
+        public enum CoreUpdateState
+        {
+            Operational,
+
+            Maintenance,
+
+            Unknown
+        }
+
         public static Tuple<bool, string> CheckLoaderVersion()
         {
             try
@@ -104,13 +113,11 @@ namespace LeagueSharp.Loader.Class
             wb.DownloadStringAsync(new Uri("https://loader.joduska.me/repositories.txt"));
         }
 
-        public static async Task<Tuple<bool, bool?, string>> UpdateCore(
-            string leagueOfLegendsFilePath,
-            bool showMessages)
+        public static async Task<UpdateResponse> UpdateCore(string leagueOfLegendsFilePath, bool showMessages)
         {
             if (Directory.Exists(Path.Combine(Directories.CurrentDirectory, "iwanttogetbanned")))
             {
-                return new Tuple<bool, bool?, string>(true, true, Utility.GetMultiLanguageText("NotUpdateNeeded"));
+                return new UpdateResponse(CoreUpdateState.Operational, Utility.GetMultiLanguageText("NotUpdateNeeded"));
             }
 
             try
@@ -137,34 +144,29 @@ namespace LeagueSharp.Loader.Class
                                 MessageBox.Show(message);
                             }
 
-                            return new Tuple<bool, bool?, string>(false, false, message);
+                            return new UpdateResponse(CoreUpdateState.Maintenance, message);
                         }
 
                         if (updateInfo.version != Utility.Md5Checksum(Directories.CoreFilePath)
                             && updateInfo.url.StartsWith("https://github.com/joduskame/"))
                         {
-                            //if (MainWindow != null)
-                            //{
-                            //    MainWindow.TrayIcon.ShowBalloonTip(
-                            //        Utility.GetMultiLanguageText("Updating"),
-                            //        "LeagueSharp.Core: " + Utility.GetMultiLanguageText("Updating"),
-                            //        BalloonIcon.Info);
-                            //}
-
                             try
                             {
+                                var result = CoreUpdateState.Unknown;
+
                                 await Application.Current.Dispatcher.Invoke(
                                     async () =>
                                         {
                                             var window = new UpdateWindow(UpdateAction.Core, updateInfo.url);
                                             window.Show();
-                                            var result = await window.Update();
+
+                                            if (await window.Update())
+                                            {
+                                                result = CoreUpdateState.Operational;
+                                            }
                                         });
 
-                                return new Tuple<bool, bool?, string>(
-                                    true,
-                                    true,
-                                    Utility.GetMultiLanguageText("UpdateSuccess"));
+                                return new UpdateResponse(result, Utility.GetMultiLanguageText("UpdateSuccess"));
                             }
                             catch (Exception e)
                             {
@@ -175,7 +177,7 @@ namespace LeagueSharp.Loader.Class
                                     MessageBox.Show(message);
                                 }
 
-                                return new Tuple<bool, bool?, string>(false, false, message);
+                                return new UpdateResponse(CoreUpdateState.Unknown, message);
                             }
                             finally
                             {
@@ -190,17 +192,10 @@ namespace LeagueSharp.Loader.Class
             }
             catch (Exception)
             {
-                //MessageBox.Show(e.ToString());
-                return new Tuple<bool, bool?, string>(
-                    File.Exists(Directories.CoreFilePath),
-                    null,
-                    Utility.GetMultiLanguageText("UpdateUnknown"));
+                return new UpdateResponse(CoreUpdateState.Unknown, Utility.GetMultiLanguageText("UpdateUnknown"));
             }
 
-            return new Tuple<bool, bool?, string>(
-                File.Exists(Directories.CoreFilePath),
-                true,
-                Utility.GetMultiLanguageText("NotUpdateNeeded"));
+            return new UpdateResponse(CoreUpdateState.Operational, Utility.GetMultiLanguageText("NotUpdateNeeded"));
         }
 
         public static async Task UpdateLoader(Tuple<bool, string> versionCheckResult)
@@ -214,6 +209,19 @@ namespace LeagueSharp.Loader.Class
                 window.Show();
                 await window.Update();
             }
+        }
+
+        public class UpdateResponse
+        {
+            public UpdateResponse(CoreUpdateState state, string message = "")
+            {
+                this.State = state;
+                this.Message = message;
+            }
+
+            public string Message { get; set; }
+
+            public CoreUpdateState State { get; set; }
         }
 
         [DataContract]

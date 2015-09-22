@@ -131,16 +131,17 @@ namespace LeagueSharp.Loader.Class
                 try
                 {
                     Config.Instance.LeagueOfLegendsExePath = GetFilePath(instance);
-                    var updateCheck = true;
 
-                    if (Config.Instance.UpdateCoreOnInject)
+                    if (!IsProcessInjected(instance))
                     {
-                        updateCheck = Updater.UpdateCore(GetFilePath(instance), true).Result.Item1;
-                    }
+                        var update = Updater.CoreUpdateState.Unknown;
 
-                    if (!IsProcessInjected(instance) && updateCheck)
-                    {
-                        if (injectDLL != null)
+                        if (Config.Instance.UpdateCoreOnInject)
+                        {
+                            update = Updater.UpdateCore(GetFilePath(instance), true).Result.State;
+                        }
+
+                        if (injectDLL != null && update == Updater.CoreUpdateState.Operational)
                         {
                             injectDLL(instance.Id, PathRandomizer.LeagueSharpCoreDllPath);
 

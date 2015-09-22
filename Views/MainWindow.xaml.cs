@@ -376,13 +376,6 @@ namespace LeagueSharp.Loader.Views
             await this.PrepareAssemblies(allAssemblies, Config.Instance.FirstRun || Config.Instance.UpdateOnLoad, true);
 
             this.MainTabControl.SelectedIndex = 2;
-
-            var text = Clipboard.GetText();
-            if (text.StartsWith(LSUriScheme.FullName))
-            {
-                Clipboard.SetText("");
-                await LSUriScheme.HandleUrl(text, this);
-            }
         }
 
         private async Task CheckForUpdates(bool loader, bool core, bool showDialogOnFinish)
@@ -439,16 +432,17 @@ namespace LeagueSharp.Loader.Views
                         {
                             Console.WriteLine("Update Core");
                             var updateResult = await Updater.UpdateCore(exe, !showDialogOnFinish);
-                            this.updateMessage = updateResult.Item3;
+                            this.updateMessage = updateResult.Message;
 
-                            switch (updateResult.Item2)
+                            switch (updateResult.State)
                             {
-                                case true:
+                                case Updater.CoreUpdateState.Operational:
                                     this.StatusString = Utility.GetMultiLanguageText("Updated");
                                     break;
-                                case false:
+                                case Updater.CoreUpdateState.Maintenance:
                                     this.StatusString = Utility.GetMultiLanguageText("OUTDATED");
                                     break;
+
                                 default:
                                     this.StatusString = Utility.GetMultiLanguageText("Unknown");
                                     break;
@@ -457,6 +451,7 @@ namespace LeagueSharp.Loader.Views
                             return;
                         }
                     }
+
                     this.StatusString = Utility.GetMultiLanguageText("Unknown");
                     this.updateMessage = Utility.GetMultiLanguageText("LeagueNotFound");
                 }
@@ -806,6 +801,16 @@ namespace LeagueSharp.Loader.Views
             else
             {
                 this.ShowTextMessage("Error", Utility.GetMultiLanguageText("LogNotFound"));
+            }
+        }
+
+        private async void MainWindow_OnActivated(object sender, EventArgs e)
+        {
+            var text = Clipboard.GetText();
+            if (text.StartsWith(LSUriScheme.FullName))
+            {
+                Clipboard.SetText("");
+                await LSUriScheme.HandleUrl(text, this);
             }
         }
 

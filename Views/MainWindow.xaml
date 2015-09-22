@@ -13,6 +13,7 @@
                       WindowStartupLocation="CenterScreen"
                       Loaded="MainWindow_OnLoaded"
                       Closing="MainWindow_OnClosing"
+                      Activated="MainWindow_OnActivated"
                       Icon="../Resources/icon_64x64.ico"
                       ShowIconOnTitleBar="False"
                       BorderThickness="0.5"

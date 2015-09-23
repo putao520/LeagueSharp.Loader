@@ -817,6 +817,8 @@ namespace LeagueSharp.Loader.Views
         private async void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
         {
             await this.Bootstrap();
+
+            this.SetForeground();
         }
 
         private void NewItem_OnClick(object sender, RoutedEventArgs e)
@@ -925,6 +927,21 @@ namespace LeagueSharp.Loader.Views
                 Config.Instance.SelectedProfile.InstalledAssemblies = new ObservableCollection<LeagueSharpAssembly>();
                 Config.Instance.SelectedProfile.Name = Utility.GetMultiLanguageText("DefaultProfile");
             }
+        }
+
+        private void SetForeground()
+        {
+            this.Show();
+
+            if (this.WindowState == WindowState.Minimized)
+            {
+                this.WindowState = WindowState.Normal;
+            }
+
+            this.Activate();
+            this.Topmost = true;
+            this.Topmost = false;
+            this.Focus();
         }
 
         private void SettingsButton_OnClick(object sender, RoutedEventArgs e)
@@ -1123,9 +1140,7 @@ namespace LeagueSharp.Loader.Views
         {
             if (this.Visibility == Visibility.Hidden)
             {
-                this.Show();
-                this.Focus();
-                this.WindowState = WindowState.Normal;
+                this.SetForeground();
                 this.MenuItemLabelHide.Header = "Hide";
             }
         }
@@ -1144,7 +1159,7 @@ namespace LeagueSharp.Loader.Views
             }
             else
             {
-                this.Show();
+                this.SetForeground();
                 this.MenuItemLabelHide.Header = "Hide";
             }
         }

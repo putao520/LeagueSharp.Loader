@@ -113,6 +113,41 @@ namespace LeagueSharp.Loader.Class
             wb.DownloadStringAsync(new Uri("https://loader.joduska.me/repositories.txt"));
         }
 
+        public static async Task<bool> IsSupported(string path)
+        {
+            if (Directory.Exists(Path.Combine(Directories.CurrentDirectory, "iwanttogetbanned")))
+            {
+                return true;
+            }
+
+            var coreMd5 = Utility.Md5Checksum(Directories.CoreFilePath);
+            var leagueMd5 = Utility.Md5Checksum(path);
+            var wr = WebRequest.Create(string.Format(CoreVersionCheckURL, leagueMd5));
+            wr.Timeout = 4000;
+            wr.Method = "GET";
+            var response = await wr.GetResponseAsync();
+
+            return await Task<bool>.Factory.StartNew(
+                () =>
+                    {
+                        using (var stream = response.GetResponseStream())
+                        {
+                            if (stream != null)
+                            {
+                                var ser = new DataContractJsonSerializer(typeof(UpdateInfo));
+                                var updateInfo = (UpdateInfo)ser.ReadObject(stream);
+
+                                if (updateInfo.version != "0" && updateInfo.version == coreMd5)
+                                {
+                                    return true;
+                                }
+                            }
+                        }
+
+                        return false;
+                    });
+        }
+
         public static async Task<UpdateResponse> UpdateCore(string leagueOfLegendsFilePath, bool showMessages)
         {
             if (Directory.Exists(Path.Combine(Directories.CurrentDirectory, "iwanttogetbanned")))
@@ -126,7 +161,7 @@ namespace LeagueSharp.Loader.Class
                 var wr = WebRequest.Create(string.Format(CoreVersionCheckURL, leagueMd5));
                 wr.Timeout = 4000;
                 wr.Method = "GET";
-                var response = wr.GetResponse();
+                var response = await wr.GetResponseAsync();
 
                 using (var stream = response.GetResponseStream())
                 {

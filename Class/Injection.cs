@@ -34,13 +34,13 @@ namespace LeagueSharp.Loader.Class
     {
         public static MemoryMappedFile mmf = null;
 
+        private static IntPtr bootstrapper;
+
         private static GetFilePathDelegate getFilePath;
 
         private static HasModuleDelegate hasModule;
 
         private static InjectDLLDelegate injectDLL;
-
-        private static IntPtr bootstrapper;
 
         public delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
 
@@ -58,21 +58,6 @@ namespace LeagueSharp.Loader.Class
         public static event OnInjectDelegate OnInject;
 
         public static bool InjectedAssembliesChanged { get; set; }
-
-        public static void Unload()
-        {
-            if (bootstrapper != IntPtr.Zero)
-            {
-                try
-                {
-                    Win32Imports.FreeLibrary(bootstrapper);
-                }
-                catch
-                {
-                    // ignored
-                }
-            }
-        }
 
         public static bool IsInjected
         {
@@ -134,14 +119,12 @@ namespace LeagueSharp.Loader.Class
 
                     if (!IsProcessInjected(instance))
                     {
-                        var update = Updater.CoreUpdateState.Unknown;
-
                         if (Config.Instance.UpdateCoreOnInject)
                         {
-                            update = Updater.UpdateCore(GetFilePath(instance), true).Result.State;
+                            Updater.UpdateCore(Config.Instance.LeagueOfLegendsExePath, true).Wait();
                         }
 
-                        if (injectDLL != null && update == Updater.CoreUpdateState.Operational)
+                        if (injectDLL != null && Updater.IsSupported(Config.Instance.LeagueOfLegendsExePath).Result)
                         {
                             injectDLL(instance.Id, PathRandomizer.LeagueSharpCoreDllPath);
 
@@ -178,6 +161,21 @@ namespace LeagueSharp.Loader.Class
             var str = string.Format("LOGIN|{0}|{1}", user, passwordHash);
             var lParam = new COPYDATASTRUCT { cbData = 2, dwData = str.Length * 2 + 2, lpData = str };
             Win32Imports.SendMessage(wnd, 74U, IntPtr.Zero, ref lParam);
+        }
+
+        public static void Unload()
+        {
+            if (bootstrapper != IntPtr.Zero)
+            {
+                try
+                {
+                    Win32Imports.FreeLibrary(bootstrapper);
+                }
+                catch
+                {
+                    // ignored
+                }
+            }
         }
 
         private static List<IntPtr> FindWindows(string title)

@@ -58,5 +58,6 @@
                 Click="AppData_OnClick" />
         <CheckBox IsChecked="{Binding Config.UpdateCoreOnInject, UpdateSourceTrigger=PropertyChanged}"
         	Content="{DynamicResource UpdateCoreOnInject}" Margin="0,0,10,23" Height="18" VerticalAlignment="Bottom" />
+        <Button Content="Save Config" HorizontalAlignment="Right" Margin="0,0,0,61" VerticalAlignment="Bottom" Width="75" Click="SaveConfig_Click" />
     </Grid>
 </UserControl>

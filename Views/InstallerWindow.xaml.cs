@@ -187,6 +187,7 @@ namespace LeagueSharp.Loader.Views
             await this.ShowMessageAsync(Utility.GetMultiLanguageText("Installer"), msg);
             if (close)
             {
+                Utility.MapClassToXmlFile(typeof(Config), Config.Instance, Directories.ConfigFilePath);
                 this.Close();
             }
         }

@@ -27,6 +27,7 @@ namespace LeagueSharp.Loader.Views.Settings
     using System.Windows.Controls;
     using System.Windows.Input;
 
+    using LeagueSharp.Loader.Class;
     using LeagueSharp.Loader.Data;
 
     using MahApps.Metro;
@@ -188,6 +189,11 @@ namespace LeagueSharp.Loader.Views.Settings
 
             Process.Start(Application.ResourceAssembly.Location);
             Environment.Exit(0);
+        }
+
+        private void SaveConfig_Click(object sender, RoutedEventArgs e)
+        {
+            Utility.MapClassToXmlFile(typeof(Config), Config.Instance, Directories.ConfigFilePath);
         }
     }
 }

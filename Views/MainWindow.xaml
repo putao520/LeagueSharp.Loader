@@ -24,6 +24,23 @@
                       Height="{Binding Config.WindowHeight, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}">
     <Controls:MetroWindow.RightWindowCommands>
         <Controls:WindowCommands>
+
+            <Button>
+                <StackPanel Orientation="Horizontal">
+                    <Rectangle Width="18" Height="18" Fill="White" Visibility="Collapsed" x:Name="icon_connected">
+                        <Rectangle.OpacityMask>
+                            <VisualBrush Stretch="Fill" Visual="{StaticResource icon_connected}" />
+                        </Rectangle.OpacityMask>
+                    </Rectangle>
+
+                    <Rectangle Width="18" Height="18" Fill="White" Visibility="Visible" x:Name="icon_disconnected">
+                        <Rectangle.OpacityMask>
+                            <VisualBrush Stretch="Fill" Visual="{StaticResource icon_disconnected}" />
+                        </Rectangle.OpacityMask>
+                    </Rectangle>
+                </StackPanel>
+            </Button>
+
             <Button Cursor="Hand" x:Name="NewsButton" Click="NewsButton_OnClick">
                 <StackPanel Orientation="Horizontal">
                     <Rectangle Width="14"
@@ -427,7 +444,7 @@
                 </Grid>
             </TabItem>
         </TabControl>
-        <TextBlock Text="LEAGUESHARP" FontSize="15" Foreground="White" IsHitTestVisible="False" Margin="10,-25,0,0"
-                   Height="25" VerticalAlignment="Top" HorizontalAlignment="Left" Width="100" />
+        <TextBlock x:Name="Header" Text="LEAGUESHARP" FontSize="15" Foreground="White" IsHitTestVisible="False" Margin="10,-25,0,0"
+                   Height="25" VerticalAlignment="Top" HorizontalAlignment="Left" Width="200" />
     </Grid>
 </Controls:MetroWindow>

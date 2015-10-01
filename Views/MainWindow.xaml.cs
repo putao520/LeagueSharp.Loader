@@ -27,6 +27,7 @@ namespace LeagueSharp.Loader.Views
     using System.Diagnostics;
     using System.IO;
     using System.Linq;
+    using System.Reflection;
     using System.Text.RegularExpressions;
     using System.Threading;
     using System.Threading.Tasks;
@@ -259,6 +260,8 @@ namespace LeagueSharp.Loader.Views
         private async Task Bootstrap()
         {
             #region UI
+
+            this.Header.Text = "LEAGUESHARP " + Assembly.GetExecutingAssembly().GetName().Version;
 
             this.Browser.Visibility = Visibility.Hidden;
             this.TosBrowser.Visibility = Visibility.Hidden;
@@ -873,6 +876,22 @@ namespace LeagueSharp.Loader.Views
                             {
                                 Injection.Pulse();
                             }
+
+                            Application.Current.Dispatcher.Invoke(
+                                () =>
+                                    {
+                                        if (Injection.IsInjected)
+                                        {
+                                            this.icon_connected.Visibility = Visibility.Visible;
+                                            this.icon_disconnected.Visibility = Visibility.Collapsed;
+                                        }
+                                        else
+                                        {
+                                            this.icon_connected.Visibility = Visibility.Collapsed;
+                                            this.icon_disconnected.Visibility = Visibility.Visible;
+                                        }
+                                    });
+
                             Thread.Sleep(3000);
                         }
                     });

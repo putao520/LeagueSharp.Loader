@@ -48,7 +48,7 @@ Name: "de"; MessagesFile: "compiler:Languages\German.isl"
 #include "Scripts\products\dotnetfx45.iss"
 #include "Scripts\products\vcredist2010.iss"
 #include "Scripts\products\vcredist2013.iss"
-#include "Scripts\products\vcredist2015.iss"
+#include "Scripts\products\buildtools2015.iss"
 #include "scripts\products\detectDirectX.iss"
 
 [Registry]
@@ -68,7 +68,7 @@ begin
 	dotnetfx45(1);
 	vcredist2010();
 	vcredist2013();
-	vcredist2015();
+	buildtools2015();
 	directX();
 	Result := true;
 end;

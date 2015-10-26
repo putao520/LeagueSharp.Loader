@@ -108,14 +108,6 @@ namespace LeagueSharp.Loader.Class
                             repo.Config.Set("user.email", Config.Instance.Username + "@joduska.me");
                             repo.Fetch("origin");
 
-                            if (repoDirectory != null)
-                            {
-                                repo.CheckoutPaths(
-                                    "origin/master",
-                                    new List<string>() { repoDirectory },
-                                    new CheckoutOptions { CheckoutModifiers = CheckoutModifiers.Force });
-                            }
-
                             repo.Checkout(
                                 "origin/master",
                                 new CheckoutOptions { CheckoutModifiers = CheckoutModifiers.Force });

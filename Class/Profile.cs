@@ -18,6 +18,8 @@
 
 #endregion
 
+using LeagueSharp.Loader.Data.Assemblies;
+
 namespace LeagueSharp.Loader.Class
 {
     #region

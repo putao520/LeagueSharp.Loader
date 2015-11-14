@@ -39,6 +39,22 @@ namespace LeagueSharp.Loader.Class
 
     public static class LeagueSharpAssemblies
     {
+        public static LeagueSharpAssembly GetAssembly(string projectFile, string url = "")
+        {
+            LeagueSharpAssembly foundAssembly = null;
+            try
+            {
+                    var name = Path.GetFileNameWithoutExtension(projectFile);
+                    foundAssembly = new LeagueSharpAssembly(name, projectFile, url);
+            }
+            catch (Exception e)
+            {
+                Utility.Log(LogStatus.Error, "Updater GetAssembly", e.ToString(), Logs.MainLog);
+            }
+
+            return foundAssembly;
+        }
+
         public static List<LeagueSharpAssembly> GetAssemblies(string directory, string url = "")
         {
             var projectFiles = new List<string>();

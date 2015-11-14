@@ -18,6 +18,9 @@
 
 #endregion
 
+using System.Net;
+using LeagueSharp.Loader.Data.Assemblies;
+
 namespace LeagueSharp.Loader.Views
 {
     using System;
@@ -45,7 +48,7 @@ namespace LeagueSharp.Loader.Views
     using MahApps.Metro.Controls.Dialogs;
 
     using Microsoft.Build.Evaluation;
-
+    using Newtonsoft.Json;
     public partial class MainWindow : INotifyPropertyChanged
     {
         public BackgroundWorker AssembliesWorker = new BackgroundWorker();
@@ -243,6 +246,14 @@ namespace LeagueSharp.Loader.Views
             this.MainTabControl.SelectedIndex = 2;
         }
 
+        private void AssemblyDBButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            if(Config.Instance.allDbAssemblies.Count == 0)
+                Config.Instance.allDbAssemblies = Class.AssemblyDB.getAssembliesFromDB();
+            Console.WriteLine("Asms got: " + Config.Instance.allDbAssemblies.Count);
+            this.MainTabControl.SelectedIndex = 4;
+        }
+
         private void BaseDataGrid_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             if (this.columnWidthChanging)
@@ -294,6 +305,7 @@ namespace LeagueSharp.Loader.Views
             this.NewsTabItem.Visibility = Visibility.Hidden;
             this.AssembliesTabItem.Visibility = Visibility.Hidden;
             this.SettingsTabItem.Visibility = Visibility.Hidden;
+            this.AssemblyDB.Visibility = Visibility.Hidden;
             this.DataContext = this;
 
             #region ContextMenu.DevMenu
@@ -1207,6 +1219,66 @@ namespace LeagueSharp.Loader.Views
                     this.InstalledAssembliesDataGrid.SelectedItems.Cast<LeagueSharpAssembly>(),
                     true,
                     true);
+        }
+
+        static string GetParentUriString(Uri uri)
+        {
+            return uri.AbsoluteUri.Remove(uri.AbsoluteUri.Length - uri.Segments.Last().Length);
+        }
+
+        private async void InstallFromDbItem_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (this.AssembliesDBDataGrid.SelectedItems.Count == 0)
+            {
+                return;
+            }
+            var add = this.AssembliesDBDataGrid.SelectedItems.Cast<Data.Assemblies.Assembly>().ToList();
+            foreach (var asm in add)
+            {
+                var gitModif = asm.GithubUrl.Replace("blob/master/", "");
+                Console.WriteLine(gitModif);
+                var uri = new Uri(gitModif);
+
+                var parent = GetParentUriString(new Uri(GetParentUriString(uri)));
+                var asmName = WebUtility.HtmlDecode(uri.Segments.Last().Replace(".csproj",""));
+                Console.WriteLine(parent + " : "+ asmName);
+                var w = new InstallerWindow {Owner = this};
+                w.ListAssemblies(
+                    parent,
+                    true,
+                    asmName != "" ? asmName : null);
+                w.ShowDialog();
+            }
+        }
+
+        private void DBTextBoxBase_OnTextChanged(object sender, TextChangedEventArgs e)
+        {
+            var searchText = this.DBSearchTextBox.Text;
+            var view = CollectionViewSource.GetDefaultView(Config.Instance.allDbAssemblies);
+            searchText = searchText.Replace("*", "(.*)");
+            view.Filter = obj =>
+            {
+                try
+                {
+                    var assembly = obj as Data.Assemblies.Assembly;
+                    if (assembly == null)
+                        return false;
+
+                    var nameMatch = Regex.Match(assembly.Name, searchText, RegexOptions.IgnoreCase);
+                    var champeMatch = assembly.Type ==AssemblyType.Executable && Regex.Match(string.Join(", ", assembly.Champions), searchText, RegexOptions.IgnoreCase).Success;
+                    var authorMatch = Regex.Match(assembly.AuthorName, searchText, RegexOptions.IgnoreCase);
+                    var svnNameMatch = Regex.Match(assembly.GithubUrl, searchText, RegexOptions.IgnoreCase);
+                    var descNameMatch = Regex.Match(assembly.Description, searchText, RegexOptions.IgnoreCase);
+                    
+
+                    return authorMatch.Success || champeMatch || nameMatch.Success || svnNameMatch.Success
+                           || descNameMatch.Success;
+                }
+                catch (Exception)
+                {
+                    return true;
+                }
+            };
         }
     }
 }

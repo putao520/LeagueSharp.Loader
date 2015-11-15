@@ -250,7 +250,7 @@ namespace LeagueSharp.Loader.Views
         {
             if(Config.Instance.allDbAssemblies.Count == 0)
                 Config.Instance.allDbAssemblies = Class.AssemblyDB.getAssembliesFromDB();
-            Console.WriteLine("Asms got: " + Config.Instance.allDbAssemblies.Count);
+
             this.MainTabControl.SelectedIndex = 4;
         }
 
@@ -1232,22 +1232,12 @@ namespace LeagueSharp.Loader.Views
             {
                 return;
             }
-            var add = this.AssembliesDBDataGrid.SelectedItems.Cast<Data.Assemblies.Assembly>().ToList();
-            foreach (var asm in add)
-            {
-                var gitModif = asm.GithubUrl.Replace("blob/master/", "");
-                Console.WriteLine(gitModif);
-                var uri = new Uri(gitModif);
 
-                var parent = GetParentUriString(new Uri(GetParentUriString(uri)));
-                var asmName = WebUtility.HtmlDecode(uri.Segments.Last().Replace(".csproj",""));
-                Console.WriteLine(parent + " : "+ asmName);
-                var w = new InstallerWindow {Owner = this};
-                w.ListAssemblies(
-                    parent,
-                    true,
-                    asmName != "" ? asmName : null);
-                w.ShowDialog();
+            var assemblies = this.AssembliesDBDataGrid.SelectedItems.Cast<Data.Assemblies.Assembly>().ToList();
+
+            foreach (var assembly in assemblies)
+            {
+                await LSUriScheme.HandleUrl(assembly.GithubUrl, this);
             }
         }
 

@@ -474,7 +474,8 @@
                               SelectionMode="Extended"
                               PreviewMouseLeftButtonDown="InstalledAssembliesDataGrid_PreviewMouseLeftButtonDown"
                               Drop="InstalledAssembliesDataGrid_Drop"
-                              PreviewDragOver="InstalledAssembliesDataGrid_OnPreviewDragOver">
+                              PreviewDragOver="InstalledAssembliesDataGrid_OnPreviewDragOver"
+                              IsReadOnly="True">
                         <DataGrid.ContextMenu>
                             <ContextMenu>
                                 <MenuItem x:Name="InstallFromDbItem"

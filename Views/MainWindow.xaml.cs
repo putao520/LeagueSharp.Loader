@@ -49,6 +49,7 @@ namespace LeagueSharp.Loader.Views
 
     using Microsoft.Build.Evaluation;
     using Newtonsoft.Json;
+
     public partial class MainWindow : INotifyPropertyChanged
     {
         public BackgroundWorker AssembliesWorker = new BackgroundWorker();
@@ -248,10 +249,21 @@ namespace LeagueSharp.Loader.Views
 
         private void AssemblyDBButton_OnClick(object sender, RoutedEventArgs e)
         {
-            if(Config.Instance.allDbAssemblies.Count == 0)
-                Config.Instance.allDbAssemblies = Class.AssemblyDB.getAssembliesFromDB();
+            if (Config.Instance.allDbAssemblies.Count == 0)
+            {
+                var assemblies = Class.AssemblyDB.getAssembliesFromDB();
 
-            this.MainTabControl.SelectedIndex = 4;
+                if (assemblies != null)
+                {
+                    Config.Instance.allDbAssemblies = assemblies;
+                }
+                else
+                {
+                    Config.Instance.allDbAssemblies.Add(new LeagueSharp.Loader.Data.Assemblies.Assembly() { Name = "ERROR", Description = "Please try again later, we seem to have trouble!" });
+                }
+            }
+
+          this.MainTabControl.SelectedIndex = 4;
         }
 
         private void BaseDataGrid_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)

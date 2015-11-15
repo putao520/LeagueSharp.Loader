@@ -14,14 +14,25 @@ namespace LeagueSharp.Loader.Class
     {
         public static ObservableCollection<Assembly> getAssembliesFromDB()
         {
-            string assemblyJSON = "";
-
-            using (WebClient client = new WebClient())
+            try
             {
-                var uri = new Uri("https://services.joduska.me/loader/v1.0/static/1");
-                assemblyJSON = client.DownloadString(uri);
+                var assemblyJson = "";
+
+                using (var client = new WebClient())
+                {
+                    var uri = new Uri("https://services.joduska.me/loader/v1.0/static/1");
+                    assemblyJson = client.DownloadString(uri);
+                }
+
+                var converted = JsonConvert.DeserializeObject<ObservableCollection<Assembly>>(assemblyJson);
+
+                return converted ?? null;
+
             }
-            return JsonConvert.DeserializeObject<ObservableCollection<Assembly>>(assemblyJSON);
+            catch
+            {
+                return null;
+            }
         }
     }
 }

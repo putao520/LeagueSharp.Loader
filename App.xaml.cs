@@ -149,6 +149,7 @@ namespace LeagueSharp.Loader
             try
             {
                 Config.Instance = ((Config)Utility.MapXmlFileToClass(typeof(Config), Directories.ConfigFilePath));
+                
             }
             catch (Exception)
             {
@@ -177,6 +178,7 @@ namespace LeagueSharp.Loader
                 {
                     Config.Instance =
                         ((Config)Utility.MapXmlFileToClass(typeof(Config), Directories.ConfigFilePath + ".bak"));
+
                     File.Delete(Directories.ConfigFilePath);
                     File.Copy(Directories.ConfigFilePath + ".bak", Directories.ConfigFilePath);
                     File.SetAttributes(Directories.ConfigFilePath, FileAttributes.Normal);

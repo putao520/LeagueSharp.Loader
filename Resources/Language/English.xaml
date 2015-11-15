@@ -9,6 +9,7 @@
     <!-- MainWindow Tabs -->
     <system:String x:Key="News">News</system:String>
     <system:String x:Key="Assemblies">Assemblies</system:String>
+    <system:String x:Key="AssembliesDB">AssemblyDB</system:String>
 
     <!-- MainWindow Profile selector -->
     <system:String x:Key="DefaultProfile">Default</system:String>
@@ -19,6 +20,15 @@
     <system:String x:Key="ColumnVersion">Version</system:String>
     <system:String x:Key="ColumnLocation">Location</system:String>
     <system:String x:Key="ColumnDescription">Description</system:String>
+
+    <!-- MainWindow Assemblies DB datagrid columns -->
+    <system:String x:Key="DBColumnName">Name</system:String>
+    <system:String x:Key="DBColumnDescription">Description</system:String>
+    <system:String x:Key="DBColumnAuthor">Author</system:String>
+    <system:String x:Key="DBColumnScore">Score</system:String>
+    
+    <!-- MainWindow Assemblies DB datagrid Menu -->
+    <system:String x:Key="InstallFromDB">Install</system:String>
 
     <!-- MainWindow Assemblies datagrid Menu -->
     <system:String x:Key="MenuUpdateAndCompile">Update and Compile</system:String>

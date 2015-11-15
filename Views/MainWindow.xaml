@@ -74,6 +74,22 @@
                 </StackPanel>
             </Button>
 
+            <Button Cursor="Hand" x:Name="AssemblyDBButton" Click="AssemblyDBButton_OnClick">
+                <StackPanel Orientation="Horizontal">
+                    <Rectangle Width="14"
+                               Height="14"
+                               Fill="{Binding RelativeSource={RelativeSource AncestorType=Button},
+                                              Path=Foreground}">
+                        <Rectangle.OpacityMask>
+                            <VisualBrush Stretch="Fill" Visual="{StaticResource appbar_layer}" />
+                        </Rectangle.OpacityMask>
+                    </Rectangle>
+                    <TextBlock Margin="4 0 0 0"
+                               VerticalAlignment="Center"
+                               Text="{DynamicResource AssembliesDB}" />
+                </StackPanel>
+            </Button>
+            
             <Button Cursor="Hand" x:Name="StatusButton" Click="StatusButton_OnClick">
                 <StackPanel Orientation="Horizontal">
                     <Rectangle Width="14"
@@ -441,6 +457,57 @@
                         <TreeViewItem x:Uid="Hotkeys" Header="{DynamicResource Hotkeys}" />
                         <TreeViewItem x:Uid="Log" Header="{DynamicResource Log}" />
                     </TreeView>
+                </Grid>
+            </TabItem>
+            <TabItem x:Name="AssemblyDB" Header="AssembyDB" Height="36" VerticalAlignment="Top">
+                <Grid Background="#FFE5E5E5">
+                    <TextBox x:Name="DBSearchTextBox" Height="23" Margin="0,10,10,0" TextWrapping="Wrap"
+                             VerticalAlignment="Top" TextChanged="DBTextBoxBase_OnTextChanged"
+                             HorizontalAlignment="Right" Width="181" />
+                    <DataGrid x:Name="AssembliesDBDataGrid"
+                              Margin="10,41,10,40"
+                              CanUserAddRows="False"
+                              AutoGenerateColumns="False"
+                              ContextMenuOpening="InstalledAssembliesDataGrid_OnContextMenuOpening"
+                              ItemsSource="{Binding Config.allDbAssemblies, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                              AllowDrop="True"
+                              SelectionMode="Extended"
+                              PreviewMouseLeftButtonDown="InstalledAssembliesDataGrid_PreviewMouseLeftButtonDown"
+                              Drop="InstalledAssembliesDataGrid_Drop"
+                              PreviewDragOver="InstalledAssembliesDataGrid_OnPreviewDragOver">
+                        <DataGrid.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem x:Name="InstallFromDbItem"
+                                          Header="{DynamicResource InstallFromDB}"
+                                          Click="InstallFromDbItem_OnClick">
+                                    <MenuItem.Icon>
+                                        <Canvas Width="10"
+                                                Height="15"
+                                                Clip="F1 M 0,0L 76,0L 76,76L 0,76L 0,0">
+                                            <Path Canvas.Left="0"
+                                                  Canvas.Top="0"
+                                                  Width="15"
+                                                  Height="15"
+                                                  Data="F1 M 18,33.5001L 18,27L 27,19L 36,27.5001L 36,33.5001L 30,28.2097L 30,40.5C 30,46.299 34.701,51 40.5,51C 46.299,51 51,46.299 51,40.5C 51,34.8686 46.5668,30.2727 41,30.0117L 41,24.0074C 49.8814,24.2718 57,31.5546 57,40.5C 57,49.6127 49.6127,57 40.5,57C 31.3873,57 24,49.6127 24,40.5L 24,28.125L 18,33.5001 Z "
+                                                  Fill="{DynamicResource BlackBrush}"
+                                                  Stretch="Fill" />
+                                        </Canvas>
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                            </ContextMenu>
+                        </DataGrid.ContextMenu>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn x:Name="DBColumnName" Header="{DynamicResource ColumnName}"
+                                                Width="{Binding Config.ColumnNameWidth, UpdateSourceTrigger=PropertyChanged}"
+                                                Binding="{Binding Name, UpdateSourceTrigger=PropertyChanged}" />
+                            <DataGridTextColumn x:Name="DBColumnAuthor" Header="{DynamicResource DBColumnAuthor}"
+                                                Width="80"
+                                                Binding="{Binding AuthorName, UpdateSourceTrigger=PropertyChanged}" />
+                            <DataGridTextColumn x:Name="DBColumnDescription" Header="{DynamicResource DBColumnDescription}"
+                                                Width="*"
+                                                Binding="{Binding Description , UpdateSourceTrigger=PropertyChanged}" />
+                        </DataGrid.Columns>
+                    </DataGrid>
                 </Grid>
             </TabItem>
         </TabControl>

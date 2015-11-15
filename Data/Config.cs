@@ -18,6 +18,8 @@
 
 #endregion
 
+using LeagueSharp.Loader.Data.Assemblies;
+
 namespace LeagueSharp.Loader.Data
 {
     #region
@@ -40,6 +42,23 @@ namespace LeagueSharp.Loader.Data
     {
         [XmlIgnore]
         public static Config Instance;
+
+        [XmlIgnore]
+        private ObservableCollection<Assembly> _allDbAssemblies = new ObservableCollection<Assembly>();
+
+        [XmlIgnore]
+        public ObservableCollection<Assembly> allDbAssemblies
+        {
+            get
+            {
+                return this._allDbAssemblies;
+            }
+            set
+            {
+                this._allDbAssemblies = value;
+                this.OnPropertyChanged();
+            }
+        }
 
         private string _appDirectory;
 

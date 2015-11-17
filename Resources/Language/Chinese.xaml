@@ -9,7 +9,8 @@
     <!-- MainWindow Tabs -->
     <system:String x:Key="News">新闻</system:String>
     <system:String x:Key="Assemblies">脚本</system:String>
-
+    <system:String x:Key="AssemblyDB">脚本数据库</system:String>
+  
     <!-- MainWindow Profile selector -->
     <system:String x:Key="DefaultProfile">默认</system:String>
 
@@ -70,7 +71,9 @@
     <system:String x:Key="Show Ping">读取界面显示Ping值</system:String>
     <system:String x:Key="Show Drawings">显示线圈及菜单</system:String>
     <system:String x:Key="Send Anonymous Assembly Statistics">上传脚本使用统计(匿名)</system:String>
-    <system:String x:Key="UpdateOnStart">开启前升级脚本</system:String>
+    <system:String x:Key="Always Inject Default Profile">总是注入默认选项脚本</system:String>
+    <system:String x:Key="UpdateOnStart">开启L#自动升级脚本</system:String>
+    <system:String x:Key="Update Core On Inject">注入时自动升级Core</system:String>
     <system:String x:Key="AppData">缓存目录</system:String>
     <system:String x:Key="Inject">注入</system:String>
     <system:String x:Key="Logout">退出</system:String>
@@ -110,16 +113,16 @@
     <system:String x:Key="LoginError">登陆失败 {0}: {1}</system:String>
     <system:String x:Key="Uninstall">卸载</system:String>
     <system:String x:Key="UninstallConfirm">是否确定卸载选定脚本？</system:String>
-    <system:String x:Key="ConfigWriteError">无法写入config.xml</system:String>
+    <system:String x:Key="ConfigWriteError">无法写入到配置文件中 请检查权限</system:String>
     <system:String x:Key="ShareText">脚本链接复制到剪贴板</system:String>
-    <system:String x:Key="LogNotFound">找不到日志文件</system:String>
+    <system:String x:Key="LogNotFound">日志文件不存在</system:String>
     <system:String x:Key="NewProfile2">新的简介</system:String>
     <system:String x:Key="Rename">重命名</system:String>
     <system:String x:Key="RenameText">为简介添加新的名字</system:String>
     <system:String x:Key="DownloadingData">下载所需数据中</system:String>
     <system:String x:Key="Installer">安装程序</system:String>
     <system:String x:Key="SuccessfullyInstalled">选定脚本安装成功</system:String>
-    <system:String x:Key="ErrorInstalling">在安装某个脚本时发生了一个错误，请检查日志，获取更多信息</system:String>
+    <system:String x:Key="ErrorInstalling">在安装某个脚本时发生了一个错误，请查看日志检查错误</system:String>
 
     <system:String x:Key="EnableDeveloper">启用开发者选项</system:String>
     <system:String x:Key="Developer">开发者</system:String>
@@ -130,15 +133,15 @@
 
     <system:String x:Key="Checking">正在查看LoL版...</system:String>
     <system:String x:Key="Updated">L#是最新版</system:String>
-    <system:String x:Key="OUTDATED">L#版过时了</system:String>
-    <system:String x:Key="Unknown">未知状态</system:String>
+    <system:String x:Key="OUTDATED">L#需要更新</system:String>
+    <system:String x:Key="Unknown">L#版本未知</system:String>
     <system:String x:Key="UpdateStatus">状态</system:String>
 
     <system:String x:Key="LoaderUpdateFailed">无法下载最新版，请自己亲自登录官网更新</system:String>
-    <system:String x:Key="LeagueNotFound">无法确认LeagueOfLegends.exe的位置, 请尝试进入自定义游戏获取位置</system:String>
-    <system:String x:Key="UpdateSuccess">L#已为当前的LOL版本成功更新文件</system:String>
-    <system:String x:Key="UpdateUnknown">无法确认L#是否为当前的LeagueOfLegends版更新了, 通常这是因为你无法连接官网造成的 官网:Http://www.joduska.me</system:String>
-    <system:String x:Key="NotUpdateNeeded">L#已为当前的LOL版本更新了文件</system:String>
+    <system:String x:Key="LeagueNotFound">LOL版本尚未获取, 请打开LOL尝试自定义游戏自动获取LOL目录确定是否能够注入</system:String>
+    <system:String x:Key="UpdateSuccess">L#已经更新成功, 已经支持目前版本!</system:String>
+    <system:String x:Key="UpdateUnknown">无法确认L#是否为目前LOL版本更新了, 通常这是因为你无法连接官网造成的 官网:Http://www.joduska.me</system:String>
+    <system:String x:Key="NotUpdateNeeded">L#已支持目前LOL版本, 可以完美注入!</system:String>
     <system:String x:Key="RandomizationFailed">无法随机化DLL名字</system:String>
 
 </ResourceDictionary>

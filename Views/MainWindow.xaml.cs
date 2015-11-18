@@ -962,7 +962,7 @@ namespace LeagueSharp.Loader.Views
         {
             if (Config.Instance.Profiles.Count > 1)
             {
-                Config.Instance.Profiles.RemoveAt(this.ProfilesButton.SelectedIndex);
+                Config.Instance.Profiles.Remove(Config.SelectedProfile);
                 Config.Instance.SelectedProfile = Config.Instance.Profiles.First();
             }
             else

@@ -257,8 +257,12 @@ namespace LeagueSharp.Loader.Class
 
         public static void Log(string status, string source, string message, Log log)
         {
+            if (Application.Current == null)
+            {
+                return;
+            }
             Application.Current.Dispatcher.Invoke(
-                () => log.Items.Add(new LogItem { Status = status, Source = source, Message = message }));
+                () => log.Items.Add(new LogItem {Status = status, Source = source, Message = message}));
         }
 
         public static string MakeValidFileName(string name)

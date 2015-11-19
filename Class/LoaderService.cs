@@ -40,7 +40,7 @@ namespace LeagueSharp.Loader.Class
             {
                 assemblies.AddRange(
                     Config.Instance.Profiles[0].InstalledAssemblies.Where(
-                        a => a.InjectChecked && a.Type != AssemblyType.Library)
+                        a => !a.IsBlocked && a.InjectChecked && a.Type != AssemblyType.Library)
                                                .Select(
                                                    assembly =>
                                                    new LSharpAssembly
@@ -53,7 +53,7 @@ namespace LeagueSharp.Loader.Class
 
             assemblies.AddRange(
                 Config.Instance.SelectedProfile.InstalledAssemblies.Where(
-                    a => a.InjectChecked && a.Type != AssemblyType.Library)
+                    a => !a.IsBlocked && a.InjectChecked && a.Type != AssemblyType.Library)
                       .Select(
                           assembly => new LSharpAssembly { Name = assembly.Name, PathToBinary = assembly.PathToBinary })
                       .ToList());

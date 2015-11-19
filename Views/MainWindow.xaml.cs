@@ -341,6 +341,8 @@ namespace LeagueSharp.Loader.Views
 
             await this.CheckForUpdates(true, true, false);
 
+            await LeagueSharpAssemblies.UpdateBlockedRepos();
+
             Updater.GetRepositories(
                 delegate(List<string> list)
                     {

@@ -131,7 +131,14 @@ namespace LeagueSharp.Loader.Views
                 bgWorker.DoWork += delegate
                     {
                         var updatedDir = GitUpdater.Update(location, Logs.MainLog, Directories.RepositoryDir);
-                        FoundAssemblies = LeagueSharpAssemblies.GetAssemblies(updatedDir, location);
+                        if (LeagueSharpAssemblies.BlockedRepos.Any(x => x.IndexOf(location, StringComparison.OrdinalIgnoreCase) >= 0))
+                        {
+                            FoundAssemblies = new List<LeagueSharpAssembly>();
+                        }
+                        else
+                        {
+                            FoundAssemblies = LeagueSharpAssemblies.GetAssemblies(updatedDir, location);
+                        }
 
                         foreach (var assembly in FoundAssemblies.ToArray())
                         {

@@ -34,11 +34,65 @@ namespace LeagueSharp.Loader.Class
     using LeagueSharp.Loader.Data;
 
     using Microsoft.Build.Evaluation;
+    using System.Net;
+    using System.Threading.Tasks;
 
     #endregion
 
     public static class LeagueSharpAssemblies
     {
+        private static List<string> _blockedrepolist = new List<string>();
+        private static string _blockedPath = Path.Combine(new FileInfo(Assembly.GetExecutingAssembly().Location).DirectoryName, "System", "BlockedRepositories.txt");
+        public static List<string> BlockedRepos
+        {
+            get
+            {
+                return _blockedrepolist;
+            }
+        }
+
+        internal static async Task UpdateBlockedRepos()
+        {
+            await Task.Run(() =>
+            {
+                string path = Path.Combine(new FileInfo(Assembly.GetExecutingAssembly().Location).DirectoryName, "System", "BlockedRepositories.txt");
+                try
+                {
+                    using (WebClient wc = new WebClient())
+                    {
+                        wc.DownloadStringAsync(new Uri("https://raw.githubusercontent.com/LeagueSharp/LeagueSharp.Loader/master/Updates/BlockedRepositories.txt"));
+                        wc.DownloadStringCompleted += (object sender, DownloadStringCompletedEventArgs args) =>
+                        {
+                            if (args.Error == null && !args.Cancelled)
+                            {
+                                File.WriteAllText(path, args.Result);
+                            }
+                        };
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Error getting blocked repositories " + e);
+                }
+
+                try
+                {
+                    using (StreamReader sr = new StreamReader(_blockedPath))
+                    {
+                        string line;
+                        while ((line = sr.ReadLine()) != null)
+                        {
+                            _blockedrepolist.Add(line);
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Error opening blocked repositories textfile." + e);
+                }
+            });
+        }
+
         public static LeagueSharpAssembly GetAssembly(string projectFile, string url = "")
         {
             LeagueSharpAssembly foundAssembly = null;
@@ -429,6 +483,14 @@ namespace LeagueSharp.Loader.Class
             if (this.PropertyChanged != null)
             {
                 this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        internal bool IsBlocked
+        {
+            get
+            {
+                return LeagueSharpAssemblies.BlockedRepos.Any(x => x.IndexOf(SvnUrl, StringComparison.OrdinalIgnoreCase) >= 0);
             }
         }
     }

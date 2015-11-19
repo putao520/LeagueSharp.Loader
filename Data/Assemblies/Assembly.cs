@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using LeagueSharp.Loader.Class;
-using System.Collections.Generic;
 using System.ComponentModel;
 using Newtonsoft.Json;
 

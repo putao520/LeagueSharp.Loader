@@ -275,13 +275,18 @@ namespace LeagueSharp.Loader.Class
                         Directories.RepositoryDir,
                         this.SvnUrl.GetHashCode().ToString("X"),
                         "trunk");
-                    var projectFile =
-                        Directory.GetFiles(folderToSearch, "*.csproj", SearchOption.AllDirectories)
-                                 .FirstOrDefault(file => Path.GetFileNameWithoutExtension(file) == this.Name);
-                    if (projectFile != default(string))
+
+                    if (Directory.Exists(folderToSearch))
                     {
-                        this._pathToProjectFile = projectFile;
-                        return projectFile;
+                        var projectFile =
+                            Directory.GetFiles(folderToSearch, "*.csproj", SearchOption.AllDirectories)
+                                     .FirstOrDefault(file => Path.GetFileNameWithoutExtension(file) == this.Name);
+
+                        if (!string.IsNullOrEmpty(projectFile))
+                        {
+                            this._pathToProjectFile = projectFile;
+                            return projectFile;
+                        }
                     }
                 }
                 catch
@@ -353,6 +358,7 @@ namespace LeagueSharp.Loader.Class
                 {
                     return AssemblyName.GetAssemblyName(this.PathToBinary).Version.ToString();
                 }
+
                 return "?";
             }
         }
@@ -365,7 +371,21 @@ namespace LeagueSharp.Loader.Class
 
             if (Compiler.Compile(project, Path.Combine(Directories.LogsDir, this.Name + ".txt"), Logs.MainLog))
             {
-                var result = Utility.OverwriteFile(Compiler.GetOutputFilePath(project), this.PathToBinary);
+                var result = true;
+                var assemblySource = Compiler.GetOutputFilePath(project);
+                var assemblyDestination = this.PathToBinary;
+                var pdbSource = Path.ChangeExtension(assemblySource, ".pdb");
+                var pdbDestination = Path.ChangeExtension(assemblyDestination, ".pdb");
+
+                if (File.Exists(assemblySource))
+                {
+                    result = Utility.OverwriteFile(assemblySource, assemblyDestination);
+                }
+
+                if (File.Exists(pdbSource))
+                {
+                    Utility.OverwriteFile(pdbSource, pdbDestination);
+                }
 
                 Utility.ClearDirectory(Path.Combine(project.DirectoryPath, "bin"));
                 Utility.ClearDirectory(Path.Combine(project.DirectoryPath, "obj"));
@@ -416,13 +436,9 @@ namespace LeagueSharp.Loader.Class
                 {
                     var pf = new ProjectFile(this.PathToProjectFile, Logs.MainLog)
                         {
-                            Configuration = "Release",
+                            Configuration = Config.Instance.EnableDebug ? "Debug" : "Release",
                             PlatformTarget = "x86",
-                            ReferencesPath = Directories.CoreDirectory,
-                            UpdateReferences = true,
-                            PostbuildEvent = true,
-                            PrebuildEvent = true,
-                            ResetOutputPath = true
+                            ReferencesPath = Directories.CoreDirectory
                         };
                     pf.Change();
 

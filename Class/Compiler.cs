@@ -41,7 +41,7 @@ namespace LeagueSharp.Loader.Class
                 if (project != null)
                 {
                     var doLog = false;
-                    var logErrorFile = Path.Combine(Directories.LogsDir, ("Error - " + Path.GetFileName(logfile)));
+                    var logErrorFile = Path.Combine(Directories.LogsDir, "Error - " + Path.GetFileName(logfile));
                     if (File.Exists(logErrorFile))
                     {
                         File.Delete(logErrorFile);
@@ -68,8 +68,8 @@ namespace LeagueSharp.Loader.Class
                         result ? LogStatus.Ok : LogStatus.Error,
                         "Compiler",
                         result
-                            ? string.Format("Compile - {0}", project.FullPath)
-                            : string.Format("Compile - Check ./logs/ for details - {0}", project.FullPath),
+                            ? $"Compile - {project.FullPath}"
+                            : $"Compile - Check ./logs/ for details - {project.FullPath}",
                         log);
 
                     if (!result && doLog && File.Exists(logfile))

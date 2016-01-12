@@ -83,6 +83,8 @@
     <system:String x:Key="Extended Zoom">Extended Zoom</system:String>
     <system:String x:Key="UpdateOnStart">Update assemblies on start</system:String>
     <system:String x:Key="UpdateCoreOnInject">Update Core on Inject</system:String>
+    <system:String x:Key="EnableDebug">Enable Assembly Debug</system:String>
+    
 
     <system:String x:Key="Inject">Inject</system:String>
     <system:String x:Key="Logout">Logout</system:String>

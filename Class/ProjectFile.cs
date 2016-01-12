@@ -1,6 +1,6 @@
 ﻿#region LICENSE
 
-// Copyright 2015-2015 LeagueSharp.Loader
+// Copyright 2016-2016 LeagueSharp.Loader
 // ProjectFile.cs is part of LeagueSharp.Loader.
 // 
 // LeagueSharp.Loader is free software: you can redistribute it and/or modify
@@ -20,8 +20,6 @@
 
 namespace LeagueSharp.Loader.Class
 {
-    #region
-
     using System;
     using System.IO;
 
@@ -29,16 +27,18 @@ namespace LeagueSharp.Loader.Class
 
     using Microsoft.Build.Evaluation;
 
-    #endregion
-
     [Serializable]
     internal class ProjectFile
     {
+        private readonly Log log;
+
+        public readonly Project Project;
+
         public ProjectFile(string file, Log log)
         {
             try
             {
-                this._log = log;
+                this.log = log;
 
                 if (File.Exists(file))
                 {
@@ -48,27 +48,15 @@ namespace LeagueSharp.Loader.Class
             }
             catch (Exception ex)
             {
-                Utility.Log(LogStatus.Error, "ProjectFile", string.Format("Error - {0}", ex.Message), this._log);
+                Utility.Log(LogStatus.Error, "ProjectFile", $"Error - {ex.Message}", this.log);
             }
         }
-
-        public readonly Project Project;
-
-        private readonly Log _log;
 
         public string Configuration { get; set; }
 
         public string PlatformTarget { get; set; }
 
-        public bool PostbuildEvent { get; set; }
-
-        public bool PrebuildEvent { get; set; }
-
         public string ReferencesPath { get; set; }
-
-        public bool ResetOutputPath { get; set; }
-
-        public bool UpdateReferences { get; set; }
 
         public void Change()
         {
@@ -78,56 +66,38 @@ namespace LeagueSharp.Loader.Class
                 {
                     return;
                 }
-                if (!string.IsNullOrWhiteSpace(this.Configuration))
+
+                this.Project.SetGlobalProperty("Configuration", "LeagueSharp");
+                this.Project.SetGlobalProperty("Platform", "LeagueSharp");
+                this.Project.SetGlobalProperty("PlatformTarget", this.PlatformTarget);
+
+                this.Project.SetGlobalProperty("PreBuildEvent", string.Empty);
+                this.Project.SetGlobalProperty("PostBuildEvent", string.Empty);
+
+                this.Project.SetGlobalProperty("DebugSymbols", this.Configuration == "Release" ? "false" : "true");
+                this.Project.SetGlobalProperty("DebugType", this.Configuration == "Release" ? "None" : "full");
+                this.Project.SetGlobalProperty("Optimize", this.Configuration == "Release" ? "true" : "false");
+                this.Project.SetGlobalProperty("DefineConstants", this.Configuration == "Release" ? "TRACE" : "DEBUG;TRACE");
+
+                this.Project.SetGlobalProperty("OutputPath", "bin\\" + this.Configuration + "\\");
+
+                foreach (var item in this.Project.GetItems("Reference"))
                 {
-                    this.Project.SetProperty("Configuration", this.Configuration);
-                    this.Project.Save();
-                }
-                if (this.PrebuildEvent)
-                {
-                    this.Project.SetProperty("PreBuildEvent", string.Empty);
-                }
-                if (this.PostbuildEvent)
-                {
-                    this.Project.SetProperty("PostBuildEvent", string.Empty);
-                }
-                if (!string.IsNullOrWhiteSpace(this.PlatformTarget))
-                {
-                    this.Project.SetProperty("PlatformTarget", this.PlatformTarget);
-                }
-                var outputPath = this.Project.GetProperty("OutputPath");
-                if (this.ResetOutputPath || outputPath == null || string.IsNullOrWhiteSpace(outputPath.EvaluatedValue))
-                {
-                    this.Project.SetProperty("OutputPath", "bin\\" + this.Configuration);
-                }
-                if (this.UpdateReferences)
-                {
-                    foreach (var item in this.Project.GetItems("Reference"))
+                    var hintPath = item?.GetMetadata("HintPath");
+
+                    if (!string.IsNullOrWhiteSpace(hintPath?.EvaluatedValue))
                     {
-                        if (item == null)
-                        {
-                            continue;
-                        }
-                        var hintPath = item.GetMetadata("HintPath");
-                        if (hintPath != null && !string.IsNullOrWhiteSpace(hintPath.EvaluatedValue))
-                        {
-                            item.SetMetadataValue(
-                                "HintPath",
-                                Path.Combine(this.ReferencesPath, Path.GetFileName(hintPath.EvaluatedValue)));
-                        }
+                        item.SetMetadataValue("HintPath", Path.Combine(this.ReferencesPath, Path.GetFileName(hintPath.EvaluatedValue)));
                     }
                 }
 
                 this.Project.Save();
-                Utility.Log(
-                    LogStatus.Ok,
-                    "ProjectFile",
-                    string.Format("File Updated - {0}", this.Project.FullPath),
-                    this._log);
+
+                Utility.Log(LogStatus.Ok, "ProjectFile", $"File Updated - {this.Project.FullPath}", this.log);
             }
             catch (Exception ex)
             {
-                Utility.Log(LogStatus.Error, "ProjectFile", ex.Message, this._log);
+                Utility.Log(LogStatus.Error, "ProjectFile", ex.Message, this.log);
             }
         }
     }

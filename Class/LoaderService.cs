@@ -77,32 +77,17 @@ namespace LeagueSharp.Loader.Class
 
             try
             {
-                reload =
-                    KeyInterop.VirtualKeyFromKey(
-                        Config.Instance.Hotkeys.SelectedHotkeys.First(h => h.Name == "Reload").Hotkey);
-                recompile =
-                    KeyInterop.VirtualKeyFromKey(
-                        Config.Instance.Hotkeys.SelectedHotkeys.First(h => h.Name == "CompileAndReload").Hotkey);
+                reload = KeyInterop.VirtualKeyFromKey(Config.Instance.Hotkeys.SelectedHotkeys.First(h => h.Name == "Reload").Hotkey);
+                recompile = KeyInterop.VirtualKeyFromKey(Config.Instance.Hotkeys.SelectedHotkeys.First(h => h.Name == "CompileAndReload").Hotkey);
                 antiAfk = Config.Instance.Settings.GameSettings.First(s => s.Name == "Anti-AFK").SelectedValue == "True";
-                console = Config.Instance.Settings.GameSettings.First(s => s.Name == "Debug Console").SelectedValue
-                          == "True";
-                towerRange =
-                    Config.Instance.Settings.GameSettings.First(s => s.Name == "Display Enemy Tower Range")
-                          .SelectedValue == "True";
-                extendedZoom = Config.Instance.Settings.GameSettings.First(s => s.Name == "Extended Zoom").SelectedValue
-                               == "True";
-                drawings = Config.Instance.Settings.GameSettings.First(s => s.Name == "Show Drawings").SelectedValue
-                           == "True";
+                console = Config.Instance.Settings.GameSettings.First(s => s.Name == "Debug Console").SelectedValue == "True" || Config.Instance.ShowDevOptions || Config.Instance.EnableDebug;
+                towerRange = Config.Instance.Settings.GameSettings.First(s => s.Name == "Display Enemy Tower Range").SelectedValue == "True";
+                extendedZoom = Config.Instance.Settings.GameSettings.First(s => s.Name == "Extended Zoom").SelectedValue == "True";
+                drawings = Config.Instance.Settings.GameSettings.First(s => s.Name == "Show Drawings").SelectedValue == "True";
                 ping = Config.Instance.Settings.GameSettings.First(s => s.Name == "Show Ping").SelectedValue == "True";
-                statistics =
-                    Config.Instance.Settings.GameSettings.First(s => s.Name == "Send Anonymous Assembly Statistics")
-                          .SelectedValue == "True";
-                menuToggle =
-                    KeyInterop.VirtualKeyFromKey(
-                        Config.Instance.Hotkeys.SelectedHotkeys.First(h => h.Name == "ShowMenuToggle").Hotkey);
-                menuPress =
-                    KeyInterop.VirtualKeyFromKey(
-                        Config.Instance.Hotkeys.SelectedHotkeys.First(h => h.Name == "ShowMenuPress").Hotkey);
+                statistics = Config.Instance.Settings.GameSettings.First(s => s.Name == "Send Anonymous Assembly Statistics").SelectedValue == "True";
+                menuToggle = KeyInterop.VirtualKeyFromKey(Config.Instance.Hotkeys.SelectedHotkeys.First(h => h.Name == "ShowMenuToggle").Hotkey);
+                menuPress = KeyInterop.VirtualKeyFromKey(Config.Instance.Hotkeys.SelectedHotkeys.First(h => h.Name == "ShowMenuPress").Hotkey);
                 selectedLanguage = Config.Instance.SelectedLanguage;
             }
             catch

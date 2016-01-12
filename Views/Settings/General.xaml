@@ -7,7 +7,7 @@
              mc:Ignorable="d">
 
     <Grid Margin="0,0,0,0">
-        <DataGrid Margin="0,0,0,167"
+        <DataGrid Margin="0,0,0,189"
                   x:Name="GameSettingsDataGrid"
                   CanUserAddRows="False"
                   AutoGenerateColumns="False"
@@ -38,26 +38,30 @@
 
         <CheckBox IsChecked="{Binding Config.ShowDevOptions, UpdateSourceTrigger=PropertyChanged}"
                   Content="{DynamicResource EnableDeveloper}" Margin="0,0,10,69" Height="18" VerticalAlignment="Bottom" />
+        <CheckBox IsChecked="{Binding Config.EnableDebug, UpdateSourceTrigger=PropertyChanged}"
+                  Content="{DynamicResource EnableDebug}" Margin="0,0,10,91" Height="18" VerticalAlignment="Bottom" />
         <CheckBox IsChecked="{Binding Config.UpdateOnLoad, UpdateSourceTrigger=PropertyChanged}"
                   Content="{DynamicResource UpdateOnStart}" Margin="0,0,10,46" Height="18" VerticalAlignment="Bottom" />
         <CheckBox Content="{DynamicResource Inject}" Margin="0,0,10,0"
                   IsChecked="{Binding Config.Install, UpdateSourceTrigger=PropertyChanged}" Height="18"
                   VerticalAlignment="Bottom" />
-        <ComboBox HorizontalAlignment="Left" Margin="70,0,0,127" Width="135" Height="26" VerticalAlignment="Bottom"
+        <CheckBox IsChecked="{Binding Config.UpdateCoreOnInject, UpdateSourceTrigger=PropertyChanged}"
+                  Content="{DynamicResource UpdateCoreOnInject}" Margin="0,0,10,23" Height="18"
+                  VerticalAlignment="Bottom" />
+        <ComboBox HorizontalAlignment="Left" Margin="70,0,0,149" Width="135" Height="26" VerticalAlignment="Bottom"
                   Loaded="ComboBox_Loaded" Text="{DynamicResource Language}"
                   SelectionChanged="ComboBox_SelectionChanged" />
-        <Label Content="{DynamicResource Language}" HorizontalAlignment="Left" Margin="0,0,0,127" Height="26"
+        <Label Content="{DynamicResource Language}" HorizontalAlignment="Left" Margin="0,0,0,149" Height="26"
                VerticalAlignment="Bottom" Width="65" />
-        <ComboBox Margin="70,0,0,96" VerticalAlignment="Bottom" Height="26" Loaded="Color_Loaded"
+        <ComboBox Margin="70,0,0,118" VerticalAlignment="Bottom" Height="26" Loaded="Color_Loaded"
                   SelectionChanged="Color_SelectionChanged" HorizontalAlignment="Left" Width="135" />
-        <Label Content="{DynamicResource Color}" HorizontalAlignment="Left" Margin="0,0,0,96" Height="26"
+        <Label Content="{DynamicResource Color}" HorizontalAlignment="Left" Margin="0,0,0,118" Height="26"
                VerticalAlignment="Bottom" Width="65" />
         <Button Content="{DynamicResource Logout}" HorizontalAlignment="Right" Margin="0,0,0,0"
                 VerticalAlignment="Bottom" Width="75" Click="Logout_OnClick" />
         <Button Content="AppData" HorizontalAlignment="Right" Margin="0,0,0,30" VerticalAlignment="Bottom" Width="75"
                 Click="AppData_OnClick" />
-        <CheckBox IsChecked="{Binding Config.UpdateCoreOnInject, UpdateSourceTrigger=PropertyChanged}"
-        	Content="{DynamicResource UpdateCoreOnInject}" Margin="0,0,10,23" Height="18" VerticalAlignment="Bottom" />
-        <Button Content="Save Config" HorizontalAlignment="Right" Margin="0,0,0,61" VerticalAlignment="Bottom" Width="75" Click="SaveConfig_Click" />
+        <Button Content="Save Config" HorizontalAlignment="Right" Margin="0,0,0,61" VerticalAlignment="Bottom"
+                Width="75" Click="SaveConfig_Click" />
     </Grid>
 </UserControl>

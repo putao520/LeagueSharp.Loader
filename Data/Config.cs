@@ -1,6 +1,6 @@
 ﻿#region LICENSE
 
-// Copyright 2015-2015 LeagueSharp.Loader
+// Copyright 2016-2016 LeagueSharp.Loader
 // Config.cs is part of LeagueSharp.Loader.
 // 
 // LeagueSharp.Loader is free software: you can redistribute it and/or modify
@@ -18,8 +18,6 @@
 
 #endregion
 
-using LeagueSharp.Loader.Data.Assemblies;
-
 namespace LeagueSharp.Loader.Data
 {
     #region
@@ -33,6 +31,7 @@ namespace LeagueSharp.Loader.Data
     using System.Xml.Serialization;
 
     using LeagueSharp.Loader.Class;
+    using LeagueSharp.Loader.Data.Assemblies;
 
     #endregion
 
@@ -45,20 +44,6 @@ namespace LeagueSharp.Loader.Data
 
         [XmlIgnore]
         private ObservableCollection<Assembly> _allDbAssemblies = new ObservableCollection<Assembly>();
-
-        [XmlIgnore]
-        public ObservableCollection<Assembly> allDbAssemblies
-        {
-            get
-            {
-                return this._allDbAssemblies;
-            }
-            set
-            {
-                this._allDbAssemblies = value;
-                this.OnPropertyChanged();
-            }
-        }
 
         private string _appDirectory;
 
@@ -98,6 +83,8 @@ namespace LeagueSharp.Loader.Data
 
         private bool _updateOnLoad;
 
+        private bool enableDebug;
+
         private bool updateCoreOnInject = true;
 
         private double windowHeight = 450;
@@ -110,7 +97,32 @@ namespace LeagueSharp.Loader.Data
 
         private double windowWidth = 800;
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        [XmlIgnore]
+        public ObservableCollection<Assembly> allDbAssemblies
+        {
+            get
+            {
+                return this._allDbAssemblies;
+            }
+            set
+            {
+                this._allDbAssemblies = value;
+                this.OnPropertyChanged();
+            }
+        }
+
+        public bool EnableDebug
+        {
+            get
+            {
+                return this.enableDebug;
+            }
+            set
+            {
+                this.enableDebug = value;
+                this.OnPropertyChanged();
+            }
+        }
 
         public string AppDirectory
         {
@@ -445,6 +457,8 @@ namespace LeagueSharp.Loader.Data
             }
         }
 
+        public event PropertyChangedEventHandler PropertyChanged;
+
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             if (this.PropertyChanged != null)
@@ -459,8 +473,6 @@ namespace LeagueSharp.Loader.Data
     {
         private ObservableCollection<GameSettings> _gameSettings;
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
         [XmlArrayItem("GameSettings", IsNullable = true)]
         public ObservableCollection<GameSettings> GameSettings
         {
@@ -474,6 +486,8 @@ namespace LeagueSharp.Loader.Data
                 this.OnPropertyChanged("GameSettings");
             }
         }
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         private void OnPropertyChanged(string propertyName)
         {
@@ -491,8 +505,6 @@ namespace LeagueSharp.Loader.Data
         private List<string> _posibleValues;
 
         private string _selectedValue;
-
-        public event PropertyChangedEventHandler PropertyChanged;
 
         [XmlIgnore]
         public string DisplayName
@@ -542,6 +554,8 @@ namespace LeagueSharp.Loader.Data
             }
         }
 
+        public event PropertyChangedEventHandler PropertyChanged;
+
         private void OnPropertyChanged(string propertyName)
         {
             if (this.PropertyChanged != null)
@@ -555,8 +569,6 @@ namespace LeagueSharp.Loader.Data
     public class Hotkeys : INotifyPropertyChanged
     {
         private ObservableCollection<HotkeyEntry> _selectedHotkeys;
-
-        public event PropertyChangedEventHandler PropertyChanged;
 
         [XmlArrayItem("SelectedHotkeys", IsNullable = true)]
         public ObservableCollection<HotkeyEntry> SelectedHotkeys
@@ -572,6 +584,8 @@ namespace LeagueSharp.Loader.Data
             }
         }
 
+        public event PropertyChangedEventHandler PropertyChanged;
+
         private void OnPropertyChanged(string propertyName)
         {
             if (this.PropertyChanged != null)
@@ -586,8 +600,6 @@ namespace LeagueSharp.Loader.Data
         private Key _hotkey;
 
         private string _name;
-
-        public event PropertyChangedEventHandler PropertyChanged;
 
         public Key DefaultKey { get; set; }
 
@@ -661,6 +673,8 @@ namespace LeagueSharp.Loader.Data
                 this.OnPropertyChanged("Name");
             }
         }
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         private void OnPropertyChanged(string propertyName)
         {

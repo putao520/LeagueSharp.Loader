@@ -182,8 +182,9 @@ namespace LeagueSharp.Loader.Class
                             return new UpdateResponse(CoreUpdateState.Maintenance, message);
                         }
 
-                        if (updateInfo.version != Utility.Md5Checksum(Directories.CoreFilePath)
-                            && updateInfo.url.StartsWith("https://github.com/joduskame/"))
+                        if (updateInfo.version != Utility.Md5Checksum(Directories.CoreFilePath) && (
+                            updateInfo.url.StartsWith("https://github.com/joduskame/") || 
+                            updateInfo.url.StartsWith("https://github.com/LeagueSharp/")))
                         {
                             try
                             {

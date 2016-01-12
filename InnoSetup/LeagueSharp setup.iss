@@ -25,7 +25,8 @@ PrivilegesRequired=admin
 Source: "..\bin\Release\loader.exe"; DestName: "loader.exe"; Excludes: *.vshost.exe; DestDir: {app}; Flags: ignoreversion
 Source: "..\bin\Release\loader.exe.config"; DestName: "loader.exe.config"; Excludes: *.vshost.exe.config;  DestDir: {app}; Flags: ignoreversion
 Source: "..\bin\Release\*.dll"; DestDir: "{app}\bin\"; Flags: ignoreversion
-Source: "..\bin\Release\NativeBinaries\x86\*.dll"; DestDir: "{app}\bin\"; Flags: ignoreversion
+Source: "..\bin\Release\NativeBinaries\x86\*.dll"; DestDir: "{app}\bin\NativeBinaries\x86\"; Flags: ignoreversion
+Source: "..\bin\Release\NativeBinaries\amd64\*.dll"; DestDir: "{app}\bin\NativeBinaries\amd64\"; Flags: ignoreversion
 
 ;System
 Source: "..\bin\Release\System\*.dll"; DestDir: "{app}\System\"; Flags: ignoreversion

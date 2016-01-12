@@ -35,62 +35,29 @@ namespace LeagueSharp.Loader.Class
 
     using Microsoft.Build.Evaluation;
     using System.Net;
+    using System.Net.Http;
+    using System.ServiceModel.Security;
     using System.Threading.Tasks;
 
     #endregion
 
     public static class LeagueSharpAssemblies
     {
-        private static List<string> _blockedrepolist = new List<string>();
-        private static string _blockedPath = Path.Combine(new FileInfo(Assembly.GetExecutingAssembly().Location).DirectoryName, "System", "BlockedRepositories.txt");
-        public static List<string> BlockedRepos
-        {
-            get
-            {
-                return _blockedrepolist;
-            }
-        }
-
         internal static async Task UpdateBlockedRepos()
         {
-            await Task.Run(() =>
+            using (var client = new HttpClient())
             {
-                string path = Path.Combine(new FileInfo(Assembly.GetExecutingAssembly().Location).DirectoryName, "System", "BlockedRepositories.txt");
-                try
-                {
-                    using (WebClient wc = new WebClient())
-                    {
-                        wc.DownloadStringAsync(new Uri("https://raw.githubusercontent.com/LeagueSharp/LeagueSharp.Loader/master/Updates/BlockedRepositories.txt"));
-                        wc.DownloadStringCompleted += (object sender, DownloadStringCompletedEventArgs args) =>
-                        {
-                            if (args.Error == null && !args.Cancelled)
-                            {
-                                File.WriteAllText(path, args.Result);
-                            }
-                        };
-                    }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Error getting blocked repositories " + e);
-                }
+                var response =
+                    await client.GetAsync(
+                        "https://raw.githubusercontent.com/LeagueSharp/LeagueSharp.Loader/master/Updates/BlockedRepositories.txt");
 
-                try
+                if (response.IsSuccessStatusCode)
                 {
-                    using (StreamReader sr = new StreamReader(_blockedPath))
-                    {
-                        string line;
-                        while ((line = sr.ReadLine()) != null)
-                        {
-                            _blockedrepolist.Add(line);
-                        }
-                    }
+                    var content = await response.Content.ReadAsStringAsync();
+                    var lines = content.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+                    Config.Instance.BlockedRepositories = new List<string>(lines);
                 }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Error opening blocked repositories textfile." + e);
-                }
-            });
+            }
         }
 
         public static LeagueSharpAssembly GetAssembly(string projectFile, string url = "")
@@ -172,19 +139,19 @@ namespace LeagueSharp.Loader.Class
             this.Status = AssemblyStatus.Ready;
         }
 
-        private string _displayName = "";
+        private string displayName = "";
 
-        private bool _injectChecked;
+        private bool injectChecked;
 
-        private bool _installChecked;
+        private bool installChecked;
 
-        private string _pathToBinary = null;
+        private string pathToBinary = null;
 
-        private string _pathToProjectFile = "";
+        private string pathToProjectFile = "";
 
-        private string _svnUrl;
+        private string svnUrl;
 
-        private AssemblyType? _type = null;
+        private AssemblyType? type = null;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -194,11 +161,11 @@ namespace LeagueSharp.Loader.Class
         {
             get
             {
-                return this._displayName == "" ? this.Name : this._displayName;
+                return this.displayName == "" ? this.Name : this.displayName;
             }
             set
             {
-                this._displayName = value;
+                this.displayName = value;
             }
         }
 
@@ -211,11 +178,11 @@ namespace LeagueSharp.Loader.Class
                     return true;
                 }
 
-                return this._injectChecked;
+                return this.injectChecked;
             }
             set
             {
-                this._injectChecked = value;
+                this.injectChecked = value;
                 this.OnPropertyChanged("InjectChecked");
             }
         }
@@ -224,22 +191,16 @@ namespace LeagueSharp.Loader.Class
         {
             get
             {
-                return this._installChecked;
+                return this.installChecked;
             }
             set
             {
-                this._installChecked = value;
+                this.installChecked = value;
                 this.OnPropertyChanged("InstallChecked");
             }
         }
 
-        public string Location
-        {
-            get
-            {
-                return this.SvnUrl == "" ? "Local" : this.SvnUrl;
-            }
-        }
+        public string Location => this.SvnUrl == "" ? "Local" : this.SvnUrl;
 
         public string Name { get; set; }
 
@@ -247,16 +208,16 @@ namespace LeagueSharp.Loader.Class
         {
             get
             {
-                if (this._pathToBinary == null)
+                if (this.pathToBinary == null)
                 {
-                    this._pathToBinary =
+                    this.pathToBinary =
                         Path.Combine(
                             (this.Type == AssemblyType.Library ? Directories.CoreDirectory : Directories.AssembliesDir),
                             (this.Type == AssemblyType.Library ? "" : this.PathToProjectFile.GetHashCode().ToString("X"))
                             + Path.GetFileName(Compiler.GetOutputFilePath(this.GetProject())));
                 }
 
-                return this._pathToBinary;
+                return this.pathToBinary;
             }
         }
 
@@ -264,9 +225,9 @@ namespace LeagueSharp.Loader.Class
         {
             get
             {
-                if (File.Exists(this._pathToProjectFile))
+                if (File.Exists(this.pathToProjectFile))
                 {
-                    return this._pathToProjectFile;
+                    return this.pathToProjectFile;
                 }
 
                 try
@@ -284,7 +245,7 @@ namespace LeagueSharp.Loader.Class
 
                         if (!string.IsNullOrEmpty(projectFile))
                         {
-                            this._pathToProjectFile = projectFile;
+                            this.pathToProjectFile = projectFile;
                             return projectFile;
                         }
                     }
@@ -294,17 +255,17 @@ namespace LeagueSharp.Loader.Class
                     // ignored
                 }
 
-                return this._pathToProjectFile;
+                return this.pathToProjectFile;
             }
             set
             {
                 if (!value.Contains("%AppData%"))
                 {
-                    this._pathToProjectFile = value;
+                    this.pathToProjectFile = value;
                 }
                 else
                 {
-                    this._pathToProjectFile = value.Replace(
+                    this.pathToProjectFile = value.Replace(
                         "%AppData%",
                         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData));
                 }
@@ -317,11 +278,11 @@ namespace LeagueSharp.Loader.Class
         {
             get
             {
-                return this._svnUrl;
+                return this.svnUrl;
             }
             set
             {
-                this._svnUrl = value;
+                this.svnUrl = value;
                 this.OnPropertyChanged("SvnUrl");
             }
         }
@@ -330,18 +291,18 @@ namespace LeagueSharp.Loader.Class
         {
             get
             {
-                if (this._type == null)
+                if (this.type == null)
                 {
                     var project = this.GetProject();
                     if (project != null)
                     {
-                        this._type = project.GetPropertyValue("OutputType").ToLower().Contains("exe")
+                        this.type = project.GetPropertyValue("OutputType").ToLower().Contains("exe")
                                          ? AssemblyType.Executable
                                          : AssemblyType.Library;
                     }
                 }
 
-                return this._type ?? AssemblyType.Unknown;
+                return this.type ?? AssemblyType.Unknown;
             }
         }
 
@@ -442,16 +403,6 @@ namespace LeagueSharp.Loader.Class
                         };
                     pf.Change();
 
-                    /* _pathToBinary =
-                        Path.Combine(
-                            (Type == AssemblyType.Library ? Directories.CoreDirectory : Directories.AssembliesDir),
-                            (Type == AssemblyType.Library ? "" : PathToProjectFile.GetHashCode().ToString("X")) +
-                            Path.GetFileName(Compiler.GetOutputFilePath(pf.Project)));
-
-                    _type = pf.Project.GetPropertyValue("OutputType").ToLower().Contains("exe")
-                        ? AssemblyType.Executable
-                        : AssemblyType.Library;*/
-
                     return pf.Project;
                 }
                 catch (Exception e)
@@ -460,16 +411,6 @@ namespace LeagueSharp.Loader.Class
                 }
             }
             return null;
-        }
-
-        /// <summary>
-        ///     Returns the relative path to the Project after the trunk folder.
-        /// </summary>
-        /// <returns></returns>
-        public string GetProjectPathRelative()
-        {
-            var dir = this.PathToProjectFile.Remove(this.PathToProjectFile.LastIndexOf("\\"));
-            return dir.Remove(0, dir.LastIndexOf("trunk\\") + "trunk\\".Length);
         }
 
         public void Update()
@@ -496,17 +437,19 @@ namespace LeagueSharp.Loader.Class
 
         private void OnPropertyChanged(string propertyName)
         {
-            if (this.PropertyChanged != null)
-            {
-                this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         internal bool IsBlocked
         {
             get
             {
-                return LeagueSharpAssemblies.BlockedRepos.Any(x => x.IndexOf(SvnUrl, StringComparison.OrdinalIgnoreCase) >= 0);
+                if (string.IsNullOrEmpty(this.SvnUrl))
+                {
+                    return false; // just to make sure :^)
+                }
+
+                return Config.Instance.BlockedRepositories.Any(x => this.SvnUrl.StartsWith(x));
             }
         }
     }

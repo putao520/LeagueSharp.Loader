@@ -83,6 +83,8 @@ namespace LeagueSharp.Loader.Data
 
         private bool _updateOnLoad;
 
+        private List<string> blockedRepositories;
+
         private bool enableDebug;
 
         private bool updateCoreOnInject = true;
@@ -457,14 +459,24 @@ namespace LeagueSharp.Loader.Data
             }
         }
 
+        public List<string> BlockedRepositories
+        {
+            get
+            {
+                return this.blockedRepositories;
+            }
+            set
+            {
+                this.blockedRepositories = value;
+                this.OnPropertyChanged();
+            }
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            if (this.PropertyChanged != null)
-            {
-                this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 

@@ -43,23 +43,6 @@ namespace LeagueSharp.Loader.Class
 
     public static class LeagueSharpAssemblies
     {
-        internal static async Task UpdateBlockedRepos()
-        {
-            using (var client = new HttpClient())
-            {
-                var response =
-                    await client.GetAsync(
-                        "https://raw.githubusercontent.com/LeagueSharp/LeagueSharp.Loader/master/Updates/BlockedRepositories.txt");
-
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var lines = content.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
-                    Config.Instance.BlockedRepositories = new List<string>(lines);
-                }
-            }
-        }
-
         public static LeagueSharpAssembly GetAssembly(string projectFile, string url = "")
         {
             LeagueSharpAssembly foundAssembly = null;

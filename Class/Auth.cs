@@ -23,6 +23,7 @@ namespace LeagueSharp.Loader.Class
     #region
 
     using System;
+    using System.Diagnostics;
     using System.IO;
     using System.Net;
     using System.Text;
@@ -62,6 +63,7 @@ namespace LeagueSharp.Loader.Class
                 wr.ContentType = "application/x-www-form-urlencoded";
 
                 WebResponse response = null;
+
                 try
                 {
                     var dataStream = wr.GetRequestStream();
@@ -78,7 +80,8 @@ namespace LeagueSharp.Loader.Class
                             string.Format(Utility.GetMultiLanguageText("WrongAuth"), "www.joduska.me"));
                     }
                 }
-                if (response != null && response.GetResponseStream() != null)
+
+                if (response?.GetResponseStream() != null)
                 {
                     try
                     {
@@ -93,6 +96,7 @@ namespace LeagueSharp.Loader.Class
                         //
                     }
                 }
+
                 return new Tuple<bool, string>(true, "Success");
             }
             catch (Exception)

@@ -340,21 +340,8 @@ namespace LeagueSharp.Loader.Views
             Updater.MainWindow = this;
 
             await this.CheckForUpdates(true, true, false);
-
-            await LeagueSharpAssemblies.UpdateBlockedRepos();
-
-            Updater.GetRepositories(
-                delegate(List<string> list)
-                    {
-                        if (list.Count > 0)
-                        {
-                            Config.Instance.KnownRepositories.Clear();
-                            foreach (var repo in list)
-                            {
-                                Config.Instance.KnownRepositories.Add(repo);
-                            }
-                        }
-                    });
+            await Updater.UpdateBlockedRepos();
+            await Updater.UpdateRepositories();
 
             Config.Instance.FirstRun = false;
 
@@ -846,7 +833,6 @@ namespace LeagueSharp.Loader.Views
         private async void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
         {
             await this.Bootstrap();
-
             this.SetForeground();
         }
 
@@ -874,9 +860,12 @@ namespace LeagueSharp.Loader.Views
 
         private void OnLogin(string username)
         {
-            Utility.Log(LogStatus.Ok, "Login", string.Format("Succesfully signed in as {0}", username), Logs.MainLog);
+            Utility.Log(LogStatus.Ok, "Login", $"Succesfully signed in as {username}", Logs.MainLog);
             this.Browser.Visibility = Visibility.Visible;
             this.TosBrowser.Visibility = Visibility.Visible;
+
+            this.Browser.Navigate("http://api.joduska.me/public/news/html");
+            this.TosBrowser.Navigate("http://api.joduska.me/public/tos");
 
             try
             {

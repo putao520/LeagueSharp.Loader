@@ -24,8 +24,12 @@ namespace LeagueSharp.Loader.Class
 
     using System;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
+    using System.Diagnostics;
     using System.IO;
+    using System.Linq;
     using System.Net;
+    using System.Net.Http;
     using System.Reflection;
     using System.Runtime.Serialization;
     using System.Runtime.Serialization.Json;
@@ -89,28 +93,47 @@ namespace LeagueSharp.Loader.Class
             return new Tuple<bool, string>(false, "");
         }
 
-        public static void GetRepositories(RepositoriesUpdateDelegate del)
+        public static async Task UpdateBlockedRepos()
         {
-            var wb = new WebClient();
+            using (var client = new HttpClient())
+            {
+                var response =
+                    await client.GetAsync(
+                        "https://raw.githubusercontent.com/LeagueSharp/LeagueSharp.Loader/master/Updates/BlockedRepositories.txt");
 
-            wb.DownloadStringCompleted += delegate(object sender, DownloadStringCompletedEventArgs args)
+                if (response.IsSuccessStatusCode)
                 {
+                    var content = await response.Content.ReadAsStringAsync();
+                    var lines = content.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+                    Config.Instance.BlockedRepositories = new List<string>(lines);
+                }
+            }
+        }
+
+        public static async Task UpdateRepositories()
+        {
+            using (var client = new HttpClient())
+            {
+                var response = await client.GetAsync("https://loader.joduska.me/repositories.txt");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
                     var result = new List<string>();
+
                     try
                     {
-                        var matches = Regex.Matches(args.Result, "<repo>(.*)</repo>");
-                        foreach (Match match in matches)
-                        {
-                            result.Add(match.Groups[1].ToString());
-                        }
+                        var matches = Regex.Matches(content, "<repo>(.*)</repo>");
+                        result.AddRange(from Match match in matches select match.Groups[1].ToString());
                     }
                     catch (Exception)
                     {
+                        // ignored
                     }
-                    del(result);
-                };
 
-            wb.DownloadStringAsync(new Uri("https://loader.joduska.me/repositories.txt"));
+                    Config.Instance.KnownRepositories = new ObservableCollection<string>(result);
+                }
+            }
         }
 
         public static async Task<bool> IsSupported(string path)

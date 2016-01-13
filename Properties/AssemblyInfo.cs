@@ -73,5 +73,5 @@ using System.Windows;
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
 
-[assembly: AssemblyVersion("2.0.12.2")]
-[assembly: AssemblyFileVersion("2.0.12.2")]
+[assembly: AssemblyVersion("2.0.12.3")]
+[assembly: AssemblyFileVersion("2.0.12.3")]

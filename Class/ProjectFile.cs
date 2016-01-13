@@ -67,8 +67,8 @@ namespace LeagueSharp.Loader.Class
                     return;
                 }
 
-                this.Project.SetGlobalProperty("Configuration", "LeagueSharp");
-                this.Project.SetGlobalProperty("Platform", "LeagueSharp");
+                this.Project.SetGlobalProperty("Configuration", this.Configuration);
+                this.Project.SetGlobalProperty("Platform", this.PlatformTarget);
                 this.Project.SetGlobalProperty("PlatformTarget", this.PlatformTarget);
 
                 this.Project.SetGlobalProperty("PreBuildEvent", string.Empty);

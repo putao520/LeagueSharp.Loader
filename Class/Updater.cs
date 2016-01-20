@@ -99,6 +99,7 @@ namespace LeagueSharp.Loader.Class
             {
                 using (var client = new HttpClient())
                 {
+                    client.Timeout = TimeSpan.FromSeconds(5);
                     var response =
                         await client.GetAsync(
                             "https://raw.githubusercontent.com/LeagueSharp/LeagueSharp.Loader/master/Updates/BlockedRepositories.txt");
@@ -123,6 +124,7 @@ namespace LeagueSharp.Loader.Class
             {
                 using (var client = new HttpClient())
                 {
+                    client.Timeout = TimeSpan.FromSeconds(5);
                     var response = await client.GetAsync("https://loader.joduska.me/repositories.txt");
 
                     if (response.IsSuccessStatusCode)
@@ -160,7 +162,7 @@ namespace LeagueSharp.Loader.Class
             var coreMd5 = Utility.Md5Checksum(Directories.CoreFilePath);
             var leagueMd5 = Utility.Md5Checksum(path);
             var wr = WebRequest.Create(string.Format(CoreVersionCheckURL, leagueMd5));
-            wr.Timeout = 4000;
+            wr.Timeout = 5000;
             wr.Method = "GET";
             var response = await wr.GetResponseAsync();
 
@@ -203,7 +205,7 @@ namespace LeagueSharp.Loader.Class
             {
                 var leagueMd5 = Utility.Md5Checksum(leagueOfLegendsFilePath);
                 var wr = WebRequest.Create(string.Format(CoreVersionCheckURL, leagueMd5));
-                wr.Timeout = 4000;
+                wr.Timeout = 5000;
                 wr.Method = "GET";
                 var response = await wr.GetResponseAsync();
 

@@ -121,17 +121,32 @@ namespace LeagueSharp.Loader.Class
                     {
                         if (Config.Instance.UpdateCoreOnInject)
                         {
-                            Updater.UpdateCore(Config.Instance.LeagueOfLegendsExePath, true).Wait();
+                            try
+                            {
+                                Updater.UpdateCore(Config.Instance.LeagueOfLegendsExePath, true).Wait();
+                            }
+                            catch (Exception e)
+                            {
+                                Utility.Log(LogStatus.Error, "UpdateCoreOnInject", e.Message, Logs.MainLog);
+                            }
                         }
 
-                        if (injectDLL != null && Updater.IsSupported(Config.Instance.LeagueOfLegendsExePath).Result)
+                        var supported = true;
+
+                        try
+                        {
+                            supported = Updater.IsSupported(Config.Instance.LeagueOfLegendsExePath).Result;
+                        }
+                        catch (Exception e)
+                        {
+                            Utility.Log(LogStatus.Error, "IsSupported", e.Message, Logs.MainLog);
+                        }
+
+                        if (injectDLL != null && supported)
                         {
                             injectDLL(instance.Id, PathRandomizer.LeagueSharpCoreDllPath);
 
-                            if (OnInject != null)
-                            {
-                                OnInject(IntPtr.Zero);
-                            }
+                            OnInject?.Invoke(IntPtr.Zero);
                         }
                     }
                 }

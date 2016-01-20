@@ -232,6 +232,33 @@ namespace LeagueSharp.Loader.Views
                             this.Close();
                         }
                     });
+
+            if (!this.Config.EnableDebug)
+            {
+                foreach (var file in Directory.EnumerateFiles(Directories.CoreDirectory, "*.pdb"))
+                {
+                    try
+                    {
+                        File.Delete(file);
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
+                }
+
+                foreach (var file in Directory.EnumerateFiles(Directories.AssembliesDir, "*.pdb"))
+                {
+                    try
+                    {
+                        File.Delete(file);
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
+                }
+            }
         }
 
         public async void ShowTextMessage(string title, string message)

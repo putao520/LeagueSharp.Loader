@@ -95,44 +95,58 @@ namespace LeagueSharp.Loader.Class
 
         public static async Task UpdateBlockedRepos()
         {
-            using (var client = new HttpClient())
+            try
             {
-                var response =
-                    await client.GetAsync(
-                        "https://raw.githubusercontent.com/LeagueSharp/LeagueSharp.Loader/master/Updates/BlockedRepositories.txt");
-
-                if (response.IsSuccessStatusCode)
+                using (var client = new HttpClient())
                 {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var lines = content.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
-                    Config.Instance.BlockedRepositories = new List<string>(lines);
+                    var response =
+                        await client.GetAsync(
+                            "https://raw.githubusercontent.com/LeagueSharp/LeagueSharp.Loader/master/Updates/BlockedRepositories.txt");
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var content = await response.Content.ReadAsStringAsync();
+                        var lines = content.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+                        Config.Instance.BlockedRepositories = new List<string>(lines);
+                    }
                 }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
             }
         }
 
         public static async Task UpdateRepositories()
         {
-            using (var client = new HttpClient())
+            try
             {
-                var response = await client.GetAsync("https://loader.joduska.me/repositories.txt");
-
-                if (response.IsSuccessStatusCode)
+                using (var client = new HttpClient())
                 {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var result = new List<string>();
+                    var response = await client.GetAsync("https://loader.joduska.me/repositories.txt");
 
-                    try
+                    if (response.IsSuccessStatusCode)
                     {
-                        var matches = Regex.Matches(content, "<repo>(.*)</repo>");
-                        result.AddRange(from Match match in matches select match.Groups[1].ToString());
-                    }
-                    catch (Exception)
-                    {
-                        // ignored
-                    }
+                        var content = await response.Content.ReadAsStringAsync();
+                        var result = new List<string>();
 
-                    Config.Instance.KnownRepositories = new ObservableCollection<string>(result);
+                        try
+                        {
+                            var matches = Regex.Matches(content, "<repo>(.*)</repo>");
+                            result.AddRange(from Match match in matches select match.Groups[1].ToString());
+                        }
+                        catch (Exception)
+                        {
+                            // ignored
+                        }
+
+                        Config.Instance.KnownRepositories = new ObservableCollection<string>(result);
+                    }
                 }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
             }
         }
 
@@ -153,18 +167,25 @@ namespace LeagueSharp.Loader.Class
             return await Task<bool>.Factory.StartNew(
                 () =>
                     {
-                        using (var stream = response.GetResponseStream())
+                        try
                         {
-                            if (stream != null)
+                            using (var stream = response.GetResponseStream())
                             {
-                                var ser = new DataContractJsonSerializer(typeof(UpdateInfo));
-                                var updateInfo = (UpdateInfo)ser.ReadObject(stream);
-
-                                if (updateInfo.version != "0" && updateInfo.version == coreMd5)
+                                if (stream != null)
                                 {
-                                    return true;
+                                    var ser = new DataContractJsonSerializer(typeof(UpdateInfo));
+                                    var updateInfo = (UpdateInfo)ser.ReadObject(stream);
+
+                                    if (updateInfo.version != "0" && updateInfo.version == coreMd5)
+                                    {
+                                        return true;
+                                    }
                                 }
                             }
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e);
                         }
 
                         return false;

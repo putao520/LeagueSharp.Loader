@@ -106,11 +106,11 @@ namespace LeagueSharp.Loader.Class
                         {
                             repo.Config.Set("user.name", Config.Instance.Username);
                             repo.Config.Set("user.email", Config.Instance.Username + "@joduska.me");
-                            repo.Fetch("origin");
 
-                            repo.Checkout(
-                                "origin/master",
-                                new CheckoutOptions { CheckoutModifiers = CheckoutModifiers.Force });
+                            repo.Reset(ResetMode.Hard);
+                            repo.RemoveUntrackedFiles();
+                            repo.Fetch("origin");
+                            repo.Checkout("master", new CheckoutOptions { CheckoutModifiers = CheckoutModifiers.Force });
                         }
                     }
                     else

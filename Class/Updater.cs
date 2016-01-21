@@ -30,6 +30,8 @@ namespace LeagueSharp.Loader.Class
     using System.Linq;
     using System.Net;
     using System.Net.Http;
+    using System.Net.Sockets;
+    using System.Net.WebSockets;
     using System.Reflection;
     using System.Runtime.Serialization;
     using System.Runtime.Serialization.Json;
@@ -184,6 +186,18 @@ namespace LeagueSharp.Loader.Class
                                     }
                                 }
                             }
+                        }
+                        catch (WebException)
+                        {
+                            return true; // still try to inject, even if service is down
+                        }
+                        catch (WebSocketException)
+                        {
+                            return true; // still try to inject, even if service is down
+                        }
+                        catch (SocketException)
+                        {
+                            return true; // still try to inject, even if service is down
                         }
                         catch (Exception e)
                         {

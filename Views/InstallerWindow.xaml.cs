@@ -130,7 +130,7 @@ namespace LeagueSharp.Loader.Views
             {
                 bgWorker.DoWork += delegate
                     {
-                        var updatedDir = GitUpdater.Update(location, Logs.MainLog, Directories.RepositoryDir);
+                        var updatedDir = GitUpdater.Update(location);
 
                         if (Config.Instance.BlockedRepositories.Any(location.StartsWith))
                         {

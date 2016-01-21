@@ -407,7 +407,7 @@ namespace LeagueSharp.Loader.Class
             this.OnPropertyChanged("Version");
             try
             {
-                GitUpdater.Update(this.SvnUrl, Logs.MainLog, Directories.RepositoryDir);
+                GitUpdater.Update(this.SvnUrl);
             }
             catch (Exception e)
             {

@@ -114,6 +114,14 @@
     <Compile Include="Class\Auth.cs" />
     <Compile Include="Class\FolderSelectDialog.cs" />
     <Compile Include="Class\Injection.cs" />
+    <Compile Include="Class\Installer\AssemblyData.cs" />
+    <Compile Include="Class\Installer\AssemblyResponse.cs" />
+    <Compile Include="Class\Installer\AssemblyEntry.cs" />
+    <Compile Include="Class\Installer\Dependency.cs" />
+    <Compile Include="Class\Installer\DependencyInstaller.cs" />
+    <Compile Include="Class\Installer\WebClientEx.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Class\LSUriScheme.cs" />
     <Compile Include="Class\PathRandomizer.cs" />
     <Compile Include="Class\Profile.cs" />

@@ -33,6 +33,7 @@ namespace LeagueSharp.Loader.Views
     using System.Windows.Input;
 
     using LeagueSharp.Loader.Class;
+    using LeagueSharp.Loader.Class.Installer;
     using LeagueSharp.Loader.Data;
 
     using MahApps.Metro.Controls.Dialogs;
@@ -84,6 +85,9 @@ namespace LeagueSharp.Loader.Views
         public void InstallSelected()
         {
             var amount = this.FoundAssemblies.Count(a => a.InstallChecked);
+
+            var di = new DependencyInstaller(this.FoundAssemblies.Select(a => a.PathToProjectFile));
+            di.Satisfy();
 
             foreach (var assembly in this.FoundAssemblies.ToArray())
             {

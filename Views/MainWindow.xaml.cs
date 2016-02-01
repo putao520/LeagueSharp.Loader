@@ -42,6 +42,7 @@ namespace LeagueSharp.Loader.Views
     using System.Windows.Media;
 
     using LeagueSharp.Loader.Class;
+    using LeagueSharp.Loader.Class.Installer;
     using LeagueSharp.Loader.Data;
 
     using MahApps.Metro.Controls;
@@ -204,6 +205,9 @@ namespace LeagueSharp.Loader.Views
                                         }
                                     });
                         }
+
+                        var di = new DependencyInstaller(leagueSharpAssemblies.Select(a => a.PathToProjectFile));
+                        di.Satisfy();
 
                         if (compile)
                         {

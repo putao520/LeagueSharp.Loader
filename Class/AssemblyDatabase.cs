@@ -1,7 +1,7 @@
 ﻿#region LICENSE
 
 // Copyright 2016-2016 LeagueSharp.Loader
-// AssemblyEntry.cs is part of LeagueSharp.Loader.
+// AssemblyDatabase.cs is part of LeagueSharp.Loader.
 // 
 // LeagueSharp.Loader is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,19 +18,33 @@
 
 #endregion
 
-namespace LeagueSharp.Loader.Class.Installer
+namespace LeagueSharp.Loader.Class
 {
-    using Newtonsoft.Json;
+    using System;
+    using System.Collections.ObjectModel;
+    using System.Linq;
 
-    public class AssemblyEntry
+    using PlaySharp.Service.Model;
+
+    internal class AssemblyDatabase
     {
-        [JsonProperty("id")]
-        public int Id { get; set; }
+        public static ObservableCollection<AssemblyEntry> GetAssemblies()
+        {
+            try
+            {
+                var assemblies = WebService.Client.Assemblies();
 
-        [JsonProperty("github_url")]
-        public string GithubUrl { get; set; }
+                if (assemblies != null)
+                {
+                    return new ObservableCollection<AssemblyEntry>(assemblies.OrderBy(a => a.Name));
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
 
-        [JsonProperty("type")]
-        public int Type { get; set; }
+            return null;
+        }
     }
 }

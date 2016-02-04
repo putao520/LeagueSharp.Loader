@@ -101,7 +101,7 @@ namespace LeagueSharp.Loader.Class
                         {
                             assemblies.ForEach(
                                 assembly => Config.Instance.SelectedProfile.InstalledAssemblies.Add(assembly));
-                            await ((MainWindow)window).PrepareAssemblies(assemblies, true, true, false);
+                            await ((MainWindow)window).PrepareAssemblies(assemblies, true, true);
                             ((MainWindow)window).ShowTextMessage(
                                 Utility.GetMultiLanguageText("Installer"),
                                 Utility.GetMultiLanguageText("SuccessfullyInstalled"));

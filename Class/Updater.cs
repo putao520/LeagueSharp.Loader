@@ -25,13 +25,10 @@ namespace LeagueSharp.Loader.Class
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
-    using System.Diagnostics;
     using System.IO;
     using System.Linq;
     using System.Net;
     using System.Net.Http;
-    using System.Net.Sockets;
-    using System.Net.WebSockets;
     using System.Reflection;
     using System.Runtime.Serialization;
     using System.Runtime.Serialization.Json;
@@ -46,7 +43,16 @@ namespace LeagueSharp.Loader.Class
 
     internal class Updater
     {
-        public const string CoreVersionCheckURL = "http://api.joduska.me/public/deploy/kernel/{0}";
+        public delegate void RepositoriesUpdateDelegate(List<string> list);
+
+        public enum CoreUpdateState
+        {
+            Operational,
+
+            Maintenance,
+
+            Unknown
+        }
 
         public const string VersionCheckURL = "http://api.joduska.me/public/deploy/loader/version";
 
@@ -59,17 +65,6 @@ namespace LeagueSharp.Loader.Class
         public static string UpdateZip = Path.Combine(Directories.CoreDirectory, "update.zip");
 
         public static bool Updating = false;
-
-        public delegate void RepositoriesUpdateDelegate(List<string> list);
-
-        public enum CoreUpdateState
-        {
-            Operational,
-
-            Maintenance,
-
-            Unknown
-        }
 
         public static Tuple<bool, string> CheckLoaderVersion()
         {
@@ -103,8 +98,8 @@ namespace LeagueSharp.Loader.Class
                 {
                     client.Timeout = TimeSpan.FromSeconds(5);
                     var response =
-                        await client.GetAsync(
-                            "https://raw.githubusercontent.com/LeagueSharp/LeagueSharp.Loader/master/Updates/BlockedRepositories.txt");
+                        await
+                        client.GetAsync("https://raw.githubusercontent.com/LeagueSharp/LeagueSharp.Loader/master/Updates/BlockedRepositories.txt");
 
                     if (response.IsSuccessStatusCode)
                     {
@@ -161,54 +156,35 @@ namespace LeagueSharp.Loader.Class
                 return true;
             }
 
-            var coreMd5 = Utility.Md5Checksum(Directories.CoreFilePath);
-            var leagueMd5 = Utility.Md5Checksum(path);
-            var wr = WebRequest.Create(string.Format(CoreVersionCheckURL, leagueMd5));
-            wr.Timeout = 5000;
-            wr.Method = "GET";
-            var response = await wr.GetResponseAsync();
+            try
+            {
+                if (!WebService.Client.IsAuthenticated)
+                {
+                    Utility.Log(LogStatus.Error, "IsSupported", "WebService authentication failed", Logs.MainLog);
+                    return false;
+                }
 
-            return await Task<bool>.Factory.StartNew(
-                () =>
-                    {
-                        try
-                        {
-                            using (var stream = response.GetResponseStream())
-                            {
-                                if (stream != null)
-                                {
-                                    var ser = new DataContractJsonSerializer(typeof(UpdateInfo));
-                                    var updateInfo = (UpdateInfo)ser.ReadObject(stream);
+                var leagueChecksum = Utility.Md5Checksum(path);
+                var coreChecksum = Utility.Md5Checksum(Directories.CoreFilePath);
+                var core = WebService.Client.Core(leagueChecksum);
 
-                                    if (updateInfo.version != "0" && updateInfo.version == coreMd5)
-                                    {
-                                        return true;
-                                    }
-                                }
-                            }
-                        }
-                        catch (WebException)
-                        {
-                            return true; // still try to inject, even if service is down
-                        }
-                        catch (WebSocketException)
-                        {
-                            return true; // still try to inject, even if service is down
-                        }
-                        catch (SocketException)
-                        {
-                            return true; // still try to inject, even if service is down
-                        }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine(e);
-                        }
+                if (core == null)
+                {
+                    Utility.Log(LogStatus.Error, "IsSupported", "Failed to receive Core version from WebService", Logs.MainLog);
+                    return false;
+                }
 
-                        return false;
-                    });
+                return core.HashCore == coreChecksum;
+            }
+            catch (Exception e)
+            {
+                Utility.Log(LogStatus.Error, "IsSupported", e.Message, Logs.MainLog);
+            }
+
+            return false;
         }
 
-        public static async Task<UpdateResponse> UpdateCore(string leagueOfLegendsFilePath, bool showMessages)
+        public static async Task<UpdateResponse> UpdateCore(string path, bool showMessages)
         {
             if (Directory.Exists(Path.Combine(Directories.CurrentDirectory, "iwanttogetbanned")))
             {
@@ -217,78 +193,66 @@ namespace LeagueSharp.Loader.Class
 
             try
             {
-                var leagueMd5 = Utility.Md5Checksum(leagueOfLegendsFilePath);
-                var wr = WebRequest.Create(string.Format(CoreVersionCheckURL, leagueMd5));
-                wr.Timeout = 5000;
-                wr.Method = "GET";
-                var response = await wr.GetResponseAsync();
-
-                using (var stream = response.GetResponseStream())
+                if (!WebService.Client.IsAuthenticated)
                 {
-                    if (stream != null)
+                    Utility.Log(LogStatus.Error, "UpdateCore", "WebService authentication failed", Logs.MainLog);
+                    return new UpdateResponse(CoreUpdateState.Unknown, "WebService authentication failed");
+                }
+
+                var leagueChecksum = Utility.Md5Checksum(path);
+                var coreChecksum = Utility.Md5Checksum(Directories.CoreFilePath);
+                var core = WebService.Client.Core(leagueChecksum);
+
+                if (core == null)
+                {
+                    return new UpdateResponse(
+                        CoreUpdateState.Maintenance,
+                        Utility.GetMultiLanguageText("WrongVersion") + Environment.NewLine + leagueChecksum);
+                }
+
+                if (core.HashCore != coreChecksum && (core.Url.StartsWith("https://github.com/joduskame/") || core.Url.StartsWith("https://github.com/LeagueSharp/")))
+                {
+                    try
                     {
-                        var ser = new DataContractJsonSerializer(typeof(UpdateInfo));
-                        var updateInfo = (UpdateInfo)ser.ReadObject(stream);
+                        var result = CoreUpdateState.Unknown;
 
-                        if (updateInfo.version == "0")
+                        await Application.Current.Dispatcher.Invoke(
+                            async () =>
+                                {
+                                    var window = new UpdateWindow(UpdateAction.Core, core.Url);
+                                    window.Show();
+
+                                    if (await window.Update())
+                                    {
+                                        result = CoreUpdateState.Operational;
+                                    }
+                                });
+
+                        return new UpdateResponse(result, Utility.GetMultiLanguageText("UpdateSuccess"));
+                    }
+                    catch (Exception e)
+                    {
+                        var message = Utility.GetMultiLanguageText("FailedToDownload") + e;
+
+                        if (showMessages)
                         {
-                            var message = Utility.GetMultiLanguageText("WrongVersion") + leagueMd5;
-
-                            if (showMessages)
-                            {
-                                MessageBox.Show(message);
-                            }
-
-                            return new UpdateResponse(CoreUpdateState.Maintenance, message);
+                            MessageBox.Show(message);
                         }
 
-                        if (updateInfo.version != Utility.Md5Checksum(Directories.CoreFilePath) && (
-                            updateInfo.url.StartsWith("https://github.com/joduskame/") || 
-                            updateInfo.url.StartsWith("https://github.com/LeagueSharp/")))
+                        return new UpdateResponse(CoreUpdateState.Unknown, message);
+                    }
+                    finally
+                    {
+                        if (File.Exists(UpdateZip))
                         {
-                            try
-                            {
-                                var result = CoreUpdateState.Unknown;
-
-                                await Application.Current.Dispatcher.Invoke(
-                                    async () =>
-                                        {
-                                            var window = new UpdateWindow(UpdateAction.Core, updateInfo.url);
-                                            window.Show();
-
-                                            if (await window.Update())
-                                            {
-                                                result = CoreUpdateState.Operational;
-                                            }
-                                        });
-
-                                return new UpdateResponse(result, Utility.GetMultiLanguageText("UpdateSuccess"));
-                            }
-                            catch (Exception e)
-                            {
-                                var message = Utility.GetMultiLanguageText("FailedToDownload") + e;
-
-                                if (showMessages)
-                                {
-                                    MessageBox.Show(message);
-                                }
-
-                                return new UpdateResponse(CoreUpdateState.Unknown, message);
-                            }
-                            finally
-                            {
-                                if (File.Exists(UpdateZip))
-                                {
-                                    File.Delete(UpdateZip);
-                                }
-                            }
+                            File.Delete(UpdateZip);
                         }
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                return new UpdateResponse(CoreUpdateState.Unknown, Utility.GetMultiLanguageText("UpdateUnknown"));
+                Utility.Log(LogStatus.Error, "UpdateCore", e.Message, Logs.MainLog);
             }
 
             return new UpdateResponse(CoreUpdateState.Operational, Utility.GetMultiLanguageText("NotUpdateNeeded"));

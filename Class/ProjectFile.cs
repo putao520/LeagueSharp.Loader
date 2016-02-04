@@ -92,8 +92,6 @@ namespace LeagueSharp.Loader.Class
                 }
 
                 this.Project.Save();
-
-                Utility.Log(LogStatus.Ok, "ProjectFile", $"File Updated - {this.Project.FullPath}", this.log);
             }
             catch (Exception ex)
             {

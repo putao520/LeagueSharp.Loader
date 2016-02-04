@@ -18,14 +18,13 @@
 
 #endregion
 
-using LeagueSharp.Loader.Data.Assemblies;
-
 namespace LeagueSharp.Loader.Class
 {
     #region
 
     using System.Collections.ObjectModel;
     using System.ComponentModel;
+    using System.Runtime.CompilerServices;
 
     #endregion
 
@@ -46,7 +45,7 @@ namespace LeagueSharp.Loader.Class
             set
             {
                 this._installedAssemblies = value;
-                this.OnPropertyChanged("InstalledAssemblies");
+                this.OnPropertyChanged();
             }
         }
 
@@ -59,16 +58,13 @@ namespace LeagueSharp.Loader.Class
             set
             {
                 this._name = value;
-                this.OnPropertyChanged("Name");
+                this.OnPropertyChanged();
             }
         }
 
-        public void OnPropertyChanged(string propertyName)
+        public void OnPropertyChanged([CallerMemberName]string propertyName = null)
         {
-            if (this.PropertyChanged != null)
-            {
-                this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

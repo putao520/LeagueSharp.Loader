@@ -475,7 +475,7 @@
                               CanUserAddRows="False"
                               AutoGenerateColumns="False"
                               ContextMenuOpening="InstalledAssembliesDataGrid_OnContextMenuOpening"
-                              ItemsSource="{Binding Config.allDbAssemblies, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+                              ItemsSource="{Binding Config.DatabaseAssemblies, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                               AllowDrop="True"
                               SelectionMode="Extended"
                               PreviewMouseLeftButtonDown="InstalledAssembliesDataGrid_PreviewMouseLeftButtonDown"

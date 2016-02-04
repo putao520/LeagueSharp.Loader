@@ -25,10 +25,13 @@ namespace LeagueSharp.Loader.Class.Installer
     using System.IO;
     using System.Linq;
     using System.Text.RegularExpressions;
+    using System.Threading.Tasks;
 
     using LeagueSharp.Loader.Data;
 
     using Newtonsoft.Json;
+
+    using PlaySharp.Service.Model;
 
     public class DependencyInstaller
     {
@@ -66,6 +69,35 @@ namespace LeagueSharp.Loader.Class.Installer
             return Cache.Any(d => d.Name == name);
         }
 
+        public async Task<bool> SatisfyAsync()
+        {
+            var successful = true;
+
+            foreach (var project in this.Projects)
+            {
+                try
+                {
+                    var projectReferences = this.ParseReferences(project);
+                    var missingReferences = projectReferences.Where(r => this.IsKnown(r) && !this.IsInstalled(r)).Select(r => Cache.First(d => r == d.Name));
+
+                    foreach (var dependency in missingReferences)
+                    {
+                        if (!await dependency.InstallAsync().ConfigureAwait(true))
+                        {
+                            successful = false;
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    successful = false;
+                    Console.WriteLine(e);
+                }
+            }
+
+            return successful;
+        }
+
         public bool Satisfy()
         {
             var successful = true;
@@ -101,11 +133,7 @@ namespace LeagueSharp.Loader.Class.Installer
 
             try
             {
-                using (var client = new WebClientEx())
-                {
-                    var json = client.DownloadString("http://nodeapi.joduska.me/loader2/assemblies/1");
-                    assemblies = JsonConvert.DeserializeObject<AssemblyResponse>(json).Data.Assemblies.Where(a => a.Type == 3).ToList();
-                }
+                assemblies = WebService.Client.Assemblies().Where(a => a.Type == 3).ToList();
             }
             catch (Exception e)
             {
@@ -135,16 +163,12 @@ namespace LeagueSharp.Loader.Class.Installer
 
                 using (var client = new WebClientEx())
                 {
+                    var dependency = Dependency.FromAssemblyEntry(assembly);
                     var content = client.DownloadString(project);
-                    var repositoryMatch = Regex.Match(assembly.GithubUrl, @"^(http[s]?)://(?<host>.*?)/(?<author>.*?)/(?<repo>.*?)(/{1}|$)");
                     var assemblyNameMatch = Regex.Match(content, "<AssemblyName>(?<name>.*?)</AssemblyName>");
+                    dependency.Name = assemblyNameMatch.Groups["name"].Value;
 
-                    var projectName = assembly.GithubUrl.Substring(assembly.GithubUrl.LastIndexOf("/") + 1);
-                    var assemblyName = assemblyNameMatch.Groups["name"].Value;
-                    var repositoryUrl =
-                        $"https://{repositoryMatch.Groups["host"]}/{repositoryMatch.Groups["author"]}/{repositoryMatch.Groups["repo"]}";
-
-                    return new Dependency { Repository = repositoryUrl, Project = projectName, Name = assemblyName };
+                    return dependency;
                 }
             }
             catch

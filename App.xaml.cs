@@ -143,54 +143,7 @@ namespace LeagueSharp.Loader
 
         private void ConfigInit()
         {
-            Utility.CreateFileFromResource(Directories.ConfigFilePath, "LeagueSharp.Loader.Resources.config.xml");
-
-            var configCorrupted = false;
-            try
-            {
-                Config.Instance = ((Config)Utility.MapXmlFileToClass(typeof(Config), Directories.ConfigFilePath));
-                
-            }
-            catch (Exception)
-            {
-                configCorrupted = true;
-            }
-
-            if (!configCorrupted)
-            {
-                try
-                {
-                    if (File.Exists(Directories.ConfigFilePath + ".bak"))
-                    {
-                        File.Delete(Directories.ConfigFilePath + ".bak");
-                    }
-                    File.Copy(Directories.ConfigFilePath, Directories.ConfigFilePath + ".bak");
-                    File.SetAttributes(Directories.ConfigFilePath + ".bak", FileAttributes.Hidden);
-                }
-                catch (Exception)
-                {
-                    //ignore
-                }
-            }
-            else
-            {
-                try
-                {
-                    Config.Instance =
-                        ((Config)Utility.MapXmlFileToClass(typeof(Config), Directories.ConfigFilePath + ".bak"));
-
-                    File.Delete(Directories.ConfigFilePath);
-                    File.Copy(Directories.ConfigFilePath + ".bak", Directories.ConfigFilePath);
-                    File.SetAttributes(Directories.ConfigFilePath, FileAttributes.Normal);
-                }
-                catch (Exception)
-                {
-                    File.Delete(Directories.ConfigFilePath + ".bak");
-                    File.Delete(Directories.ConfigFilePath);
-                    MessageBox.Show("Couldn't load config.xml.");
-                    Environment.Exit(0);
-                }
-            }
+            Config.Load();
 
             #region Add GameSetting DisableDrawings
 
@@ -325,7 +278,7 @@ namespace LeagueSharp.Loader
                     Config.Instance.RandomName = Utility.GetUniqueKey(6) + ".exe";
                     var filePath = Path.Combine(Directories.CurrentDirectory, "loader.exe");
                     var rndExePath = Path.Combine(Directories.CurrentDirectory, Config.Instance.RandomName);
-                    Utility.MapClassToXmlFile(typeof(Config), Config.Instance, Directories.ConfigFilePath);
+                    Config.Save();
 
                     File.Copy(filePath, rndExePath);
                     File.Copy(filePath + ".config", rndExePath + ".config");

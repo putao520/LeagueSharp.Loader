@@ -84,9 +84,9 @@ namespace LeagueSharp.Loader.Class
 
     public enum AssemblyType
     {
-        Library,
+        Library = 3,
 
-        Executable,
+        Executable = 1,
 
         Unknown,
     }

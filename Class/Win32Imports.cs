@@ -50,19 +50,5 @@ namespace LeagueSharp.Loader.Class
 
         [DllImport("kernel32.dll")]
         public static extern IntPtr LoadLibrary(string dllToLoad);
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto)]
-        public static extern IntPtr PostMessage(
-            IntPtr hWnd,
-            uint Msg,
-            IntPtr wParam,
-            ref Injection.COPYDATASTRUCT lParam);
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto)]
-        public static extern IntPtr SendMessage(
-            IntPtr hWnd,
-            uint Msg,
-            IntPtr wParam,
-            ref Injection.COPYDATASTRUCT lParam);
     }
 }

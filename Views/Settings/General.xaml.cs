@@ -137,8 +137,7 @@ namespace LeagueSharp.Loader.Views.Settings
 
             if (Config.Instance.SelectedLanguage != null)
             {
-                senderBox.SelectedItem =
-                    senderBox.Items.Cast<string>().FirstOrDefault(item => item == Config.Instance.SelectedLanguage);
+                senderBox.SelectedItem = senderBox.Items.Cast<string>().FirstOrDefault(item => item == Config.Instance.SelectedLanguage);
             }
 
             //English as default
@@ -193,7 +192,7 @@ namespace LeagueSharp.Loader.Views.Settings
 
         private void SaveConfig_Click(object sender, RoutedEventArgs e)
         {
-            Utility.MapClassToXmlFile(typeof(Config), Config.Instance, Directories.ConfigFilePath);
+            Config.Save(true);
         }
     }
 }

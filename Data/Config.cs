@@ -22,16 +22,22 @@ namespace LeagueSharp.Loader.Data
 {
     #region
 
+    using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.ComponentModel;
+    using System.Diagnostics;
+    using System.IO;
     using System.Runtime.CompilerServices;
     using System.Windows;
     using System.Windows.Input;
     using System.Xml.Serialization;
 
     using LeagueSharp.Loader.Class;
-    using LeagueSharp.Loader.Data.Assemblies;
+
+    using Newtonsoft.Json;
+
+    using PlaySharp.Service.Model;
 
     #endregion
 
@@ -39,12 +45,6 @@ namespace LeagueSharp.Loader.Data
     [XmlRoot(Namespace = "", IsNullable = false)]
     public class Config : INotifyPropertyChanged
     {
-        [XmlIgnore]
-        public static Config Instance;
-
-        [XmlIgnore]
-        private ObservableCollection<Assembly> _allDbAssemblies = new ObservableCollection<Assembly>();
-
         private string _appDirectory;
 
         private double _columnCheckWidth = 20;
@@ -85,6 +85,8 @@ namespace LeagueSharp.Loader.Data
 
         private List<string> blockedRepositories;
 
+        private ObservableCollection<AssemblyEntry> databaseAssemblies = new ObservableCollection<AssemblyEntry>();
+
         private bool enableDebug;
 
         private bool updateCoreOnInject = true;
@@ -100,15 +102,20 @@ namespace LeagueSharp.Loader.Data
         private double windowWidth = 800;
 
         [XmlIgnore]
-        public ObservableCollection<Assembly> allDbAssemblies
+        [JsonIgnore]
+        public static Config Instance { get; set; }
+
+        [XmlIgnore]
+        [JsonIgnore]
+        public ObservableCollection<AssemblyEntry> DatabaseAssemblies
         {
             get
             {
-                return this._allDbAssemblies;
+                return this.databaseAssemblies;
             }
             set
             {
-                this._allDbAssemblies = value;
+                this.databaseAssemblies = value;
                 this.OnPropertyChanged();
             }
         }
@@ -472,7 +479,124 @@ namespace LeagueSharp.Loader.Data
             }
         }
 
+        public string AuthKey { get; set; }
+
         public event PropertyChangedEventHandler PropertyChanged;
+
+        public static void SaveAndRestart()
+        {
+            Save(false);
+
+            var info = new ProcessStartInfo
+                {
+                    Arguments = "/C choice /C Y /N /D Y /T 1 & " + Path.Combine(Directories.CurrentDirectory, "loader.exe"),
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    CreateNoWindow = true,
+                    FileName = "cmd.exe"
+                };
+
+            Process.Start(info);
+            Environment.Exit(0);
+        }
+
+        public static void Save(bool cloud = false)
+        {
+            try
+            {
+                Utility.MapClassToXmlFile(typeof(Config), Instance, Directories.ConfigFilePath);
+
+                if (cloud && !string.IsNullOrEmpty(Instance.Username) && !string.IsNullOrEmpty(Instance.Password) && WebService.Client.IsAuthenticated)
+                {
+                    WebService.Client.CloudStore(Instance, "Config");
+                }
+            }
+            catch
+            {
+                MessageBox.Show(Utility.GetMultiLanguageText("ConfigWriteError"));
+            }
+        }
+
+        public static void Load()
+        {
+            Utility.CreateFileFromResource(Directories.ConfigFilePath, "LeagueSharp.Loader.Resources.config.xml");
+            var configCorrupted = false;
+
+            try
+            {
+                Instance = (Config)Utility.MapXmlFileToClass(typeof(Config), Directories.ConfigFilePath);
+            }
+            catch (Exception)
+            {
+                configCorrupted = true;
+            }
+
+            if (!configCorrupted)
+            {
+                try
+                {
+                    if (File.Exists(Directories.ConfigFilePath + ".bak"))
+                    {
+                        File.Delete(Directories.ConfigFilePath + ".bak");
+                    }
+
+                    File.Copy(Directories.ConfigFilePath, Directories.ConfigFilePath + ".bak");
+                    File.SetAttributes(Directories.ConfigFilePath + ".bak", FileAttributes.Hidden);
+                }
+                catch (Exception)
+                {
+                    //ignore
+                }
+            }
+            else
+            {
+                try
+                {
+                    Instance = (Config)Utility.MapXmlFileToClass(typeof(Config), Directories.ConfigFilePath + ".bak");
+
+                    File.Delete(Directories.ConfigFilePath);
+                    File.Copy(Directories.ConfigFilePath + ".bak", Directories.ConfigFilePath);
+                    File.SetAttributes(Directories.ConfigFilePath, FileAttributes.Normal);
+                }
+                catch (Exception)
+                {
+                    File.Delete(Directories.ConfigFilePath + ".bak");
+                    File.Delete(Directories.ConfigFilePath);
+                    MessageBox.Show("Couldn't load config.xml.");
+                    Environment.Exit(0);
+                }
+            }
+
+            try
+            {
+                if (Instance.FirstRun && 
+                    !string.IsNullOrEmpty(Instance.Username) && 
+                    !string.IsNullOrEmpty(Instance.Password) && 
+                    WebService.Client.Login(Instance.Username, Instance.Password))
+                {
+                    var configContent = WebService.Client.Cloud("Config");
+
+                    if (!string.IsNullOrEmpty(configContent))
+                    {
+                        var config = JsonConvert.DeserializeObject<Config>(configContent);
+
+                        if (config != null)
+                        {
+                            config.Username = Instance.Username;
+                            config.Password = Instance.Password;
+                            config.AuthKey = WebService.Client.LoginData.Token;
+
+                            Instance = config;
+                        }
+                    }
+
+                    Instance.FirstRun = false;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
 
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
@@ -495,18 +619,15 @@ namespace LeagueSharp.Loader.Data
             set
             {
                 this._gameSettings = value;
-                this.OnPropertyChanged("GameSettings");
+                this.OnPropertyChanged();
             }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private void OnPropertyChanged(string propertyName)
+        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            if (this.PropertyChanged != null)
-            {
-                this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 
@@ -519,13 +640,8 @@ namespace LeagueSharp.Loader.Data
         private string _selectedValue;
 
         [XmlIgnore]
-        public string DisplayName
-        {
-            get
-            {
-                return Utility.GetMultiLanguageText(this._name);
-            }
-        }
+        [JsonIgnore]
+        public string DisplayName => Utility.GetMultiLanguageText(this._name);
 
         public string Name
         {
@@ -536,7 +652,7 @@ namespace LeagueSharp.Loader.Data
             set
             {
                 this._name = value;
-                this.OnPropertyChanged("Name");
+                this.OnPropertyChanged();
             }
         }
 
@@ -549,7 +665,7 @@ namespace LeagueSharp.Loader.Data
             set
             {
                 this._posibleValues = value;
-                this.OnPropertyChanged("PosibleValues");
+                this.OnPropertyChanged();
             }
         }
 
@@ -562,18 +678,15 @@ namespace LeagueSharp.Loader.Data
             set
             {
                 this._selectedValue = value;
-                this.OnPropertyChanged("SelectedValue");
+                this.OnPropertyChanged();
             }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private void OnPropertyChanged(string propertyName)
+        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            if (this.PropertyChanged != null)
-            {
-                this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 
@@ -598,12 +711,9 @@ namespace LeagueSharp.Loader.Data
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private void OnPropertyChanged(string propertyName)
+        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            if (this.PropertyChanged != null)
-            {
-                this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 
@@ -617,13 +727,7 @@ namespace LeagueSharp.Loader.Data
 
         public string Description { get; set; }
 
-        public string DisplayDescription
-        {
-            get
-            {
-                return Utility.GetMultiLanguageText(this.Description);
-            }
-        }
+        public string DisplayDescription => Utility.GetMultiLanguageText(this.Description);
 
         public Key Hotkey
         {
@@ -634,7 +738,7 @@ namespace LeagueSharp.Loader.Data
             set
             {
                 this._hotkey = value;
-                this.OnPropertyChanged("Hotkey");
+                this.OnPropertyChanged();
                 this.OnPropertyChanged("HotkeyString");
             }
         }
@@ -665,13 +769,7 @@ namespace LeagueSharp.Loader.Data
             }
         }
 
-        public string HotkeyString
-        {
-            get
-            {
-                return this._hotkey.ToString();
-            }
-        }
+        public string HotkeyString => this._hotkey.ToString();
 
         public string Name
         {
@@ -682,18 +780,15 @@ namespace LeagueSharp.Loader.Data
             set
             {
                 this._name = value;
-                this.OnPropertyChanged("Name");
+                this.OnPropertyChanged();
             }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private void OnPropertyChanged(string propertyName)
+        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            if (this.PropertyChanged != null)
-            {
-                this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

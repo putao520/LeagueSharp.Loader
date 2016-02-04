@@ -20,25 +20,24 @@
 
 namespace LeagueSharp.Loader.Class
 {
-    #region
-
     using System;
-    using System.Diagnostics;
-    using System.IO;
-    using System.Net;
-    using System.Text;
-    using System.Text.RegularExpressions;
+    using System.Net.Cache;
 
-    using LeagueSharp.Loader.Data;
+    using PlaySharp.Service;
 
-    #endregion
+    internal static class WebService
+    {
+        public static ServiceClient Client { get; }
+
+        static WebService()
+        {
+            Client = new ServiceClient();
+            Client.CacheLevel = HttpRequestCacheLevel.Default;
+        }
+    }
 
     internal static class Auth
     {
-        public const string AuthServer = "loader.joduska.me";
-
-        public static bool Authed { get; set; }
-
         public static string Hash(string input)
         {
             return Utility.Md5Hash(IPB_Clean_Password(input));
@@ -53,56 +52,17 @@ namespace LeagueSharp.Loader.Class
 
             try
             {
-                var data = "p=" + hash;
-                var dataBytes = Encoding.UTF8.GetBytes(data);
-
-                var wr = WebRequest.Create("https://" + AuthServer + "/login/" + WebUtility.UrlEncode(user));
-                wr.Timeout = 2000;
-                wr.ContentLength = dataBytes.Length;
-                wr.Method = "POST";
-                wr.ContentType = "application/x-www-form-urlencoded";
-
-                WebResponse response = null;
-
-                try
+                if (WebService.Client.Login(user, hash))
                 {
-                    var dataStream = wr.GetRequestStream();
-                    dataStream.Write(dataBytes, 0, dataBytes.Length);
-                    dataStream.Close();
-                    response = wr.GetResponse();
+                    return new Tuple<bool, string>(true, "Success");
                 }
-                catch (WebException ex)
-                {
-                    if ((int)((HttpWebResponse)ex.Response).StatusCode == 403)
-                    {
-                        return new Tuple<bool, string>(
-                            false,
-                            string.Format(Utility.GetMultiLanguageText("WrongAuth"), "www.joduska.me"));
-                    }
-                }
-
-                if (response?.GetResponseStream() != null)
-                {
-                    try
-                    {
-                        var passwordHash = new StreamReader(response.GetResponseStream()).ReadToEnd();
-                        if (Regex.IsMatch(passwordHash, "^[a-f0-9]{32}$"))
-                        {
-                            Config.Instance.Password = passwordHash;
-                        }
-                    }
-                    catch
-                    {
-                        //
-                    }
-                }
-
-                return new Tuple<bool, string>(true, "Success");
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                return new Tuple<bool, string>(true, "Fallback T_T");
+                return new Tuple<bool, string>(false, e.Message);
             }
+
+            return new Tuple<bool, string>(false, string.Format(Utility.GetMultiLanguageText("WrongAuth"), "www.joduska.me"));
         }
 
         private static string IPB_Clean_Password(string pass)

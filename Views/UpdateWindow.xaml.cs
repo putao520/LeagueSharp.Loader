@@ -146,30 +146,6 @@ namespace LeagueSharp.Loader.Views
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        private void SaveAndRestart()
-        {
-            try
-            {
-                Utility.MapClassToXmlFile(typeof(Config), Config.Instance, Directories.ConfigFilePath);
-            }
-            catch
-            {
-                MessageBox.Show(Utility.GetMultiLanguageText("ConfigWriteError"));
-            }
-
-            new Process
-                {
-                    StartInfo =
-                        {
-                            FileName = Updater.SetupFile,
-                            Arguments = "/VERYSILENT /DIR=\"" + Directories.CurrentDirectory + "\""
-                        }
-                }.Start();
-
-            Config.Instance.TosAccepted = false;
-            Environment.Exit(0);
-        }
-
         private async Task<bool> UpdateCore()
         {
             this.UpdateMessage = "Core " + this.FindResource("Updating");
@@ -238,7 +214,19 @@ namespace LeagueSharp.Loader.Views
                 }
             }
 
-            this.SaveAndRestart();
+            Config.Instance.TosAccepted = false;
+            Config.Save(true);
+
+            new Process
+            {
+                StartInfo =
+                        {
+                            FileName = Updater.SetupFile,
+                            Arguments = "/VERYSILENT /DIR=\"" + Directories.CurrentDirectory + "\""
+                        }
+            }.Start();
+
+            Environment.Exit(0);
 
             return true;
         }

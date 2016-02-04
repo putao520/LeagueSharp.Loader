@@ -158,26 +158,6 @@ namespace LeagueSharp.Loader.Class
             }
         }
 
-        public static void SendConfig(IntPtr wnd)
-        {
-            var str = string.Format(
-                "{0}{1}{2}{3}",
-                (Config.Instance.Settings.GameSettings[0].SelectedValue == "True") ? "1" : "0",
-                (Config.Instance.Settings.GameSettings[3].SelectedValue == "True") ? "1" : "0",
-                (Config.Instance.Settings.GameSettings[1].SelectedValue == "True") ? "1" : "0",
-                (Config.Instance.Settings.GameSettings[2].SelectedValue == "True") ? "2" : "0");
-
-            var lParam = new COPYDATASTRUCT { cbData = 2, dwData = str.Length * 2 + 2, lpData = str };
-            Win32Imports.SendMessage(wnd, 74U, IntPtr.Zero, ref lParam);
-        }
-
-        public static void SendLoginCredentials(IntPtr wnd, string user, string passwordHash)
-        {
-            var str = string.Format("LOGIN|{0}|{1}", user, passwordHash);
-            var lParam = new COPYDATASTRUCT { cbData = 2, dwData = str.Length * 2 + 2, lpData = str };
-            Win32Imports.SendMessage(wnd, 74U, IntPtr.Zero, ref lParam);
-        }
-
         public static void Unload()
         {
             if (bootstrapper != IntPtr.Zero)
@@ -273,7 +253,7 @@ namespace LeagueSharp.Loader.Class
                     writer.WriteArray(0, arr, 0, arr.Length);
                 }
 
-                bootstrapper = Win32Imports.LoadLibrary(PathRandomizer.LeagueSharpBootstrapDllPath);
+                bootstrapper = Win32Imports.LoadLibrary(Directories.BootstrapFilePath);
                 if (!(bootstrapper != IntPtr.Zero))
                 {
                     return;
@@ -311,16 +291,6 @@ namespace LeagueSharp.Loader.Class
             {
                 Console.WriteLine(e);
             }
-        }
-
-        public struct COPYDATASTRUCT
-        {
-            public int cbData;
-
-            public int dwData;
-
-            [MarshalAs(UnmanagedType.LPWStr)]
-            public string lpData;
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1, CharSet = CharSet.Unicode)]

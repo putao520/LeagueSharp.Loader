@@ -20,10 +20,17 @@
 
 namespace LeagueSharp.Loader.Class.Installer
 {
+    using System;
     using System.IO;
     using System.Linq;
+    using System.Text.RegularExpressions;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using System.Windows;
 
     using LeagueSharp.Loader.Data;
+
+    using PlaySharp.Service.Model;
 
     public class Dependency
     {
@@ -33,9 +40,59 @@ namespace LeagueSharp.Loader.Class.Installer
 
         public string Project { get; set; }
 
+        public string Description { get; set; }
+
+        public static Dependency FromAssemblyEntry(AssemblyEntry assembly)
+        {
+            try
+            {
+                var repositoryMatch = Regex.Match(assembly.GithubUrl, @"^(http[s]?)://(?<host>.*?)/(?<author>.*?)/(?<repo>.*?)(/{1}|$)");
+                var projectName = assembly.GithubUrl.Substring(assembly.GithubUrl.LastIndexOf("/") + 1);
+                var repositoryUrl = $"https://{repositoryMatch.Groups["host"]}/{repositoryMatch.Groups["author"]}/{repositoryMatch.Groups["repo"]}";
+
+                return new Dependency { Repository = repositoryUrl, Project = projectName, Name = assembly.Name, Description = assembly.Description };
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message);
+            }
+
+            return null;
+        }
+
         public override string ToString()
         {
             return $"{this.Name} - {this.Project} - {this.Repository}";
+        }
+
+        public async Task<bool> InstallAsync()
+        {
+            var updateResult = string.Empty;
+            var compileResult = false;
+
+            await Task.Factory.StartNew(() => { updateResult = GitUpdater.Update(this.Repository); });
+            if (string.IsNullOrEmpty(updateResult))
+            {
+                return false;
+            }
+
+            var fileSearchResult = Directory.EnumerateFiles(updateResult, this.Project, SearchOption.AllDirectories).FirstOrDefault();
+            if (string.IsNullOrEmpty(fileSearchResult))
+            {
+                return false;
+            }
+
+            var assembly = new LeagueSharpAssembly(this.Name, fileSearchResult, this.Repository) { Description = this.Description };
+
+            await Task.Factory.StartNew(() => { compileResult = assembly.Compile(); });
+            if (!compileResult)
+            {
+                return false;
+            }
+
+            Config.Instance.Profiles.First().InstalledAssemblies.Add(assembly);
+
+            return true;
         }
 
         public bool Install()
@@ -52,7 +109,7 @@ namespace LeagueSharp.Loader.Class.Installer
                 return false;
             }
 
-            var assembly = new LeagueSharpAssembly(this.Name, fileSearchResult, this.Repository);
+            var assembly = new LeagueSharpAssembly(this.Name, fileSearchResult, this.Repository) { Description = this.Description };
 
             var compileResult = assembly.Compile();
             if (!compileResult)
@@ -60,7 +117,7 @@ namespace LeagueSharp.Loader.Class.Installer
                 return false;
             }
 
-            Config.Instance.SelectedProfile.InstalledAssemblies.Add(assembly);
+            Config.Instance.Profiles.First().InstalledAssemblies.Add(assembly);
 
             return true;
         }

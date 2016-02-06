@@ -172,7 +172,7 @@ namespace LeagueSharp.Loader.Views
                     {
                         if (update)
                         {
-                            var updateList = leagueSharpAssemblies.GroupBy(a => a.SvnUrl).Select(g => g.First());
+                            var updateList = leagueSharpAssemblies.GroupBy(a => a.SvnUrl).Select(g => g.First()).ToList();
 
                             Parallel.ForEach(
                                 updateList,
@@ -189,8 +189,15 @@ namespace LeagueSharp.Loader.Views
                         }
                     });
 
-            var di = new DependencyInstaller(leagueSharpAssemblies.Select(a => a.PathToProjectFile));
-            await di.SatisfyAsync();
+            try
+            {
+                var di = new DependencyInstaller(leagueSharpAssemblies.Select(a => a.PathToProjectFile).ToList());
+                await di.SatisfyAsync();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
 
             await Task.Factory.StartNew(
                 () =>

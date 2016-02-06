@@ -86,8 +86,15 @@ namespace LeagueSharp.Loader.Views
         {
             var amount = this.FoundAssemblies.Count(a => a.InstallChecked);
 
-            var di = new DependencyInstaller(this.FoundAssemblies.Select(a => a.PathToProjectFile));
-            di.Satisfy();
+            try
+            {
+                var di = new DependencyInstaller(this.FoundAssemblies.Select(a => a.PathToProjectFile).ToList());
+                di.Satisfy();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
 
             foreach (var assembly in this.FoundAssemblies.ToArray())
             {

@@ -39,7 +39,7 @@ namespace LeagueSharp.Loader
     {
         private Mutex _mutex;
 
-        private string[] args;
+        public static string[] Args { get; set; }
 
         private bool createdNew;
 
@@ -51,7 +51,7 @@ namespace LeagueSharp.Loader
             }
 
             this._mutex = new Mutex(true, Utility.Md5Hash(Environment.UserName), out this.createdNew);
-            this.args = e.Args;
+            Args = e.Args;
 
             #region Remove the old loader
 
@@ -256,7 +256,7 @@ namespace LeagueSharp.Loader
 
                         if (!this.createdNew)
                         {
-                            if (this.args.Length > 0)
+                            if (Args.Length > 0)
                             {
                                 var loader =
                                     Process.GetProcessesByName(
@@ -264,7 +264,7 @@ namespace LeagueSharp.Loader
 
                                 if (loader != null && loader.MainWindowHandle != IntPtr.Zero)
                                 {
-                                    Clipboard.SetText(this.args[0]);
+                                    Clipboard.SetText(Args[0]);
                                     ShowWindow(loader.MainWindowHandle, 5);
                                     SetForegroundWindow(loader.MainWindowHandle);
                                 }

@@ -97,6 +97,11 @@ namespace LeagueSharp.Loader.Class
                 {
                     using (var repo = new Repository(directory))
                     {
+                        if (repo.Head == null)
+                        {
+                            return false;
+                        }
+
                         if (repo.Info.IsHeadDetached)
                         {
                             return false;
@@ -128,6 +133,8 @@ namespace LeagueSharp.Loader.Class
             {
                 using (var repo = new Repository(directory))
                 {
+                    Utility.Log(LogStatus.Info, "Pull", directory, Logs.MainLog);
+
                     repo.Reset(ResetMode.Hard);
                     repo.RemoveUntrackedFiles();
                     repo.Network.Pull(
@@ -167,9 +174,11 @@ namespace LeagueSharp.Loader.Class
             {
                 if (Directory.Exists(directory))
                 {
+                    Utility.ClearDirectory(directory);
                     Directory.Delete(directory, true);
                 }
 
+                Utility.Log(LogStatus.Info, "Clone", url, Logs.MainLog);
                 Repository.Clone(url, directory);
                 return true;
             }
@@ -200,6 +209,8 @@ namespace LeagueSharp.Loader.Class
             if (!pullResult)
             {
                 Utility.Log(LogStatus.Error, "Updater", $"Failed to Pull Updates - {url}", Logs.MainLog);
+
+                Clone(url, root);
             }
 
             return root;

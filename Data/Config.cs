@@ -645,9 +645,12 @@ namespace LeagueSharp.Loader.Data
 
         public static void Load()
         {
-            if (LoadFromCloud())
+            if (App.Args.Length == 0)
             {
-                return;
+                if (LoadFromCloud())
+                {
+                    return;
+                }
             }
 
             if (LoadFromFile())

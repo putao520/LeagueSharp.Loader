@@ -21,6 +21,7 @@
 namespace LeagueSharp.Loader.Class.Installer
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Text.RegularExpressions;
@@ -82,6 +83,9 @@ namespace LeagueSharp.Loader.Class.Installer
                 return false;
             }
 
+            var di = new DependencyInstaller(new List<string> { fileSearchResult });
+            await di.SatisfyAsync();
+
             var assembly = new LeagueSharpAssembly(this.Name, fileSearchResult, this.Repository) { Description = this.Description };
 
             await Task.Factory.StartNew(() => { compileResult = assembly.Compile(); });
@@ -108,6 +112,9 @@ namespace LeagueSharp.Loader.Class.Installer
             {
                 return false;
             }
+
+            var di = new DependencyInstaller(new List<string> { fileSearchResult });
+            di.Satisfy();
 
             var assembly = new LeagueSharpAssembly(this.Name, fileSearchResult, this.Repository) { Description = this.Description };
 

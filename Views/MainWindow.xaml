@@ -27,13 +27,13 @@
 
             <Button>
                 <StackPanel Orientation="Horizontal">
-                    <Rectangle Width="18" Height="18" Fill="White" Visibility="Collapsed" x:Name="icon_connected">
+                    <Rectangle Width="18" Height="18" Fill="White" Visibility="Collapsed" x:Name="icon_connected" ToolTip="Successfully Injected">
                         <Rectangle.OpacityMask>
                             <VisualBrush Stretch="Fill" Visual="{StaticResource icon_connected}" />
                         </Rectangle.OpacityMask>
                     </Rectangle>
 
-                    <Rectangle Width="18" Height="18" Fill="White" Visibility="Visible" x:Name="icon_disconnected">
+                    <Rectangle Width="18" Height="18" Fill="White" Visibility="Visible" x:Name="icon_disconnected" ToolTip="Not Injected">
                         <Rectangle.OpacityMask>
                             <VisualBrush Stretch="Fill" Visual="{StaticResource icon_disconnected}" />
                         </Rectangle.OpacityMask>

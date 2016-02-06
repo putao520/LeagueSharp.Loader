@@ -40,14 +40,14 @@ namespace LeagueSharp.Loader.Class.Installer
             UpdateReferenceCache();
         }
 
-        public DependencyInstaller(IEnumerable<string> projects)
+        public DependencyInstaller(List<string> projects)
         {
             this.Projects = projects;
         }
 
         public static List<Dependency> Cache { get; set; } = new List<Dependency>();
 
-        public IEnumerable<string> Projects { get; set; }
+        public IReadOnlyList<string> Projects { get; set; }
 
         private bool IsInstalled(string name)
         {
@@ -56,7 +56,7 @@ namespace LeagueSharp.Loader.Class.Installer
                 throw new ArgumentNullException(nameof(name));
             }
 
-            return File.Exists(Path.Combine(Directories.CoreDirectory, $"{name}.dll"));
+            return Config.Instance.Profiles.First().InstalledAssemblies.Any(a => a.Name == name);
         }
 
         private bool IsKnown(string name)
@@ -82,7 +82,7 @@ namespace LeagueSharp.Loader.Class.Installer
 
                     foreach (var dependency in missingReferences)
                     {
-                        if (!await dependency.InstallAsync().ConfigureAwait(true))
+                        if (!await dependency.InstallAsync())
                         {
                             successful = false;
                         }

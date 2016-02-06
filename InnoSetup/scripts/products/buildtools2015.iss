@@ -10,14 +10,25 @@ de.buildtools2015_size=24,5 MB
 [Code]
 const
 	buildtools2015_url = 'http://download.microsoft.com/download/E/E/D/EEDF18A8-4AED-4CE0-BEBE-70A83094FC5A/BuildTools_Full.exe';
-	buildtools2015_productcode = '{D1437F51-786A-4F57-A99C-F8E94FBA1BD8}';
+	
+var 
+    missing: Boolean;
 
 procedure buildtools2015();
 begin
-		if (not msiproduct(buildtools2015_productcode)) then
+		missing := True;
+		
+		if msiproduct('{D1437F51-786A-4F57-A99C-F8E94FBA1BD8}') or msiproduct('{477F7BAD-67AD-4E4F-B704-4AF4F44CB9BD}') or msiproduct('{2BDE4E1E-FE85-471C-8419-35CC61408E27}') then 
+		begin
+			missing := False;
+		end;
+
+		if (missing) then
+		begin
 			AddProduct('BuildTools_Full.exe', '/passive /norestart',
 				CustomMessage('buildtools2015_title'),
 				CustomMessage('buildtools2015_size'),
 				buildtools2015_url,
 				false, false);
+		end;
 end;

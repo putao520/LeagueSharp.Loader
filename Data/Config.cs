@@ -555,6 +555,7 @@ namespace LeagueSharp.Loader.Data
                     return false;
                 }
 
+                config.RandomName = Instance.RandomName;
                 config.Username = Instance.Username;
                 config.Password = Instance.Password;
                 config.AuthKey = WebService.Client.LoginData.Token;

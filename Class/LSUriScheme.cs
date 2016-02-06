@@ -105,6 +105,8 @@ namespace LeagueSharp.Loader.Class
                             ((MainWindow)window).ShowTextMessage(
                                 Utility.GetMultiLanguageText("Installer"),
                                 Utility.GetMultiLanguageText("SuccessfullyInstalled"));
+
+                            Config.Save(true);
                         }
                         break;
                 }

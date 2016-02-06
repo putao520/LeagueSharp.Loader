@@ -485,6 +485,7 @@ namespace LeagueSharp.Loader.Data
 
         public static void SaveAndRestart()
         {
+            Instance.FirstRun = false;
             Save(false);
 
             var info = new ProcessStartInfo
@@ -516,86 +517,155 @@ namespace LeagueSharp.Loader.Data
             }
         }
 
+        private static bool LoadFromCloud()
+        {
+            try
+            {
+                try
+                {
+                    if (File.Exists(Directories.ConfigFilePath))
+                    {
+                        Instance = (Config)Utility.MapXmlFileToClass(typeof(Config), Directories.ConfigFilePath);
+                    }
+                }
+                catch
+                {
+                    // load error
+                }
+
+                if (string.IsNullOrEmpty(Instance?.Username) || string.IsNullOrEmpty(Instance?.Password))
+                {
+                    return false;
+                }
+
+                if (!WebService.Client.Login(Instance.Username, Instance.Password))
+                {
+                    return false;
+                }
+
+                var configContent = WebService.Client.Cloud("Config");
+                if (string.IsNullOrEmpty(configContent))
+                {
+                    return false;
+                }
+
+                var config = JsonConvert.DeserializeObject<Config>(configContent);
+                if (config == null)
+                {
+                    return false;
+                }
+
+                config.Username = Instance.Username;
+                config.Password = Instance.Password;
+                config.AuthKey = WebService.Client.LoginData.Token;
+                Instance = config;
+
+                Save(false);
+
+                return true;
+            }
+            catch
+            {
+                // ignored
+            }
+
+            return false;
+        }
+
+        private static bool LoadFromBackup()
+        {
+            try
+            {
+                if (!File.Exists($"{Directories.ConfigFilePath}.bak"))
+                {
+                    return false;
+                }
+
+                Instance = (Config)Utility.MapXmlFileToClass(typeof(Config), $"{Directories.ConfigFilePath}.bak");
+                Save(false);
+
+                return true;
+            }
+            catch
+            {
+                File.Delete($"{Directories.ConfigFilePath}.bak");
+            }
+
+            return false;
+        }
+
+        private static bool LoadFromResource()
+        {
+            try
+            {
+                Utility.CreateFileFromResource(Directories.ConfigFilePath, "LeagueSharp.Loader.Resources.config.xml");
+                Instance = (Config)Utility.MapXmlFileToClass(typeof(Config), Directories.ConfigFilePath);
+                Save(false);
+
+                return true;
+            }
+            catch
+            {
+                // ignored
+            }
+
+            return false;
+        }
+
+        private static bool LoadFromFile()
+        {
+            try
+            {
+                if (!File.Exists(Directories.ConfigFilePath))
+                {
+                    return false;
+                }
+
+                Instance = (Config)Utility.MapXmlFileToClass(typeof(Config), Directories.ConfigFilePath);
+                var backupFile = $"{Directories.ConfigFilePath}.bak";
+
+                if (File.Exists(backupFile))
+                {
+                    File.Delete(backupFile);
+                }
+
+                File.Copy(Directories.ConfigFilePath, backupFile);
+                File.SetAttributes(backupFile, FileAttributes.Hidden);
+
+                return true;
+            }
+            catch
+            {
+                //ignore
+            }
+
+            return false;
+        }
+
         public static void Load()
         {
-            Utility.CreateFileFromResource(Directories.ConfigFilePath, "LeagueSharp.Loader.Resources.config.xml");
-            var configCorrupted = false;
-
-            try
+            if (LoadFromCloud())
             {
-                Instance = (Config)Utility.MapXmlFileToClass(typeof(Config), Directories.ConfigFilePath);
-            }
-            catch (Exception)
-            {
-                configCorrupted = true;
+                return;
             }
 
-            if (!configCorrupted)
+            if (LoadFromFile())
             {
-                try
-                {
-                    if (File.Exists(Directories.ConfigFilePath + ".bak"))
-                    {
-                        File.Delete(Directories.ConfigFilePath + ".bak");
-                    }
-
-                    File.Copy(Directories.ConfigFilePath, Directories.ConfigFilePath + ".bak");
-                    File.SetAttributes(Directories.ConfigFilePath + ".bak", FileAttributes.Hidden);
-                }
-                catch (Exception)
-                {
-                    //ignore
-                }
-            }
-            else
-            {
-                try
-                {
-                    Instance = (Config)Utility.MapXmlFileToClass(typeof(Config), Directories.ConfigFilePath + ".bak");
-
-                    File.Delete(Directories.ConfigFilePath);
-                    File.Copy(Directories.ConfigFilePath + ".bak", Directories.ConfigFilePath);
-                    File.SetAttributes(Directories.ConfigFilePath, FileAttributes.Normal);
-                }
-                catch (Exception)
-                {
-                    File.Delete(Directories.ConfigFilePath + ".bak");
-                    File.Delete(Directories.ConfigFilePath);
-                    MessageBox.Show("Couldn't load config.xml.");
-                    Environment.Exit(0);
-                }
+                return;
             }
 
-            try
+            if (LoadFromBackup())
             {
-                if (Instance.FirstRun && 
-                    !string.IsNullOrEmpty(Instance.Username) && 
-                    !string.IsNullOrEmpty(Instance.Password) && 
-                    WebService.Client.Login(Instance.Username, Instance.Password))
-                {
-                    var configContent = WebService.Client.Cloud("Config");
-
-                    if (!string.IsNullOrEmpty(configContent))
-                    {
-                        var config = JsonConvert.DeserializeObject<Config>(configContent);
-
-                        if (config != null)
-                        {
-                            config.Username = Instance.Username;
-                            config.Password = Instance.Password;
-                            config.AuthKey = WebService.Client.LoginData.Token;
-
-                            Instance = config;
-                        }
-                    }
-
-                    Instance.FirstRun = false;
-                }
+                return;
             }
-            catch (Exception e)
+
+            if (LoadFromResource())
             {
-                Console.WriteLine(e);
+                return;
             }
+
+            MessageBox.Show("Something went horribly wrong while loading your Configuration /ff");
+            Environment.Exit(0);
         }
 
         private void OnPropertyChanged([CallerMemberName] string propertyName = null)

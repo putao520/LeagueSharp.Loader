@@ -271,19 +271,54 @@ namespace LeagueSharp.Loader.Views
 
         public async void ShowTextMessage(string title, string message)
         {
-            var visibility = this.Browser.Visibility;
             this.Browser.Visibility = Visibility.Hidden;
+            this.TosBrowser.Visibility = Visibility.Hidden;
+
             await this.ShowMessageAsync(title, message);
-            this.Browser.Visibility = (visibility == Visibility.Hidden) ? Visibility.Hidden : Visibility.Visible;
+
+            this.Browser.Visibility = Visibility.Visible;
+            this.TosBrowser.Visibility = Visibility.Visible;
+        }
+
+        private void TosButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            this.Browser.Visibility = Visibility.Hidden;
+
+            this.TosBrowser.Navigate("http://api.joduska.me/public/tos");
+            this.MainTabControl.SelectedIndex = 1;
+            this.TosBrowser.Visibility = Visibility.Visible;
+        }
+
+        private void NewsButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            this.TosBrowser.Visibility = Visibility.Hidden;
+
+            this.Browser.Navigate("http://api.joduska.me/public/news/html");
+            this.MainTabControl.SelectedIndex = 1;
+            this.Browser.Visibility = Visibility.Visible;
         }
 
         private void AssemblyButton_OnClick(object sender, RoutedEventArgs e)
         {
+            this.Browser.Visibility = Visibility.Hidden;
+            this.TosBrowser.Visibility = Visibility.Hidden;
+
             this.MainTabControl.SelectedIndex = 2;
+        }
+
+        private void SettingsButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            this.Browser.Visibility = Visibility.Hidden;
+            this.TosBrowser.Visibility = Visibility.Hidden;
+
+            this.MainTabControl.SelectedIndex = 3;
         }
 
         private async void AssemblyDBButton_OnClick(object sender, RoutedEventArgs e)
         {
+            this.Browser.Visibility = Visibility.Hidden;
+            this.TosBrowser.Visibility = Visibility.Hidden;
+
             try
             {
                 if (Config.Instance.DatabaseAssemblies?.Count == 0)
@@ -297,6 +332,27 @@ namespace LeagueSharp.Loader.Views
             }
 
             this.MainTabControl.SelectedIndex = 4;
+        }
+
+        private async void StatusButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            this.Browser.Visibility = Visibility.Hidden;
+            this.TosBrowser.Visibility = Visibility.Hidden;
+
+            await this.CheckForUpdates(true, true, true);
+        }
+
+        private void TosAccept_Click(object sender, RoutedEventArgs e)
+        {
+            Config.Instance.TosAccepted = true;
+            this.RightWindowCommands.Visibility = Visibility.Visible;
+            this.NewsButton_OnClick(null, null);
+        }
+
+        private void TosDecline_Click(object sender, RoutedEventArgs e)
+        {
+            this.MainWindow_OnClosing(null, null);
+            Environment.Exit(0);
         }
 
         private void BaseDataGrid_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
@@ -403,10 +459,11 @@ namespace LeagueSharp.Loader.Views
             if (!Config.Instance.TosAccepted)
             {
                 this.RightWindowCommands.Visibility = Visibility.Collapsed;
+                this.TosButton_OnClick(null, null);
             }
             else
             {
-                this.MainTabControl.SelectedIndex = 1;
+                this.AssemblyButton_OnClick(null, null);
             }
 
             // wait for tos accept
@@ -913,19 +970,13 @@ namespace LeagueSharp.Loader.Views
             Config.Instance.SelectedProfile = Config.Instance.Profiles.Last();
         }
 
-        private void NewsButton_OnClick(object sender, RoutedEventArgs e)
-        {
-            this.MainTabControl.SelectedIndex = 1;
-        }
+
 
         private void OnLogin(string username)
         {
             Utility.Log(LogStatus.Ok, "Login", $"Succesfully signed in as {username}", Logs.MainLog);
             this.Browser.Visibility = Visibility.Visible;
             this.TosBrowser.Visibility = Visibility.Visible;
-
-            this.Browser.Navigate("http://api.joduska.me/public/news/html");
-            this.TosBrowser.Navigate("http://api.joduska.me/public/tos");
         }
 
         private void InitSystem()
@@ -1026,10 +1077,7 @@ namespace LeagueSharp.Loader.Views
             this.Focus();
         }
 
-        private void SettingsButton_OnClick(object sender, RoutedEventArgs e)
-        {
-            this.MainTabControl.SelectedIndex = 3;
-        }
+
 
         private void ShareItem_OnClick(object sender, RoutedEventArgs e)
         {
@@ -1159,10 +1207,7 @@ namespace LeagueSharp.Loader.Views
             }
         }
 
-        private async void StatusButton_OnClick(object sender, RoutedEventArgs e)
-        {
-            await this.CheckForUpdates(true, true, true);
-        }
+
 
         private void TextBoxBase_OnTextChanged(object sender, TextChangedEventArgs e)
         {
@@ -1193,20 +1238,6 @@ namespace LeagueSharp.Loader.Views
                         return true;
                     }
                 };
-        }
-
-        private void TosAccept_Click(object sender, RoutedEventArgs e)
-        {
-            Config.Instance.TosAccepted = true;
-            this.MainTabControl.SelectedIndex = 1;
-            this.RightWindowCommands.Visibility = Visibility.Visible;
-            this.TosBrowser.Visibility = Visibility.Collapsed;
-        }
-
-        private void TosDecline_Click(object sender, RoutedEventArgs e)
-        {
-            this.MainWindow_OnClosing(null, null);
-            Environment.Exit(0);
         }
 
         private void TrayIcon_OnTrayLeftMouseUp(object sender, RoutedEventArgs e)

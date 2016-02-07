@@ -1,6 +1,6 @@
 ﻿#region LICENSE
 
-// Copyright 2015-2015 LeagueSharp.Loader
+// Copyright 2016-2016 LeagueSharp.Loader
 // App.xaml.cs is part of LeagueSharp.Loader.
 // 
 // LeagueSharp.Loader is free software: you can redistribute it and/or modify
@@ -28,6 +28,7 @@ namespace LeagueSharp.Loader
     using System.Reflection;
     using System.Runtime.InteropServices;
     using System.Threading;
+    using System.Threading.Tasks;
     using System.Windows;
 
     using LeagueSharp.Loader.Class;
@@ -35,39 +36,42 @@ namespace LeagueSharp.Loader
 
     using MahApps.Metro;
 
+    using NBug;
+
     public partial class App
     {
-        private Mutex _mutex;
-
-        public static string[] Args { get; set; }
+        private Mutex mutex;
 
         private bool createdNew;
 
+        public static string[] Args { get; set; }
+
         protected override void OnStartup(StartupEventArgs e)
         {
+            AppDomain.CurrentDomain.UnhandledException += Handler.UnhandledException;
+            Current.DispatcherUnhandledException += Handler.DispatcherUnhandledException;
+            TaskScheduler.UnobservedTaskException += Handler.UnobservedTaskException;
+
             if (File.Exists(Updater.SetupFile))
             {
                 Thread.Sleep(1000);
             }
 
-            this._mutex = new Mutex(true, Utility.Md5Hash(Environment.UserName), out this.createdNew);
+            this.mutex = new Mutex(true, Utility.Md5Hash(Environment.UserName), out this.createdNew);
             Args = e.Args;
 
             #region Remove the old loader
 
             try
             {
-                if (string.Compare(
-                    Process.GetCurrentProcess().ProcessName,
-                    "LeagueSharp.Loader.exe",
-                    StringComparison.InvariantCultureIgnoreCase) != 0
-                    && File.Exists(Path.Combine(Directories.CurrentDirectory, "LeagueSharp.Loader.exe")))
+                if (string.Compare(Process.GetCurrentProcess().ProcessName, "LeagueSharp.Loader.exe", StringComparison.InvariantCultureIgnoreCase)
+                    != 0 && File.Exists(Path.Combine(Directories.CurrentDirectory, "LeagueSharp.Loader.exe")))
                 {
                     File.Delete(Path.Combine(Directories.CurrentDirectory, "LeagueSharp.Loader.exe"));
                     File.Delete(Path.Combine(Directories.CurrentDirectory, "LeagueSharp.Loader.exe.config"));
                 }
             }
-            catch (Exception ex)
+            catch
             {
                 //ignore
             }
@@ -85,10 +89,7 @@ namespace LeagueSharp.Loader
 
             if (Config.Instance.SelectedColor != null)
             {
-                ThemeManager.ChangeAppStyle(
-                    Current,
-                    ThemeManager.GetAccent(Config.Instance.SelectedColor),
-                    ThemeManager.GetAppTheme("BaseLight"));
+                ThemeManager.ChangeAppStyle(Current, ThemeManager.GetAccent(Config.Instance.SelectedColor), ThemeManager.GetAppTheme("BaseLight"));
             }
 
             base.OnStartup(e);
@@ -114,9 +115,7 @@ namespace LeagueSharp.Loader
                         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                         "LeagueSharp" + Environment.UserName.GetHashCode().ToString("X"));
 
-                    var oldPath2 = Path.Combine(
-                        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                        "LeagueSharp");
+                    var oldPath2 = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "LeagueSharp");
 
                     if (Directory.Exists(oldPath))
                     {
@@ -133,7 +132,7 @@ namespace LeagueSharp.Loader
                     }
                 }
             }
-            catch (Exception ex)
+            catch
             {
                 //ignore
             }
@@ -150,23 +149,13 @@ namespace LeagueSharp.Loader
             if (Config.Instance.Settings.GameSettings.All(x => x.Name != "Show Drawings"))
             {
                 Config.Instance.Settings.GameSettings.Add(
-                    new GameSettings
-                        {
-                            Name = "Show Drawings",
-                            PosibleValues = new List<string> { "True", "False" },
-                            SelectedValue = "True"
-                        });
+                    new GameSettings { Name = "Show Drawings", PosibleValues = new List<string> { "True", "False" }, SelectedValue = "True" });
             }
 
             if (Config.Instance.Settings.GameSettings.All(x => x.Name != "Show Ping"))
             {
                 Config.Instance.Settings.GameSettings.Add(
-                    new GameSettings
-                        {
-                            Name = "Show Ping",
-                            PosibleValues = new List<string> { "True", "False" },
-                            SelectedValue = "True"
-                        });
+                    new GameSettings { Name = "Show Ping", PosibleValues = new List<string> { "True", "False" }, SelectedValue = "True" });
             }
 
             if (Config.Instance.Settings.GameSettings.All(x => x.Name != "Send Anonymous Assembly Statistics"))
@@ -202,8 +191,7 @@ namespace LeagueSharp.Loader
                             SvnUrl = "https://github.com/LeagueSharp/LeagueSharp.SDK",
                             InjectChecked = true,
                             InstallChecked = true,
-                            PathToProjectFile =
-                                Path.Combine(Directories.RepositoryDir, "8443D874", "trunk", "LeagueSharp.SDK.csproj")
+                            PathToProjectFile = Path.Combine(Directories.RepositoryDir, "8443D874", "trunk", "LeagueSharp.SDK.csproj")
                         };
 
                     sdk.Update();
@@ -224,8 +212,7 @@ namespace LeagueSharp.Loader
         {
             #region Executable Randomization
 
-            if (Assembly.GetExecutingAssembly().Location.EndsWith("loader.exe")
-                || Assembly.GetExecutingAssembly().Location.EndsWith("Loader.exe"))
+            if (Assembly.GetExecutingAssembly().Location.EndsWith("loader.exe") || Assembly.GetExecutingAssembly().Location.EndsWith("Loader.exe"))
             {
                 try
                 {
@@ -233,34 +220,35 @@ namespace LeagueSharp.Loader
                     {
                         try
                         {
-                            var oldFile = Path.Combine(Directories.CurrentDirectory, Config.Instance.RandomName);
-                            var oldConfigFile = Path.Combine(
-                                AppDomain.CurrentDomain.BaseDirectory,
-                                Config.Instance.RandomName + ".config");
 
-                            if (File.Exists(oldFile))
+                            if (File.Exists(Directories.AssemblyFile))
                             {
-                                File.SetAttributes(oldFile, FileAttributes.Normal);
-                                File.Delete(oldFile);
+                                File.SetAttributes(Directories.AssemblyFile, FileAttributes.Normal);
+                                File.Delete(Directories.AssemblyFile);
                             }
 
-                            if (File.Exists(oldConfigFile))
+                            if (File.Exists(Directories.AssemblyPdbFile))
                             {
-                                File.SetAttributes(oldConfigFile, FileAttributes.Normal);
-                                File.Delete(oldConfigFile);
+                                File.SetAttributes(Directories.AssemblyPdbFile, FileAttributes.Normal);
+                                File.Delete(Directories.AssemblyPdbFile);
+                            }
+
+                            if (File.Exists(Directories.AssemblyConfigFile))
+                            {
+                                File.SetAttributes(Directories.AssemblyConfigFile, FileAttributes.Normal);
+                                File.Delete(Directories.AssemblyConfigFile);
                             }
                         }
                         catch
                         {
+                            // ignored
                         }
 
                         if (!this.createdNew)
                         {
                             if (Args.Length > 0)
                             {
-                                var loader =
-                                    Process.GetProcessesByName(
-                                        Path.GetFileNameWithoutExtension(Config.Instance.RandomName)).FirstOrDefault();
+                                var loader = Process.GetProcessesByName(Config.Instance.RandomName).FirstOrDefault();
 
                                 if (loader != null && loader.MainWindowHandle != IntPtr.Zero)
                                 {
@@ -270,19 +258,27 @@ namespace LeagueSharp.Loader
                                 }
                             }
 
-                            this._mutex = null;
+                            this.mutex = null;
                             Environment.Exit(0);
                         }
                     }
 
-                    Config.Instance.RandomName = Utility.GetUniqueKey(6) + ".exe";
-                    var filePath = Path.Combine(Directories.CurrentDirectory, "loader.exe");
-                    var rndExePath = Path.Combine(Directories.CurrentDirectory, Config.Instance.RandomName);
-                    Config.Save();
+                    try
+                    {
+                        Config.Instance.RandomName = Utility.GetUniqueKey(6);
+                        Config.Save();
 
-                    File.Copy(filePath, rndExePath);
-                    File.Copy(filePath + ".config", rndExePath + ".config");
-                    Process.Start(rndExePath);
+                        File.Copy(Path.Combine(Directories.CurrentDirectory, "loader.exe"), Directories.AssemblyFile);
+                        File.Copy(Path.Combine(Directories.CurrentDirectory, "loader.pdb"), Directories.AssemblyPdbFile);
+                        File.Copy(Path.Combine(Directories.CurrentDirectory, "loader.exe.config"), Directories.AssemblyConfigFile);
+
+                        Process.Start(Directories.AssemblyFile);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                    }
+
                     Environment.Exit(0);
                 }
                 catch (Exception)
@@ -301,26 +297,23 @@ namespace LeagueSharp.Loader
 
                         Views.MainWindow.Instance?.TrayIcon?.Dispose();
 
-                        if (this._mutex != null && this.createdNew)
+                        if (this.mutex != null && this.createdNew)
                         {
-                            this._mutex.ReleaseMutex();
+                            this.mutex.ReleaseMutex();
                         }
                     }
                     catch
                     {
+                        // ignored
                     }
 
                     if (!Assembly.GetExecutingAssembly().Location.EndsWith("loader.exe"))
                     {
-                        var oldConfigFile = Path.Combine(
-                            AppDomain.CurrentDomain.BaseDirectory,
-                            Config.Instance.RandomName + ".config");
+
 
                         var info = new ProcessStartInfo
                             {
-                                Arguments =
-                                    "/C choice /C Y /N /D Y /T 1 & Del " + Assembly.GetExecutingAssembly().Location + " "
-                                    + oldConfigFile,
+                                Arguments = "/C choice /C Y /N /D Y /T 1 & Del \"" + Directories.AssemblyFile + "\" \"" + Directories.AssemblyConfigFile + "\" \"" + Directories.AssemblyPdbFile + "\"",
                                 WindowStyle = ProcessWindowStyle.Hidden,
                                 CreateNoWindow = true,
                                 FileName = "cmd.exe"
@@ -339,9 +332,7 @@ namespace LeagueSharp.Loader
 
             if (Config.Instance.SelectedLanguage != null)
             {
-                dict.Source = new Uri(
-                    "..\\Resources\\Language\\" + Config.Instance.SelectedLanguage + ".xaml",
-                    UriKind.Relative);
+                dict.Source = new Uri("..\\Resources\\Language\\" + Config.Instance.SelectedLanguage + ".xaml", UriKind.Relative);
             }
             else
             {

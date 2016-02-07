@@ -54,5 +54,11 @@ namespace LeagueSharp.Loader.Data
         public static readonly string RepositoryDir = Path.Combine(AppDataDirectory, "Repositories") + "\\";
 
         public static readonly string SandboxFilePath = Path.Combine(CoreDirectory, "LeagueSharp.Sandbox.dll");
+
+        public static string AssemblyFile => Path.Combine(CurrentDirectory, $"{Config.Instance?.RandomName}.exe");
+
+        public static string AssemblyConfigFile => Path.Combine(CurrentDirectory, $"{Config.Instance?.RandomName}.exe.config");
+
+        public static string AssemblyPdbFile => Path.Combine(CurrentDirectory, $"{Config.Instance?.RandomName}.pdb");
     }
 }

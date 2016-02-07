@@ -416,12 +416,12 @@
                             <DataGridTextColumn x:Name="ColumnVersion" Header="{DynamicResource ColumnVersion}"
                                                 Width="{Binding Config.ColumnVersionWidth, UpdateSourceTrigger=PropertyChanged}"
                                                 Binding="{Binding Version}" IsReadOnly="True" />
-                            <DataGridTextColumn x:Name="ColumnLocation" Header="{DynamicResource ColumnLocation}"
-                                                Width="{Binding Config.ColumnLocationWidth, UpdateSourceTrigger=PropertyChanged}"
-                                                Binding="{Binding Location}" IsReadOnly="True" />
                             <DataGridTextColumn x:Name="ColumnDescription" Header="{DynamicResource ColumnDescription}"
                                                 Width="*"
                                                 Binding="{Binding Description, UpdateSourceTrigger=PropertyChanged}" />
+                            <DataGridTextColumn x:Name="ColumnLocation" Header="{DynamicResource ColumnLocation}"
+                                                Width="{Binding Config.ColumnLocationWidth, UpdateSourceTrigger=PropertyChanged}"
+                                                Binding="{Binding Location}" IsReadOnly="True" />
                         </DataGrid.Columns>
                     </DataGrid>
                     <ContentControl Style="{StaticResource LoadSharedProfilesButtonStyle}"/>

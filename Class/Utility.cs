@@ -29,6 +29,7 @@ namespace LeagueSharp.Loader.Class
     using System.Security.Cryptography;
     using System.Text;
     using System.Text.RegularExpressions;
+    using System.Threading;
     using System.Windows.Forms;
     using System.Xml.Serialization;
 
@@ -37,6 +38,24 @@ namespace LeagueSharp.Loader.Class
     using Application = System.Windows.Application;
 
     #endregion
+
+    static class ListExtensions
+    {
+        private static readonly Random Rng = new Random();
+
+        public static void ShuffleRandom<T>(this IList<T> list)
+        {
+            var n = list.Count;
+            while (n > 1)
+            {
+                n--;
+                var k = Rng.Next(n + 1);
+                var value = list[k];
+                list[k] = list[n];
+                list[n] = value;
+            }
+        }
+    }
 
     public class Utility
     {

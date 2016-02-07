@@ -163,9 +163,7 @@ namespace LeagueSharp.Loader.Views.Settings
             }
 
             Config.Instance.SelectedLanguage = selected;
-            ((MainWindow)this.DataContext).MainWindow_OnClosing(null, null);
-            Process.Start(Application.ResourceAssembly.Location);
-            Environment.Exit(0);
+            Config.SaveAndRestart(true);
         }
 
         private void GameSettingsDataGrid_OnMouseDoubleClick(object sender, MouseButtonEventArgs e)

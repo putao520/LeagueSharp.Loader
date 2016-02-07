@@ -32,7 +32,6 @@ Source: "..\bin\Release\NativeBinaries\amd64\*.dll"; DestDir: "{app}\bin\NativeB
 Source: "..\bin\Release\System\*.dll"; DestDir: "{app}\System\"; Flags: ignoreversion
 Source: "..\tools\sn.exe"; DestDir: "{app}\System\"; Flags: ignoreversion
 Source: "..\Resources\key.snk"; DestDir: "{app}\System\"; Flags: ignoreversion
-Source: "..\translations\*.xml"; DestDir: "{app}\translations\"; Flags: ignoreversion
 
 [Languages]
 Name: "en"; MessagesFile: "compiler:Default.isl"

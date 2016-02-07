@@ -37,7 +37,10 @@ namespace LeagueSharp.Loader.Class
     using System.Net;
     using System.Net.Http;
     using System.ServiceModel.Security;
+    using System.Text.RegularExpressions;
     using System.Threading.Tasks;
+
+    using PlaySharp.Service.Model;
 
     #endregion
 
@@ -70,7 +73,18 @@ namespace LeagueSharp.Loader.Class
                 foreach (var projectFile in projectFiles)
                 {
                     var name = Path.GetFileNameWithoutExtension(projectFile);
-                    foundAssemblies.Add(new LeagueSharpAssembly(name, projectFile, url));
+                    var assembly = new LeagueSharpAssembly(name, projectFile, url);
+
+                    var entry = Config.Instance.DatabaseAssemblies?.FirstOrDefault(a => a.Name == name)
+                                ?? Config.Instance.DatabaseAssemblies?.FirstOrDefault(a => Path.GetFileNameWithoutExtension(a.GithubUrl) == name);
+
+                    if (entry != null)
+                    {
+                        assembly.Description = entry.Description;
+                        assembly.DisplayName = entry.Name;
+                    }
+
+                    foundAssemblies.Add(assembly);
                 }
             }
             catch (Exception e)
@@ -201,6 +215,23 @@ namespace LeagueSharp.Loader.Class
                 }
 
                 return this.pathToBinary;
+            }
+        }
+
+        public static LeagueSharpAssembly FromAssemblyEntry(AssemblyEntry entry)
+        {
+            try
+            {
+                var repositoryMatch = Regex.Match(entry.GithubUrl, @"^(http[s]?)://(?<host>.*?)/(?<author>.*?)/(?<repo>.*?)(/{1}|$)");
+                var repositoryUrl = $"https://{repositoryMatch.Groups["host"]}/{repositoryMatch.Groups["author"]}/{repositoryMatch.Groups["repo"]}";
+                var repositoryDirectory = Path.Combine(Directories.RepositoryDir, repositoryUrl.GetHashCode().ToString("X"), "trunk");
+                var path = Path.Combine(repositoryDirectory, entry.GithubUrl.Replace(repositoryUrl, "").Replace("/blob/master/", "").Replace("/", "\\"));
+
+                return new LeagueSharpAssembly(entry.Name, path, repositoryUrl);
+            }
+            catch
+            {
+                return null;
             }
         }
 

@@ -483,10 +483,10 @@ namespace LeagueSharp.Loader.Data
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public static void SaveAndRestart()
+        public static void SaveAndRestart(bool cloud = false)
         {
             Instance.FirstRun = false;
-            Save(false);
+            Save(cloud);
 
             var info = new ProcessStartInfo
                 {

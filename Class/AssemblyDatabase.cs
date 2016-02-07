@@ -21,14 +21,14 @@
 namespace LeagueSharp.Loader.Class
 {
     using System;
-    using System.Collections.ObjectModel;
+    using System.Collections.Generic;
     using System.Linq;
 
     using PlaySharp.Service.Model;
 
     internal class AssemblyDatabase
     {
-        public static ObservableCollection<AssemblyEntry> GetAssemblies()
+        public static List<AssemblyEntry> GetAssemblies()
         {
             try
             {
@@ -36,7 +36,7 @@ namespace LeagueSharp.Loader.Class
 
                 if (assemblies != null)
                 {
-                    return new ObservableCollection<AssemblyEntry>(assemblies.OrderBy(a => a.Name));
+                    return assemblies.ToList();
                 }
             }
             catch (Exception e)

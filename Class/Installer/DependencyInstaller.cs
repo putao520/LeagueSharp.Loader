@@ -56,7 +56,7 @@ namespace LeagueSharp.Loader.Class.Installer
                 throw new ArgumentNullException(nameof(name));
             }
 
-            return Config.Instance.Profiles.First().InstalledAssemblies.Any(a => a.Name == name);
+            return Config.Instance.Profiles.First().InstalledAssemblies.Any(a => Path.GetFileNameWithoutExtension(a.PathToBinary) == name);
         }
 
         private bool IsKnown(string name)
@@ -83,35 +83,6 @@ namespace LeagueSharp.Loader.Class.Installer
                     foreach (var dependency in missingReferences)
                     {
                         if (!await dependency.InstallAsync())
-                        {
-                            successful = false;
-                        }
-                    }
-                }
-                catch (Exception e)
-                {
-                    successful = false;
-                    Console.WriteLine(e);
-                }
-            }
-
-            return successful;
-        }
-
-        public bool Satisfy()
-        {
-            var successful = true;
-
-            foreach (var project in this.Projects)
-            {
-                try
-                {
-                    var projectReferences = this.ParseReferences(project);
-                    var missingReferences = projectReferences.Where(r => this.IsKnown(r) && !this.IsInstalled(r)).Select(r => Cache.First(d => r == d.Name));
-
-                    foreach (var dependency in missingReferences)
-                    {
-                        if (!dependency.Install())
                         {
                             successful = false;
                         }

@@ -39,6 +39,8 @@ namespace LeagueSharp.Loader.Class
     using LeagueSharp.Loader.Data;
     using LeagueSharp.Loader.Views;
 
+    using PlaySharp.Service.Model;
+
     #endregion
 
     internal class Updater
@@ -295,6 +297,27 @@ namespace LeagueSharp.Loader.Class
 
             [DataMember]
             internal string version;
+        }
+
+        public static async Task UpdateWebService()
+        {
+            try
+            {
+                var assemblies = new ObservableCollection<AssemblyEntry>();
+
+                await Task.Factory.StartNew(
+                    () =>
+                        {
+                            assemblies = new ObservableCollection<AssemblyEntry>(AssemblyDatabase.GetAssemblies());
+                            assemblies.ShuffleRandom();
+                        });
+
+                Config.Instance.DatabaseAssemblies = assemblies;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
         }
     }
 }

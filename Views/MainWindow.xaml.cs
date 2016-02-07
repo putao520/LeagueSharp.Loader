@@ -49,6 +49,8 @@ namespace LeagueSharp.Loader.Views
 
     using PlaySharp.Service.Model;
 
+    using RestSharp.Extensions.MonoHttp;
+
     public partial class MainWindow : INotifyPropertyChanged
     {
         public BackgroundWorker AssembliesWorker = new BackgroundWorker();
@@ -76,6 +78,13 @@ namespace LeagueSharp.Loader.Views
         public delegate Point GetPosition(IInputElement element);
 
         public event PropertyChangedEventHandler PropertyChanged;
+
+        public static MainWindow Instance { get; private set; }
+
+        public MainWindow()
+        {
+            Instance = this;
+        }
 
         public bool CheckingForUpdates
         {
@@ -159,11 +168,6 @@ namespace LeagueSharp.Loader.Views
             bool update,
             bool compile)
         {
-            if (this.Working)
-            {
-                return;
-            }
-
             this.Working = true;
             var leagueSharpAssemblies = assemblies as IList<LeagueSharpAssembly> ?? assemblies.ToList();
 
@@ -204,7 +208,12 @@ namespace LeagueSharp.Loader.Views
                     {
                         if (compile)
                         {
-                            foreach (var assembly in leagueSharpAssemblies.OrderBy(a => a.Type))
+                            var list =
+                                leagueSharpAssemblies.OrderByDescending(a => a.Type == AssemblyType.Library)
+                                                     .ThenByDescending(a => a.Name.StartsWith("LeagueSharp."))
+                                                     .ToList();
+
+                            foreach (var assembly in list)
                             {
                                 assembly.Compile();
 
@@ -223,7 +232,7 @@ namespace LeagueSharp.Loader.Views
                 () =>
                     {
                         ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
-                        this.Working = false;
+                        
                         if (this.AssembliesWorkerCancelled)
                         {
                             this.Close();
@@ -256,6 +265,8 @@ namespace LeagueSharp.Loader.Views
                     }
                 }
             }
+
+            this.Working = false;
         }
 
         public async void ShowTextMessage(string title, string message)
@@ -271,23 +282,21 @@ namespace LeagueSharp.Loader.Views
             this.MainTabControl.SelectedIndex = 2;
         }
 
-        private void AssemblyDBButton_OnClick(object sender, RoutedEventArgs e)
+        private async void AssemblyDBButton_OnClick(object sender, RoutedEventArgs e)
         {
-            if (Config.Instance.DatabaseAssemblies.Count == 0)
+            try
             {
-                var assemblies = AssemblyDatabase.GetAssemblies();
-
-                if (assemblies != null)
+                if (Config.Instance.DatabaseAssemblies?.Count == 0)
                 {
-                    Config.Instance.DatabaseAssemblies = assemblies;
-                }
-                else
-                {
-                    Config.Instance.DatabaseAssemblies.Add(new AssemblyEntry { Name = "ERROR", Description = "Please try again later, we seem to have trouble!" });
+                    await Updater.UpdateWebService();
                 }
             }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+            }
 
-          this.MainTabControl.SelectedIndex = 4;
+            this.MainTabControl.SelectedIndex = 4;
         }
 
         private void BaseDataGrid_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
@@ -384,6 +393,7 @@ namespace LeagueSharp.Loader.Views
             await this.CheckForUpdates(false, true, false);
             await Updater.UpdateBlockedRepos();
             await Updater.UpdateRepositories();
+            await Updater.UpdateWebService();
             Utility.Log(LogStatus.Info, "Bootstrap", "Update Complete", Logs.MainLog);
 
             #endregion
@@ -714,7 +724,7 @@ namespace LeagueSharp.Loader.Views
             if (selectedAssembly.SvnUrl != "")
             {
                 var window = new InstallerWindow { Owner = this };
-                window.ListAssemblies(selectedAssembly.SvnUrl, true);
+                window.ShowProgress(selectedAssembly.SvnUrl, true);
                 window.ShowDialog();
             }
         }
@@ -1257,40 +1267,34 @@ namespace LeagueSharp.Loader.Views
             await this.PrepareAssemblies(this.InstalledAssembliesDataGrid.SelectedItems.Cast<LeagueSharpAssembly>(), true, true);
         }
 
-        static string GetParentUriString(Uri uri)
-        {
-            return uri.AbsoluteUri.Remove(uri.AbsoluteUri.Length - uri.Segments.Last().Length);
-        }
-
-        private void InstallFromDbItem_OnClick(object sender, RoutedEventArgs e)
+        private async void InstallFromDbItem_OnClick(object sender, RoutedEventArgs e)
         {
             if (this.AssembliesDBDataGrid.SelectedItems.Count == 0)
             {
                 return;
             }
 
-            var assemblies = this.AssembliesDBDataGrid.SelectedItems.Cast<AssemblyEntry>().ToList();
-
-            try
+            foreach (var result in this.AssembliesDBDataGrid.SelectedItems.Cast<AssemblyEntry>())
             {
-                foreach (var assembly in assemblies)
+                if (this.Config.SelectedProfile.InstalledAssemblies.Any(a => a.Name == HttpUtility.UrlDecode(result.Name)))
                 {
-                    Dependency.FromAssemblyEntry(assembly)?.Install();
+                    await this.ShowMessageAsync("Installer", $"{result.Name} is already installed");
+                    continue;
                 }
 
-                this.ShowTextMessage(Utility.GetMultiLanguageText("Installer"), Utility.GetMultiLanguageText("SuccessfullyInstalled"));
-            }
-            catch (Exception exception)
-            {
-                Console.WriteLine(exception);
+                await InstallerWindow.InstallAssembly(result, false);
+                //await Application.Current.Dispatcher.InvokeAsync(() => InstallerWindow.InstallAssembly(result, false));
             }
         }
 
         private void DBTextBoxBase_OnTextChanged(object sender, TextChangedEventArgs e)
         {
-            var searchText = this.DBSearchTextBox.Text;
+            var searchText = this.DBSearchTextBox.Text.Replace("*", "(.*)");
             var view = CollectionViewSource.GetDefaultView(Config.Instance.DatabaseAssemblies);
-            searchText = searchText.Replace("*", "(.*)");
+            if (view == null)
+            {
+                return;
+            }
 
             view.Filter = obj =>
                 {

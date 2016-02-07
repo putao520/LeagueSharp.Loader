@@ -299,6 +299,8 @@ namespace LeagueSharp.Loader
                         Utility.ClearDirectory(Directories.AssembliesDir);
                         Utility.ClearDirectory(Directories.LogsDir);
 
+                        Views.MainWindow.Instance?.TrayIcon?.Dispose();
+
                         if (this._mutex != null && this.createdNew)
                         {
                             this._mutex.ReleaseMutex();

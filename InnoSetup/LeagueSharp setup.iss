@@ -17,7 +17,7 @@ DisableStartupPrompt=yes
 DisableFinishedPage=yes
 Uninstallable=no
 OutputDir=Output\
-OutputBaseFilename=LeagueSharp-update
+OutputBaseFilename=LeagueSharp-update-{#MyAppVersion}
 PrivilegesRequired=admin
 
 [Files]

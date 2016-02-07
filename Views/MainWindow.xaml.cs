@@ -137,6 +137,8 @@ namespace LeagueSharp.Loader.Views
 
         public void MainWindow_OnClosing(object sender, CancelEventArgs e)
         {
+            this.Hide();
+
             if (this.AssembliesWorker.IsBusy && e != null)
             {
                 this.AssembliesWorker.CancelAsync();

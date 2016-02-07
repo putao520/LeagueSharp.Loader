@@ -285,7 +285,7 @@ namespace LeagueSharp.Loader.Views
             this.Browser.Visibility = Visibility.Hidden;
 
             this.TosBrowser.Navigate("http://api.joduska.me/public/tos");
-            this.MainTabControl.SelectedIndex = 1;
+            this.MainTabControl.SelectedIndex = 0;
             this.TosBrowser.Visibility = Visibility.Visible;
         }
 

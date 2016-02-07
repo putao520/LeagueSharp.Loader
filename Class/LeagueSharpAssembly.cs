@@ -71,7 +71,7 @@ namespace LeagueSharp.Loader.Class
                     var name = Path.GetFileNameWithoutExtension(projectFile);
                     var assembly = new LeagueSharpAssembly(name, projectFile, url);
 
-                    if (string.IsNullOrEmpty(url))
+                    if (!string.IsNullOrEmpty(url))
                     {
                         var entry = Config.Instance.DatabaseAssemblies?.FirstOrDefault(a => a.Name == name)
                                     ?? Config.Instance.DatabaseAssemblies?.FirstOrDefault(a => Path.GetFileNameWithoutExtension(a.GithubUrl) == name);

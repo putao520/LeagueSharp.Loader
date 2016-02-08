@@ -46,12 +46,15 @@ namespace LeagueSharp.Loader
 
         public static string[] Args { get; set; }
 
-        protected override void OnStartup(StartupEventArgs e)
+        public App()
         {
             AppDomain.CurrentDomain.UnhandledException += Handler.UnhandledException;
             Current.DispatcherUnhandledException += Handler.DispatcherUnhandledException;
             TaskScheduler.UnobservedTaskException += Handler.UnobservedTaskException;
+        }
 
+        protected override void OnStartup(StartupEventArgs e)
+        {
             if (File.Exists(Updater.SetupFile))
             {
                 Thread.Sleep(1000);

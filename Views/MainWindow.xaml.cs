@@ -182,7 +182,7 @@ namespace LeagueSharp.Loader.Views
 
                             Parallel.ForEach(
                                 updateList,
-                                new ParallelOptions { MaxDegreeOfParallelism = 5 },
+                                new ParallelOptions { MaxDegreeOfParallelism = this.Config.Workers },
                                 (assembly, state) =>
                                     {
                                         assembly.Update();

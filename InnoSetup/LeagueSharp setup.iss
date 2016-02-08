@@ -8,7 +8,7 @@
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppId={#MyAppName}
-DefaultDirName="{src}\LeagueSharp"
+DefaultDirName="C:\Program Files (x86)\LeagueSharp"
 Compression=lzma2
 SolidCompression=yes
 DisableReadyPage=no
@@ -22,13 +22,13 @@ PrivilegesRequired=admin
 
 [Files]
 ;Loader
-Source: "..\bin\Release\loader.exe"; DestName: "loader.exe"; Excludes: *.vshost.exe; DestDir: {app}; Flags: ignoreversion
-Source: "..\bin\Release\loader.pdb"; DestName: "loader.pdb"; Excludes: *.vshost.exe; DestDir: {app}; Flags: ignoreversion
-Source: "..\bin\Release\loader.exe.config"; DestName: "loader.exe.config"; Excludes: *.vshost.exe.config;  DestDir: {app}; Flags: ignoreversion
-Source: "..\bin\Release\NBug.config"; DestName: "NBug.config"; Excludes: *.vshost.exe.config;  DestDir: {app}; Flags: ignoreversion
-Source: "..\bin\Release\*.dll"; DestDir: "{app}\bin\"; Flags: ignoreversion
-Source: "..\bin\Release\NativeBinaries\x86\*.dll"; DestDir: "{app}\bin\NativeBinaries\x86\"; Flags: ignoreversion
-Source: "..\bin\Release\NativeBinaries\amd64\*.dll"; DestDir: "{app}\bin\NativeBinaries\amd64\"; Flags: ignoreversion
+Source: "..\bin\Release\loader.exe"; 						DestDir: {app}; Flags: ignoreversion; Excludes: *.vshost.exe
+Source: "..\bin\Release\loader.pdb"; 						DestDir: {app}; Flags: ignoreversion
+Source: "..\bin\Release\loader.exe.config"; 				DestDir: {app}; Flags: ignoreversion
+Source: "..\bin\Release\NBug.config"; 						DestDir: "{app}\bin\"; Flags: ignoreversion
+Source: "..\bin\Release\*.dll"; 							DestDir: "{app}\bin\"; Flags: ignoreversion
+Source: "..\bin\Release\NativeBinaries\x86\*.dll"; 			DestDir: "{app}\bin\NativeBinaries\x86\"; Flags: ignoreversion
+Source: "..\bin\Release\NativeBinaries\amd64\*.dll"; 		DestDir: "{app}\bin\NativeBinaries\amd64\"; Flags: ignoreversion
 
 ;System
 Source: "..\bin\Release\System\*.dll"; DestDir: "{app}\System\"; Flags: ignoreversion

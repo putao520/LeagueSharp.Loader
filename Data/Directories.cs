@@ -26,6 +26,13 @@ namespace LeagueSharp.Loader.Data
 
     public static class Directories
     {
+        static Directories()
+        {
+            Directory.CreateDirectory(AssembliesDir);
+            Directory.CreateDirectory(RepositoryDir);
+            Directory.CreateDirectory(LogsDir);
+        }
+
         public static readonly string AppDataDirectory =
             Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),

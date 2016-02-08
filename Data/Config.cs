@@ -101,9 +101,24 @@ namespace LeagueSharp.Loader.Data
 
         private double windowWidth = 800;
 
+        private int workers = 5;
+
         [XmlIgnore]
         [JsonIgnore]
         public static Config Instance { get; set; }
+
+        public int Workers
+        {
+            get
+            {
+                return this.workers;
+            }
+            set
+            {
+                this.workers = value;
+                this.OnPropertyChanged();
+            }
+        }
 
         [XmlIgnore]
         [JsonIgnore]

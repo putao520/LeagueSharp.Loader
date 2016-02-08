@@ -73,13 +73,15 @@ begin
 				regVersion := -1;
 		NetFx45:
 			if (RegQueryDWordValue(HKLM, netfx11plus_reg + 'v4\Full' + lcid, 'Release', regVersion)) then begin
-				if (regVersion = 393295) or (regVersion = 393297) then
+				if (regVersion >= 394254) or (regVersion <= 394271) then
+					regVersion := 4 // 4.6.1
+				else if (regVersion >= 393295) or (regVersion <= 393297) then
 					regVersion := 3 // 4.6
-				else if (regVersion = 379893) or (regVersion = 381029) then
+				else if (regVersion >= 379893) then
 					regVersion := 2 // 4.5.2
-				else if (regVersion = 378675) or (regVersion = 378758) then
+				else if (regVersion >= 378675) or (regVersion <= 378758) then
 					regVersion := 1 // 4.5.1
-				else if (regVersion = 378389) then
+				else if (regVersion >= 378389) then
 					regVersion := 0 // 4.5.0
 				else
 					regVersion := -1;

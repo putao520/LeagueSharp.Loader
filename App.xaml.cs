@@ -312,8 +312,6 @@ namespace LeagueSharp.Loader
 
                     if (!Assembly.GetExecutingAssembly().Location.EndsWith("loader.exe"))
                     {
-
-
                         var info = new ProcessStartInfo
                             {
                                 Arguments = "/C choice /C Y /N /D Y /T 1 & Del \"" + Directories.AssemblyFile + "\" \"" + Directories.AssemblyConfigFile + "\" \"" + Directories.AssemblyPdbFile + "\"",

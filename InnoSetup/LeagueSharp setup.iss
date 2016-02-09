@@ -25,8 +25,9 @@ PrivilegesRequired=admin
 Source: "..\bin\Release\loader.exe"; 						DestDir: {app}; Flags: ignoreversion; Excludes: *.vshost.exe
 Source: "..\bin\Release\loader.pdb"; 						DestDir: {app}; Flags: ignoreversion
 Source: "..\bin\Release\loader.exe.config"; 				DestDir: {app}; Flags: ignoreversion
-Source: "..\bin\Release\NBug.config"; 						DestDir: "{app}\bin\"; Flags: ignoreversion
 Source: "..\bin\Release\*.dll"; 							DestDir: "{app}\bin\"; Flags: ignoreversion
+Source: "..\References\NBug.dll"; 							DestDir: "{app}\bin\"; Flags: ignoreversion
+Source: "..\References\NBug.config"; 						DestDir: "{app}\bin\"; Flags: ignoreversion
 Source: "..\bin\Release\NativeBinaries\x86\*.dll"; 			DestDir: "{app}\bin\NativeBinaries\x86\"; Flags: ignoreversion
 Source: "..\bin\Release\NativeBinaries\amd64\*.dll"; 		DestDir: "{app}\bin\NativeBinaries\amd64\"; Flags: ignoreversion
 

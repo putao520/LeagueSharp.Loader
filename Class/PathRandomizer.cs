@@ -152,6 +152,11 @@ namespace LeagueSharp.Loader.Class
                 return false;
             }
 
+            if (!File.Exists(Path.Combine(Directories.CoreDirectory, "LeagueSharp.Core.dll")))
+            {
+                return false;
+            }
+
             try
             {
                 //result = result && Utility.OverwriteFile(Path.Combine(Directories.CoreDirectory, "LeagueSharp.dll"), LeagueSharpDllPath, true);

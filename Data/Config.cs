@@ -305,6 +305,12 @@ namespace LeagueSharp.Loader.Data
             }
             set
             {
+                if (value.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
+                {
+                    MessageBox.Show("Failed to set League Of Legends path\nPlease forward this message to our Support Team\n\n" + Environment.StackTrace);
+                    return;
+                }
+
                 this._leagueOfLegendsExePath = value;
                 this.OnPropertyChanged();
             }
@@ -592,6 +598,11 @@ namespace LeagueSharp.Loader.Data
                     // load error
                 }
 
+                if (!Instance.UseCloudConfig)
+                {
+                    return false;
+                }
+
                 if (string.IsNullOrEmpty(Instance?.Username) || string.IsNullOrEmpty(Instance?.Password))
                 {
                     return false;
@@ -599,6 +610,8 @@ namespace LeagueSharp.Loader.Data
 
                 if (!WebService.Client.Login(Instance.Username, Instance.Password))
                 {
+                    Instance.Username = string.Empty;
+                    Instance.Password = string.Empty;
                     return false;
                 }
 
@@ -702,9 +715,9 @@ namespace LeagueSharp.Loader.Data
             return false;
         }
 
-        public static void Load()
+        public static void Load(bool isLoader = false)
         {
-            if (App.Args.Length == 0 && Instance.UseCloudConfig)
+            if (App.Args.Length == 0 && !isLoader)
             {
                 if (LoadFromCloud())
                 {

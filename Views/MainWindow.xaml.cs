@@ -157,12 +157,6 @@ namespace LeagueSharp.Loader.Views
             {
                 // ignored
             }
-
-            var allAssemblies = new List<LeagueSharpAssembly>();
-            foreach (var profile in Config.Instance.Profiles)
-            {
-                allAssemblies.AddRange(profile.InstalledAssemblies.ToList());
-            }
         }
 
         public async Task PrepareAssemblies(

@@ -105,12 +105,12 @@ namespace LeagueSharp.Loader.Views
 
                 if (silent)
                 {
-                    await installer.ListAssemblies(repositoryUrl, true, true, HttpUtility.UrlDecode(projectName));
+                    await installer.ListAssemblies(repositoryUrl, true, true, HttpUtility.HtmlDecode(projectName));
                     installer.Close();
                     return;
                 }
 
-                installer.ShowProgress(repositoryUrl, true, HttpUtility.UrlDecode(projectName));
+                installer.ShowProgress(repositoryUrl, true, HttpUtility.HtmlDecode(projectName));
                 installer.ShowDialog();
             }
             catch (Exception e)

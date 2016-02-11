@@ -38,6 +38,8 @@ namespace LeagueSharp.Loader.Class
 
     using PlaySharp.Service.Model;
 
+    using RestSharp.Extensions.MonoHttp;
+
     #endregion
 
     public static class LeagueSharpAssemblies
@@ -78,8 +80,8 @@ namespace LeagueSharp.Loader.Class
 
                         if (entry != null)
                         {
-                            assembly.Description = entry.Description;
-                            assembly.DisplayName = entry.Name;
+                            assembly.Description = HttpUtility.HtmlDecode(entry.Description);
+                            assembly.DisplayName = HttpUtility.HtmlDecode(entry.Name);
                         }
                     }
 

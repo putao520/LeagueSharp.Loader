@@ -23,6 +23,7 @@ namespace LeagueSharp.Loader
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Globalization;
     using System.IO;
     using System.Linq;
     using System.Reflection;
@@ -145,7 +146,7 @@ namespace LeagueSharp.Loader
 
         private void ConfigInit()
         {
-            Config.Load();
+            Config.Load(Assembly.GetExecutingAssembly().Location.EndsWith("loader.exe", StringComparison.OrdinalIgnoreCase));
 
             #region Add GameSetting DisableDrawings
 
@@ -215,7 +216,7 @@ namespace LeagueSharp.Loader
         {
             #region Executable Randomization
 
-            if (Assembly.GetExecutingAssembly().Location.EndsWith("loader.exe") || Assembly.GetExecutingAssembly().Location.EndsWith("Loader.exe"))
+            if (Assembly.GetExecutingAssembly().Location.EndsWith("loader.exe", StringComparison.OrdinalIgnoreCase))
             {
                 try
                 {
@@ -269,7 +270,7 @@ namespace LeagueSharp.Loader
                     try
                     {
                         Config.Instance.RandomName = Utility.GetUniqueKey(6);
-                        Config.Save();
+                        Config.Save(false);
 
                         File.Copy(Path.Combine(Directories.CurrentDirectory, "loader.exe"), Directories.AssemblyFile);
                         File.Copy(Path.Combine(Directories.CurrentDirectory, "loader.pdb"), Directories.AssemblyPdbFile);
@@ -400,6 +401,11 @@ namespace LeagueSharp.Loader
             }
 
             this.Resources.MergedDictionaries.Add(dict);
+
+            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+            CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
         }
     }
 }

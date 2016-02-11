@@ -30,6 +30,7 @@ namespace LeagueSharp.Loader.Data
     using System.IO;
     using System.Runtime.CompilerServices;
     using System.Windows;
+    using System.Windows.Forms;
     using System.Windows.Input;
     using System.Xml.Serialization;
 
@@ -38,6 +39,8 @@ namespace LeagueSharp.Loader.Data
     using Newtonsoft.Json;
 
     using PlaySharp.Service.Model;
+
+    using MessageBox = System.Windows.MessageBox;
 
     #endregion
 
@@ -103,9 +106,24 @@ namespace LeagueSharp.Loader.Data
 
         private int workers = 5;
 
+        private bool useCloudConfig = true;
+
         [XmlIgnore]
         [JsonIgnore]
         public static Config Instance { get; set; }
+
+        public bool UseCloudConfig
+        {
+            get
+            {
+                return this.useCloudConfig;
+            }
+            set
+            {
+                this.useCloudConfig = value;
+                this.OnPropertyChanged();
+            }
+        }
 
         public int Workers
         {
@@ -498,6 +516,22 @@ namespace LeagueSharp.Loader.Data
 
         public event PropertyChangedEventHandler PropertyChanged;
 
+        private bool IsOnScreen()
+        {
+            var screens = Screen.AllScreens;
+            foreach (var screen in screens)
+            {
+                var formTopLeft = new System.Drawing.Point((int)this.WindowLeft, (int)this.WindowTop);
+
+                if (screen.WorkingArea.Contains(formTopLeft))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public static void SaveAndRestart(bool cloud = false)
         {
             Instance.FirstRun = false;
@@ -519,9 +553,19 @@ namespace LeagueSharp.Loader.Data
         {
             try
             {
+                if (!Instance.IsOnScreen())
+                {
+                    Instance.WindowTop = 100;
+                    Instance.WindowLeft = 100;
+                }
+
                 Utility.MapClassToXmlFile(typeof(Config), Instance, Directories.ConfigFilePath);
 
-                if (cloud && !string.IsNullOrEmpty(Instance.Username) && !string.IsNullOrEmpty(Instance.Password) && WebService.Client.IsAuthenticated)
+                if (cloud && 
+                    Instance.UseCloudConfig && 
+                    !string.IsNullOrEmpty(Instance.Username) && 
+                    !string.IsNullOrEmpty(Instance.Password) && 
+                    WebService.Client.IsAuthenticated)
                 {
                     WebService.Client.CloudStore(Instance, "Config");
                 }
@@ -660,7 +704,7 @@ namespace LeagueSharp.Loader.Data
 
         public static void Load()
         {
-            if (App.Args.Length == 0)
+            if (App.Args.Length == 0 && Instance.UseCloudConfig)
             {
                 if (LoadFromCloud())
                 {

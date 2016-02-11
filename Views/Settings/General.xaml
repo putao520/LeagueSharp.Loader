@@ -7,7 +7,7 @@
              mc:Ignorable="d">
 
     <Grid Margin="0,0,0,0">
-        <DataGrid Margin="0,0,0,189"
+        <DataGrid Margin="0,0,0,214"
                   x:Name="GameSettingsDataGrid"
                   CanUserAddRows="False"
                   AutoGenerateColumns="False"
@@ -48,14 +48,14 @@
         <CheckBox IsChecked="{Binding Config.UpdateCoreOnInject, UpdateSourceTrigger=PropertyChanged}"
                   Content="{DynamicResource UpdateCoreOnInject}" Margin="0,0,10,23" Height="18"
                   VerticalAlignment="Bottom" />
-        <ComboBox HorizontalAlignment="Left" Margin="70,0,0,149" Width="135" Height="26" VerticalAlignment="Bottom"
+        <ComboBox HorizontalAlignment="Left" Margin="70,0,0,175" Width="135" Height="26" VerticalAlignment="Bottom"
                   Loaded="ComboBox_Loaded" Text="{DynamicResource Language}"
                   SelectionChanged="ComboBox_SelectionChanged" />
-        <Label Content="{DynamicResource Language}" HorizontalAlignment="Left" Margin="0,0,0,149" Height="26"
+        <Label Content="{DynamicResource Language}" HorizontalAlignment="Left" Margin="0,0,0,175" Height="26"
                VerticalAlignment="Bottom" Width="65" />
-        <ComboBox Margin="70,0,0,118" VerticalAlignment="Bottom" Height="26" Loaded="Color_Loaded"
+        <ComboBox Margin="70,0,0,144" VerticalAlignment="Bottom" Height="26" Loaded="Color_Loaded"
                   SelectionChanged="Color_SelectionChanged" HorizontalAlignment="Left" Width="135" />
-        <Label Content="{DynamicResource Color}" HorizontalAlignment="Left" Margin="0,0,0,118" Height="26"
+        <Label Content="{DynamicResource Color}" HorizontalAlignment="Left" Margin="0,0,0,144" Height="26"
                VerticalAlignment="Bottom" Width="65" />
         <Button Content="{DynamicResource Logout}" HorizontalAlignment="Right" Margin="0,0,0,0"
                 VerticalAlignment="Bottom" Width="75" Click="Logout_OnClick" />
@@ -63,5 +63,7 @@
                 Click="AppData_OnClick" />
         <Button Content="Save Config" HorizontalAlignment="Right" Margin="0,0,0,61" VerticalAlignment="Bottom"
                 Width="75" Click="SaveConfig_Click" />
+        <CheckBox IsChecked="{Binding Config.UseCloudConfig, UpdateSourceTrigger=PropertyChanged}"
+        	Content="{DynamicResource CloudConfig}" Margin="0,0,10,114" Height="18" VerticalAlignment="Bottom" />
     </Grid>
 </UserControl>

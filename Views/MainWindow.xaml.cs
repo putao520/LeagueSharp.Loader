@@ -172,6 +172,7 @@ namespace LeagueSharp.Loader.Views
         {
             this.Working = true;
             var leagueSharpAssemblies = assemblies as IList<LeagueSharpAssembly> ?? assemblies.ToList();
+            Directory.CreateDirectory(Directories.AssembliesDir);
 
             await Task.Factory.StartNew(
                 () =>
@@ -633,6 +634,11 @@ namespace LeagueSharp.Loader.Views
 
         private async void CompileAll_OnClick(object sender, RoutedEventArgs e)
         {
+            if (this.Working)
+            {
+                return;
+            }
+
             await this.PrepareAssemblies(Config.Instance.SelectedProfile.InstalledAssemblies, false, true);
         }
 
@@ -940,11 +946,18 @@ namespace LeagueSharp.Loader.Views
 
         private async void MainWindow_OnActivated(object sender, EventArgs e)
         {
-            var text = Clipboard.GetText();
-            if (text.StartsWith(LSUriScheme.FullName))
+            try
             {
-                Clipboard.SetText("");
-                await LSUriScheme.HandleUrl(text, this);
+                var text = Clipboard.GetText();
+                if (text.StartsWith(LSUriScheme.FullName))
+                {
+                    Clipboard.SetText("");
+                    await LSUriScheme.HandleUrl(text, this);
+                }
+            }
+            catch
+            {
+                // ignored - OpenClipboard Failed (Exception from HRESULT: 0x800401D0 (CLIPBRD_E_CANT_OPEN))
             }
         }
 
@@ -991,27 +1004,34 @@ namespace LeagueSharp.Loader.Views
                 {
                     while (true)
                     {
-                        if (Config.Instance.Install)
+                        try
                         {
-                            Injection.Pulse();
-                        }
-
-                        Application.Current.Dispatcher.Invoke(
-                            () =>
+                            if (Config.Instance.Install)
                             {
-                                if (Injection.IsInjected)
-                                {
-                                    this.icon_connected.Visibility = Visibility.Visible;
-                                    this.icon_disconnected.Visibility = Visibility.Collapsed;
-                                }
-                                else
-                                {
-                                    this.icon_connected.Visibility = Visibility.Collapsed;
-                                    this.icon_disconnected.Visibility = Visibility.Visible;
-                                }
-                            });
+                                Injection.Pulse();
+                            }
 
-                        Thread.Sleep(3000);
+                            Application.Current.Dispatcher.Invoke(
+                                () =>
+                                    {
+                                        if (Injection.IsInjected)
+                                        {
+                                            this.icon_connected.Visibility = Visibility.Visible;
+                                            this.icon_disconnected.Visibility = Visibility.Collapsed;
+                                        }
+                                        else
+                                        {
+                                            this.icon_connected.Visibility = Visibility.Collapsed;
+                                            this.icon_disconnected.Visibility = Visibility.Visible;
+                                        }
+                                    });
+
+                            Thread.Sleep(3000);
+                        }
+                        catch
+                        {
+                            // ignored - A task was canceled.
+                        }
                     }
                 });
 
@@ -1287,12 +1307,22 @@ namespace LeagueSharp.Loader.Views
 
         private async void UpdateAll_OnClick(object sender, RoutedEventArgs e)
         {
+            if (this.Working)
+            {
+                return;
+            }
+
             await this.PrepareAssemblies(Config.Instance.SelectedProfile.InstalledAssemblies, true, true);
         }
 
         private async void UpdateAndCompileMenuItem_OnClick(object sender, RoutedEventArgs e)
         {
             if (this.InstalledAssembliesDataGrid.SelectedItems.Count == 0)
+            {
+                return;
+            }
+
+            if (this.Working)
             {
                 return;
             }

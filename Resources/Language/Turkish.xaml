@@ -8,7 +8,7 @@
 
     <!-- MainWindow Tabs -->
     <system:String x:Key="News">Haberler</system:String>
-    <system:String x:Key="Assemblies">Çevirmeler</system:String>
+    <system:String x:Key="Assemblies">Modüller</system:String>
 
     <!-- MainWindow Profile selector -->
     <system:String x:Key="DefaultProfile">Varsayılan</system:String>
@@ -24,7 +24,7 @@
     <system:String x:Key="MenuUpdateAndCompile">Güncelle ve Derle</system:String>
     <system:String x:Key="MenuRemove">Kaldır</system:String>
     <system:String x:Key="MenuGithub">Github</system:String>
-    <system:String x:Key="MenuGithubAssemblies">Github Çevirmeleri</system:String>
+    <system:String x:Key="MenuGithubAssemblies">Github Modülleri</system:String>
     <system:String x:Key="MenuShare">Paylaş</system:String>
     <system:String x:Key="MenuViewLog">Kayıtları Görüntüle</system:String>
 
@@ -38,17 +38,17 @@
     <system:String x:Key="DeclineTosButton">Reddediyorum</system:String>
     <system:String x:Key="UpdateAll">Hepsini Güncelle</system:String>
     <system:String x:Key="CompileAll">Hepsini Derle</system:String>
-    <system:String x:Key="InstallNewAssembly">Yeni Çevirme Yükle</system:String>
+    <system:String x:Key="InstallNewAssembly">Yeni Modül Yükle</system:String>
 
     <!-- InstallerWindow Title -->
-    <system:String x:Key="AssemblyInstaller">Çevirme Yükleyici</system:String>
+    <system:String x:Key="AssemblyInstaller">Modül Yükleyici</system:String>
 
     <!-- InstallerWindow Tabs -->
     <system:String x:Key="Search">Ara</system:String>
     <system:String x:Key="Select">Seç</system:String>
 
     <!-- InstallerWindow Search tab -->
-    <system:String x:Key="SelectAssembliesText">Çevirmeleri Seç:</system:String>
+    <system:String x:Key="SelectAssembliesText">Modülleri Seç:</system:String>
     <system:String x:Key="Local">Yerel</system:String>
     <system:String x:Key="Github">Github</system:String>
     <system:String x:Key="Installed">Yüklendi</system:String>
@@ -63,16 +63,19 @@
     <!-- Settings General -->
     <system:String x:Key="General">Genel</system:String>
     <system:String x:Key="GameSettings">Oyun Ayarları</system:String>
-    <system:String x:Key="Anti-AFK">Oyundan atılma engelleyicisi</system:String>
-    <system:String x:Key="Debug Console">Hata ayıklama konsolu</system:String>
-    <system:String x:Key="Display Enemy Tower Range">Düşman kule menzilini göster</system:String>
-    <system:String x:Key="Extended Zoom">Genişletilmiş kamera</system:String>
-    <system:String x:Key="UpdateOnStart">Çevirmeleri her başlangıçta güncelle</system:String>
-    <system:String x:Key="Inject">Enjekte Et</system:String>
-    <system:String x:Key="Logout">Çıkış</system:String>
-    <system:String x:Key="DefaultHotkeys">Kısayolları Geri Yükle</system:String>
-    <system:String x:Key="Language">Dil</system:String>
-    <system:String x:Key="Color">Renk</system:String>
+    <system:String x:Key="Anti-AFK">Anti-AFK</system:String>
+    <system:String x:Key="Debug Console">Hata Ayıklama Konsolu</system:String>
+    <system:String x:Key="Show Ping">Pingleri Göster</system:String>
+    <system:String x:Key="Show Drawings">Çizimleri Göster</system:String>
+    <system:String x:Key="Send Anonymous Assembly Statistics">Anonim Modül İstatistiklerini Gönder</system:String>
+    <system:String x:Key="Always Inject Default Profile">Her Zaman Varsayılan Profili Enjekte Et</system:String>
+    <system:String x:Key="Display Enemy Tower Range">Düşman Kule Menzilini Göster</system:String>
+    <system:String x:Key="Extended Zoom">Büyütülmüş Kamera</system:String>
+    <system:String x:Key="UpdateOnStart">Başlangıçta Modülleri Güncelle</system:String>
+    <system:String x:Key="UpdateCoreOnInject">Enjekte Ederken Çekirdeği Güncelle</system:String>
+    <system:String x:Key="EnableDebug">Modül Hata Ayıklamasını Etkinleştir (Performansı düşürebilir)</system:String>
+
+    <system:String x:Key="CloudConfig">Bulut Entegrasyonunu Kullan</system:String>
 
     <!-- Settings Hotkeys -->
     <system:String x:Key="Hotkeys">Kısayollar</system:String>
@@ -105,17 +108,17 @@
     <system:String x:Key="Login">Giriş</system:String>
     <system:String x:Key="LoginError">{0} olarak giriş başarısız: {1}</system:String>
     <system:String x:Key="Uninstall">Kaldır</system:String>
-    <system:String x:Key="UninstallConfirm">Seçili çevirmeleri kaldırmak istediğinize emin misiniz?</system:String>
+    <system:String x:Key="UninstallConfirm">Seçili modülleri kaldırmak istediğinize emin misiniz?</system:String>
     <system:String x:Key="ConfigWriteError">config.xml dosyasına yazılamıyor.</system:String>
-    <system:String x:Key="ShareText">Çevirme bağlantısı kopyalandı.</system:String>
+    <system:String x:Key="ShareText">Modül bağlantısı kopyalandı.</system:String>
     <system:String x:Key="LogNotFound">Kayıt dosyası bulunamadı.</system:String>
     <system:String x:Key="NewProfile2">Yeni profil</system:String>
     <system:String x:Key="Rename">Yeniden adlandır</system:String>
     <system:String x:Key="RenameText">Profil için yeni isim girin</system:String>
     <system:String x:Key="DownloadingData">Gerekli veri indiriliyor.</system:String>
     <system:String x:Key="Installer">Yükleyici</system:String>
-    <system:String x:Key="SuccessfullyInstalled">Seçili assemblyler başarıyla yüklendi.</system:String>
-    <system:String x:Key="ErrorInstalling">Bazı assemblyleri yüklerken hata oluştu, detaylar için kayıtları kontrol edin.</system:String>
+    <system:String x:Key="SuccessfullyInstalled">Seçili modüller başarıyla yüklendi.</system:String>
+    <system:String x:Key="ErrorInstalling">Bazı modülleri yüklerken hata oluştu, detaylar için kayıtları kontrol edin.</system:String>
 
     <system:String x:Key="EnableDeveloper">Geliştirici seçeneklerini aç</system:String>
     <system:String x:Key="Developer">Geliştirici</system:String>
@@ -125,7 +128,7 @@
 
     <system:String x:Key="Checking">Kontrol ediliyor...</system:String>
     <system:String x:Key="Updated">Güncel</system:String>
-    <system:String x:Key="OUTDATED">GÜNCEL DEĞİL</system:String>
+    <system:String x:Key="OUTDATED">Güncel Değil</system:String>
     <system:String x:Key="Unknown">Bilinmiyor</system:String>
     <system:String x:Key="UpdateStatus">Durum</system:String>
 

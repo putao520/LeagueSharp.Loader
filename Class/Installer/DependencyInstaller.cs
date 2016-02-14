@@ -18,6 +18,8 @@
 
 #endregion
 
+using System.Windows;
+
 namespace LeagueSharp.Loader.Class.Installer
 {
     using System;
@@ -108,7 +110,7 @@ namespace LeagueSharp.Loader.Class.Installer
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                Utility.Log(LogStatus.Error, "UpdateReferenceCache", e.Message, Logs.MainLog);
             }
 
             Cache.Clear();
@@ -144,7 +146,7 @@ namespace LeagueSharp.Loader.Class.Installer
             }
             catch
             {
-                Console.WriteLine($"Invalid: {assembly.Id} - {assembly.GithubUrl}");
+                Utility.Log(LogStatus.Info, "ParseAssemblyName", $"Invalid Library: {assembly.Id} - {assembly.GithubUrl}", Logs.MainLog);
             }
 
             return null;

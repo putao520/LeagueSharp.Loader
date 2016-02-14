@@ -54,7 +54,14 @@ namespace LeagueSharp.Loader.Class.Installer
                 var projectName = assembly.GithubUrl.Substring(assembly.GithubUrl.LastIndexOf("/") + 1);
                 var repositoryUrl = $"https://{repositoryMatch.Groups["host"]}/{repositoryMatch.Groups["author"]}/{repositoryMatch.Groups["repo"]}";
 
-                return new Dependency { AssemblyEntry = assembly, Repository = repositoryUrl, Project = projectName, Name = assembly.Name, Description = assembly.Description };
+                return new Dependency
+                {
+                    AssemblyEntry = assembly,
+                    Repository = repositoryUrl,
+                    Project = projectName.WebDecode(),
+                    Name = assembly.Name.WebDecode(),
+                    Description = assembly.Description.WebDecode()
+                };
             }
             catch (Exception e)
             {

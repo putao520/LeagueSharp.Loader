@@ -49,7 +49,7 @@ namespace LeagueSharp.Loader.Class
 
         public static async Task HandleUrl(string url, MetroWindow window)
         {
-            url = WebUtility.UrlDecode(url.Remove(0, FullName.Length));
+            url = url.Remove(0, FullName.Length).WebDecode();
 
             var r = Regex.Matches(url, "(project|projectGroup)/([^/]*)/([^/]*)/([^/]*)/?");
             foreach (Match m in r)

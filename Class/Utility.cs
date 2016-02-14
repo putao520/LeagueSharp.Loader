@@ -18,6 +18,7 @@
 
 #endregion
 
+
 namespace LeagueSharp.Loader.Class
 {
     #region
@@ -33,13 +34,15 @@ namespace LeagueSharp.Loader.Class
     using System.Windows.Forms;
     using System.Xml.Serialization;
 
+    using RestSharp.Extensions.MonoHttp;
+
     using LeagueSharp.Loader.Data;
 
     using Application = System.Windows.Application;
 
     #endregion
 
-    static class ListExtensions
+    public static class ListExtensions
     {
         private static readonly Random Rng = new Random();
 
@@ -54,6 +57,14 @@ namespace LeagueSharp.Loader.Class
                 list[k] = list[n];
                 list[n] = value;
             }
+        }
+    }
+
+    public static class WebExtensions
+    {
+        public static string WebDecode(this string s)
+        {
+            return HttpUtility.HtmlDecode(HttpUtility.UrlDecode(s));
         }
     }
 

@@ -33,16 +33,8 @@ namespace LeagueSharp.Loader.Class
 
         public static void Init()
         {
-            try
-            {
-                _loaderServiceHost = ServiceFactory.CreateService<ILoaderService, LoaderService>();
-                _loaderServiceHost.Faulted += OnLoaderServiceFaulted;
-            }
-            catch (PipeException e)
-            {
-                MessageBox.Show($"Make sure only one LeagueSharp Instance is running on your Computer.\n\n{e.Message}", "Failed to initialize Remoting");
-                Environment.Exit(0);
-            }
+            _loaderServiceHost = ServiceFactory.CreateService<ILoaderService, LoaderService>();
+            _loaderServiceHost.Faulted += OnLoaderServiceFaulted;
         }
 
         private static void OnLoaderServiceFaulted(object sender, EventArgs eventArgs)

@@ -80,8 +80,8 @@ namespace LeagueSharp.Loader.Class
 
                         if (entry != null)
                         {
-                            assembly.Description = HttpUtility.HtmlDecode(entry.Description);
-                            assembly.DisplayName = HttpUtility.HtmlDecode(entry.Name);
+                            assembly.Description = entry.Description.WebDecode();
+                            assembly.DisplayName = entry.Name.WebDecode();
                         }
                     }
 

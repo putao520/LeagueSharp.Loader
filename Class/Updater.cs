@@ -307,10 +307,24 @@ namespace LeagueSharp.Loader.Class
 
                 await Task.Factory.StartNew(
                     () =>
+                    {
+                        try
                         {
-                            assemblies = new ObservableCollection<AssemblyEntry>(AssemblyDatabase.GetAssemblies());
-                            assemblies.ShuffleRandom();
-                        });
+                            var entries = AssemblyDatabase.GetAssemblies();
+                            foreach (var entry in entries)
+                            {
+                                entry.Name = entry.Name.WebDecode();
+                                entry.Description = entry.Description.WebDecode();
+                            }
+                            entries.ShuffleRandom();
+
+                            assemblies = new ObservableCollection<AssemblyEntry>(entries);
+                        }
+                        catch(Exception e)
+                        {
+                            Utility.Log(LogStatus.Error, "UpdateWebService", e.Message, Logs.MainLog);
+                        }
+                    });
 
                 Config.Instance.DatabaseAssemblies = assemblies;
             }

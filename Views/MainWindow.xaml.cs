@@ -53,6 +53,12 @@ namespace LeagueSharp.Loader.Views
 
     public partial class MainWindow : INotifyPropertyChanged
     {
+        public const int TAB_TOS = 0;
+        public const int TAB_NEWS = 1;
+        public const int TAB_ASSEMBLIES = 2;
+        public const int TAB_SETTINGS = 3;
+        public const int TAB_DATABASE = 4;
+
         public BackgroundWorker AssembliesWorker = new BackgroundWorker();
 
         public bool AssembliesWorkerCancelled;
@@ -272,9 +278,6 @@ namespace LeagueSharp.Loader.Views
             this.TosBrowser.Visibility = Visibility.Hidden;
 
             await this.ShowMessageAsync(title, message);
-
-            this.Browser.Visibility = Visibility.Visible;
-            this.TosBrowser.Visibility = Visibility.Visible;
         }
 
         private void TosButton_OnClick(object sender, RoutedEventArgs e)
@@ -282,7 +285,8 @@ namespace LeagueSharp.Loader.Views
             this.Browser.Visibility = Visibility.Hidden;
 
             this.TosBrowser.Navigate("http://api.joduska.me/public/tos");
-            this.MainTabControl.SelectedIndex = 0;
+            this.MainTabControl.SelectedIndex = TAB_TOS;
+
             this.TosBrowser.Visibility = Visibility.Visible;
         }
 
@@ -291,7 +295,8 @@ namespace LeagueSharp.Loader.Views
             this.TosBrowser.Visibility = Visibility.Hidden;
 
             this.Browser.Navigate("http://api.joduska.me/public/news/html");
-            this.MainTabControl.SelectedIndex = 1;
+            this.MainTabControl.SelectedIndex = TAB_NEWS;
+
             this.Browser.Visibility = Visibility.Visible;
         }
 
@@ -300,7 +305,7 @@ namespace LeagueSharp.Loader.Views
             this.Browser.Visibility = Visibility.Hidden;
             this.TosBrowser.Visibility = Visibility.Hidden;
 
-            this.MainTabControl.SelectedIndex = 2;
+            this.MainTabControl.SelectedIndex = TAB_ASSEMBLIES;
         }
 
         private void SettingsButton_OnClick(object sender, RoutedEventArgs e)
@@ -308,7 +313,7 @@ namespace LeagueSharp.Loader.Views
             this.Browser.Visibility = Visibility.Hidden;
             this.TosBrowser.Visibility = Visibility.Hidden;
 
-            this.MainTabControl.SelectedIndex = 3;
+            this.MainTabControl.SelectedIndex = TAB_SETTINGS;
         }
 
         private async void AssemblyDBButton_OnClick(object sender, RoutedEventArgs e)
@@ -328,7 +333,7 @@ namespace LeagueSharp.Loader.Views
                 Console.WriteLine(exception);
             }
 
-            this.MainTabControl.SelectedIndex = 4;
+            this.MainTabControl.SelectedIndex = TAB_DATABASE;
         }
 
         private async void StatusButton_OnClick(object sender, RoutedEventArgs e)
@@ -342,6 +347,7 @@ namespace LeagueSharp.Loader.Views
         private void TosAccept_Click(object sender, RoutedEventArgs e)
         {
             Config.Instance.TosAccepted = true;
+
             this.RightWindowCommands.Visibility = Visibility.Visible;
             this.NewsButton_OnClick(null, null);
         }
@@ -497,7 +503,7 @@ namespace LeagueSharp.Loader.Views
             this.InitSystem();
             Utility.Log(LogStatus.Info, "Bootstrap", "System Initialisation Complete", Logs.MainLog);
 
-            this.MainTabControl.SelectedIndex = 2;
+            this.MainTabControl.SelectedIndex = TAB_ASSEMBLIES;
         }
 
         private async Task CheckForUpdates(bool loader, bool core, bool showDialogOnFinish)
@@ -949,9 +955,9 @@ namespace LeagueSharp.Loader.Views
                     await LSUriScheme.HandleUrl(text, this);
                 }
             }
-            catch
+            catch(Exception ex)
             {
-                // ignored - OpenClipboard Failed (Exception from HRESULT: 0x800401D0 (CLIPBRD_E_CANT_OPEN))
+                Utility.Log(LogStatus.Error, "Clipboard", ex.Message, Logs.MainLog);
             }
         }
 
@@ -978,8 +984,6 @@ namespace LeagueSharp.Loader.Views
 
             Config.Instance.SelectedProfile = Config.Instance.Profiles.Last();
         }
-
-
 
         private void OnLogin(string username)
         {
@@ -1126,63 +1130,55 @@ namespace LeagueSharp.Loader.Views
             }
         }
 
-        private async void ShowAfterLoginDialog(string message, bool showLoginDialog)
+        private async Task ShowAfterLoginDialog(string message, bool showLoginDialog)
         {
-            await this.ShowMessageAsync("Login", message);
-            if (showLoginDialog)
-            {
-                await this.ShowLoginDialog();
-            }
+
         }
 
         private async Task ShowLoginDialog()
         {
             this.MetroDialogOptions.ColorScheme = MetroDialogColorScheme.Theme;
-            var result =
-                await
-                this.ShowLoginAsync(
-                    "LeagueSharp",
-                    "Sign in",
-                    new LoginDialogSettings
-                        {
-                            ColorScheme = this.MetroDialogOptions.ColorScheme,
-                            NegativeButtonVisibility = Visibility.Visible
-                        });
 
-            var loginResult = new Tuple<bool, string>(false, "Cancel button pressed");
-            if (result != null)
+            while (true)
             {
-                var hash = Auth.Hash(result.Password);
+                var result =
+                    await
+                        this.ShowLoginAsync(
+                            "LeagueSharp",
+                            "Sign in",
+                            new LoginDialogSettings
+                            {
+                                ColorScheme = this.MetroDialogOptions.ColorScheme,
+                                NegativeButtonVisibility = Visibility.Visible
+                            });
 
-                loginResult = Auth.Login(result.Username, hash);
-            }
-
-            if (result != null && loginResult.Item1)
-            {
-                //Save the login credentials
-                Config.Instance.Username = result.Username;
-                Config.Instance.Password = Auth.Hash(result.Password);
-
-                this.OnLogin(result.Username);
-            }
-            else
-            {
                 if (result == null)
                 {
                     this.MainWindow_OnClosing(null, null);
                     Environment.Exit(0);
                 }
 
-                this.ShowAfterLoginDialog(
-                    string.Format(Utility.GetMultiLanguageText("FailedToLogin"), loginResult.Item2),
-                    true);
+                var hash = Auth.Hash(result.Password);
+                var loginResult = Auth.Login(result.Username, hash);
+
+                if (loginResult.Item1)
+                {
+                    //Save the login credentials
+                    Config.Instance.Username = result.Username;
+                    Config.Instance.Password = Auth.Hash(result.Password);
+
+                    this.OnLogin(result.Username);
+                    break;
+                }
+
+                await this.ShowMessageAsync("Login", string.Format(Utility.GetMultiLanguageText("FailedToLogin"), loginResult.Item2));
 
                 Utility.Log(
                     LogStatus.Error,
                     Utility.GetMultiLanguageText("Login"),
                     string.Format(
                         Utility.GetMultiLanguageText("LoginError"),
-                        (result != null ? result.Username : "null"),
+                        result.Username,
                         loginResult.Item2),
                     Logs.MainLog);
             }
@@ -1333,7 +1329,7 @@ namespace LeagueSharp.Loader.Views
 
             foreach (var result in this.AssembliesDBDataGrid.SelectedItems.Cast<AssemblyEntry>())
             {
-                if (this.Config.SelectedProfile.InstalledAssemblies.Any(a => a.Name == HttpUtility.UrlDecode(result.Name)))
+                if (this.Config.SelectedProfile.InstalledAssemblies.Any(a => a.Name == result.Name.WebDecode()))
                 {
                     await this.ShowMessageAsync("Installer", $"{result.Name} is already installed");
                     continue;

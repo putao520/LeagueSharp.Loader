@@ -115,10 +115,10 @@ namespace LeagueSharp.Loader.Class
             {
                 try
                 {
-                    Config.Instance.LeagueOfLegendsExePath = GetFilePath(instance);
-
                     if (!IsProcessInjected(instance))
                     {
+                        Config.Instance.LeagueOfLegendsExePath = GetFilePath(instance);
+
                         if (Config.Instance.UpdateCoreOnInject)
                         {
                             try

@@ -97,7 +97,7 @@ namespace LeagueSharp.Loader.Views
 
             try
             {
-                var projectName = Path.GetFileNameWithoutExtension(new Uri(assembly.GithubUrl).AbsolutePath);
+                var projectName = Path.GetFileNameWithoutExtension(new Uri(assembly.GithubUrl).AbsolutePath).WebDecode();
                 var repositoryMatch = Regex.Match(assembly.GithubUrl, @"^(http[s]?)://(?<host>.*?)/(?<author>.*?)/(?<repo>.*?)(/{1}|$)");
                 var repositoryUrl = $"https://{repositoryMatch.Groups["host"]}/{repositoryMatch.Groups["author"]}/{repositoryMatch.Groups["repo"]}";
 
@@ -105,12 +105,12 @@ namespace LeagueSharp.Loader.Views
 
                 if (silent)
                 {
-                    await installer.ListAssemblies(repositoryUrl, true, true, HttpUtility.HtmlDecode(projectName));
+                    await installer.ListAssemblies(repositoryUrl, true, true, projectName);
                     installer.Close();
                     return;
                 }
 
-                installer.ShowProgress(repositoryUrl, true, HttpUtility.HtmlDecode(projectName));
+                installer.ShowProgress(repositoryUrl, true, projectName);
                 installer.ShowDialog();
             }
             catch (Exception e)
@@ -262,9 +262,16 @@ namespace LeagueSharp.Loader.Views
             {
                 Config.Save(true);
 
-                if (this.IsVisible)
+                try
                 {
-                    this.Close();
+                    if (this.IsVisible)
+                    {
+                        this.Close();
+                    }
+                }
+                catch
+                {
+                    // ignored
                 }
 
                 return;

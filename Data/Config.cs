@@ -307,7 +307,6 @@ namespace LeagueSharp.Loader.Data
             {
                 if (value.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
                 {
-                    MessageBox.Show("Failed to set League Of Legends path\nPlease forward this message to our Support Team\n\n" + Environment.StackTrace);
                     return;
                 }
 

@@ -9,8 +9,7 @@
                       WindowStartupLocation="CenterOwner"
                       ShowInTaskbar="False"
                       Loaded="InstallerWindow_OnLoaded"
-                      BorderThickness="1"
-                      GlowBrush="{DynamicResource AccentColorBrush}">
+                      BorderThickness="1">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition />

@@ -1002,10 +1002,10 @@ namespace LeagueSharp.Loader.Views
                 {
                     while (true)
                     {
+                        Thread.Sleep(3000);
+
                         try
                         {
-                            Thread.Sleep(3000);
-                            
                             if (Config.Instance.Install)
                             {
                                 Injection.Pulse();

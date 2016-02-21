@@ -170,6 +170,11 @@ namespace LeagueSharp.Loader.Class
                 var coreChecksum = Utility.Md5Checksum(Directories.CoreFilePath);
                 var core = WebService.Client.Core(leagueChecksum);
 
+                if (leagueChecksum == "-1")
+                {
+                    return false;
+                }
+
                 if (core == null)
                 {
                     Utility.Log(LogStatus.Error, "IsSupported", "Failed to receive Core version from WebService", Logs.MainLog);
@@ -204,6 +209,16 @@ namespace LeagueSharp.Loader.Class
                 var leagueChecksum = Utility.Md5Checksum(path);
                 var coreChecksum = Utility.Md5Checksum(Directories.CoreFilePath);
                 var core = WebService.Client.Core(leagueChecksum);
+
+                if (leagueChecksum == "-1")
+                {
+                    return new UpdateResponse(CoreUpdateState.Unknown, $"Failed to compute Hash {path}");
+                }
+
+                if (coreChecksum == "-1")
+                {
+                    return new UpdateResponse(CoreUpdateState.Unknown, $"Failed to compute Hash {Directories.CoreFilePath}");
+                }
 
                 if (core == null)
                 {

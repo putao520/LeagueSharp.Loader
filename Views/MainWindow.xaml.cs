@@ -1004,6 +1004,8 @@ namespace LeagueSharp.Loader.Views
                     {
                         try
                         {
+                            Thread.Sleep(3000);
+                            
                             if (Config.Instance.Install)
                             {
                                 Injection.Pulse();
@@ -1023,8 +1025,6 @@ namespace LeagueSharp.Loader.Views
                                             this.icon_disconnected.Visibility = Visibility.Visible;
                                         }
                                     });
-
-                            Thread.Sleep(3000);
                         }
                         catch
                         {

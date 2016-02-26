@@ -215,7 +215,7 @@ namespace LeagueSharp.Loader.Views
             }
 
             Config.Instance.TosAccepted = false;
-            Config.Save(true);
+            Config.Save(false);
 
             new Process
             {

@@ -260,7 +260,7 @@ namespace LeagueSharp.Loader.Views
         {
             if (close)
             {
-                Config.Save(true);
+                Config.Save(false);
 
                 try
                 {

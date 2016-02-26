@@ -20,31 +20,25 @@
 
 namespace LeagueSharp.Loader.Class
 {
-    using System;
     using System.Collections.Generic;
-    using System.Linq;
 
     using PlaySharp.Service.Model;
 
     internal class AssemblyDatabase
     {
-        public static List<AssemblyEntry> GetAssemblies()
+        private static IReadOnlyList<AssemblyEntry> assemblies;
+
+        public static IReadOnlyList<AssemblyEntry> Assemblies
         {
-            try
+            get
             {
-                var assemblies = WebService.Client.Assemblies();
-
-                if (assemblies != null)
+                if (assemblies == null)
                 {
-                    return assemblies.ToList();
+                    assemblies = WebService.Client.Assemblies();
                 }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
 
-            return null;
+                return assemblies;
+            }
         }
     }
 }

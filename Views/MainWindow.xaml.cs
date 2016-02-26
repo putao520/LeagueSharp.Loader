@@ -49,7 +49,7 @@ namespace LeagueSharp.Loader.Views
 
     using PlaySharp.Service.Model;
 
-    using RestSharp.Extensions.MonoHttp;
+    using AssemblyType = LeagueSharp.Loader.Class.AssemblyType;
 
     public partial class MainWindow : INotifyPropertyChanged
     {
@@ -430,8 +430,9 @@ namespace LeagueSharp.Loader.Views
 
             #region login
 
+            var result = await Auth.Login(Config.Instance.Username, Config.Instance.Password);
             //Try to login with the saved credentials.
-            if (!Auth.Login(Config.Instance.Username, Config.Instance.Password).Item1)
+            if (!result.Item1)
             {
                 await this.ShowLoginDialog();
             }
@@ -1159,7 +1160,7 @@ namespace LeagueSharp.Loader.Views
                 }
 
                 var hash = Auth.Hash(result.Password);
-                var loginResult = Auth.Login(result.Username, hash);
+                var loginResult = await Auth.Login(result.Username, hash);
 
                 if (loginResult.Item1)
                 {
@@ -1360,7 +1361,7 @@ namespace LeagueSharp.Loader.Views
                         }
 
                         var nameMatch = Regex.Match(assembly.Name, searchText, RegexOptions.IgnoreCase);
-                        var champeMatch = assembly.Type == 1 && Regex.Match(string.Join(", ", assembly.Champions), searchText, RegexOptions.IgnoreCase).Success;
+                        var champeMatch = assembly.Type == PlaySharp.Service.Model.AssemblyType.Champion && Regex.Match(string.Join(", ", assembly.Champions), searchText, RegexOptions.IgnoreCase).Success;
                         var authorMatch = Regex.Match(assembly.AuthorName, searchText, RegexOptions.IgnoreCase);
                         var svnNameMatch = Regex.Match(assembly.GithubUrl, searchText, RegexOptions.IgnoreCase);
                         var descNameMatch = Regex.Match(assembly.Description, searchText, RegexOptions.IgnoreCase);

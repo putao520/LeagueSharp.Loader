@@ -148,6 +148,7 @@
     <Compile Include="Class\Shared\LSharpAssembly.cs" />
     <Compile Include="Class\Shared\ServiceFactory.cs" />
     <Compile Include="Class\Updater.cs" />
+    <Compile Include="Class\WebService.cs" />
     <Compile Include="Class\Win32Imports.cs" />
     <Compile Include="Data\Config.cs" />
     <Compile Include="Class\LeagueSharpAssembly.cs" />

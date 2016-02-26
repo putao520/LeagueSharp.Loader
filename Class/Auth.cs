@@ -22,19 +22,7 @@ namespace LeagueSharp.Loader.Class
 {
     using System;
     using System.Net.Cache;
-
-    using PlaySharp.Service;
-
-    internal static class WebService
-    {
-        public static ServiceClient Client { get; }
-
-        static WebService()
-        {
-            Client = new ServiceClient();
-            Client.CacheLevel = HttpRequestCacheLevel.Default;
-        }
-    }
+    using System.Threading.Tasks;
 
     internal static class Auth
     {
@@ -43,7 +31,7 @@ namespace LeagueSharp.Loader.Class
             return Utility.Md5Hash(IPB_Clean_Password(input));
         }
 
-        public static Tuple<bool, string> Login(string user, string hash)
+        public static async Task<Tuple<bool, string>> Login(string user, string hash)
         {
             if (user == null || hash == null)
             {
@@ -52,7 +40,7 @@ namespace LeagueSharp.Loader.Class
 
             try
             {
-                if (WebService.Client.Login(user, hash))
+                if (await WebService.Client.LoginAsync(user, hash))
                 {
                     return new Tuple<bool, string>(true, "Success");
                 }

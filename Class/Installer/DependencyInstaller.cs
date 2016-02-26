@@ -106,7 +106,7 @@ namespace LeagueSharp.Loader.Class.Installer
 
             try
             {
-                assemblies = WebService.Client.Assemblies().Where(a => a.Type == 3).ToList();
+                assemblies = AssemblyDatabase.Assemblies.Where(a => a.Type == AssemblyType.Library).ToList();
             }
             catch (Exception e)
             {

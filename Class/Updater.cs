@@ -168,7 +168,7 @@ namespace LeagueSharp.Loader.Class
 
                 var leagueChecksum = Utility.Md5Checksum(path);
                 var coreChecksum = Utility.Md5Checksum(Directories.CoreFilePath);
-                var core = WebService.Client.Core(leagueChecksum);
+                var core = await WebService.Client.CoreAsync(leagueChecksum);
 
                 if (leagueChecksum == "-1")
                 {
@@ -208,7 +208,7 @@ namespace LeagueSharp.Loader.Class
 
                 var leagueChecksum = Utility.Md5Checksum(path);
                 var coreChecksum = Utility.Md5Checksum(Directories.CoreFilePath);
-                var core = WebService.Client.Core(leagueChecksum);
+                var core = await WebService.Client.CoreAsync(leagueChecksum);
 
                 if (leagueChecksum == "-1")
                 {
@@ -325,7 +325,7 @@ namespace LeagueSharp.Loader.Class
                     {
                         try
                         {
-                            var entries = AssemblyDatabase.GetAssemblies();
+                            var entries = AssemblyDatabase.Assemblies.ToList();
                             foreach (var entry in entries)
                             {
                                 entry.Name = entry.Name.WebDecode();

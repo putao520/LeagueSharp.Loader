@@ -68,6 +68,13 @@ namespace LeagueSharp.Loader.Class
 
         public static bool Updating = false;
 
+        private static IReadOnlyList<string> UpdateWhiteList = new[]
+                                                               {
+                                                                   "https://github.com/joduskame/",
+                                                                   "https://github.com/LeagueSharp/",
+                                                                   "https://github.com/Esk0r/"
+                                                               }; 
+
         public static Tuple<bool, string> CheckLoaderVersion()
         {
             try
@@ -206,19 +213,11 @@ namespace LeagueSharp.Loader.Class
                     return new UpdateResponse(CoreUpdateState.Unknown, "WebService authentication failed");
                 }
 
+                var outdated = false;
                 var leagueChecksum = Utility.Md5Checksum(path);
                 var coreChecksum = Utility.Md5Checksum(Directories.CoreFilePath);
+                var coreBridgeChecksum = Utility.Md5Checksum(Directories.CoreBridgeFilePath);
                 var core = await WebService.Client.CoreAsync(leagueChecksum);
-
-                if (leagueChecksum == "-1")
-                {
-                    return new UpdateResponse(CoreUpdateState.Unknown, $"Failed to compute Hash {path}");
-                }
-
-                if (coreChecksum == "-1")
-                {
-                    return new UpdateResponse(CoreUpdateState.Unknown, $"Failed to compute Hash {Directories.CoreFilePath}");
-                }
 
                 if (core == null)
                 {
@@ -227,7 +226,22 @@ namespace LeagueSharp.Loader.Class
                         Utility.GetMultiLanguageText("WrongVersion") + Environment.NewLine + leagueChecksum);
                 }
 
-                if (core.HashCore != coreChecksum && (core.Url.StartsWith("https://github.com/joduskame/") || core.Url.StartsWith("https://github.com/LeagueSharp/")))
+                if (!File.Exists(Directories.CoreFilePath) || !File.Exists(Directories.CoreBridgeFilePath))
+                {
+                    outdated = true;
+                }
+
+                if (!string.IsNullOrEmpty(core.HashCore) && core.HashCore != coreChecksum)
+                {
+                    outdated = true;
+                }
+
+                if (!string.IsNullOrEmpty(core.HashCoreBridge) && core.HashCoreBridge != coreBridgeChecksum)
+                {
+                    outdated = true;
+                }
+
+                if (outdated && UpdateWhiteList.Any(u => core.Url.StartsWith(u)))
                 {
                     try
                     {
@@ -277,10 +291,7 @@ namespace LeagueSharp.Loader.Class
 
         public static async Task UpdateLoader(Tuple<bool, string> versionCheckResult)
         {
-            if (versionCheckResult.Item1
-                && (versionCheckResult.Item2.StartsWith("https://github.com/LeagueSharp/")
-                    || versionCheckResult.Item2.StartsWith("https://github.com/joduskame/")
-                    || versionCheckResult.Item2.StartsWith("https://github.com/Esk0r/")))
+            if (versionCheckResult.Item1 && UpdateWhiteList.Any(u => versionCheckResult.Item2.StartsWith(u)))
             {
                 var window = new UpdateWindow(UpdateAction.Loader, versionCheckResult.Item2);
                 window.Show();

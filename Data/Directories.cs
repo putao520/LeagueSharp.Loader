@@ -50,6 +50,8 @@ namespace LeagueSharp.Loader.Data
 
         public static readonly string CoreFilePath = Path.Combine(CoreDirectory, "Leaguesharp.Core.dll");
 
+        public static readonly string CoreBridgeFilePath = Path.Combine(CoreDirectory, "Leaguesharp.dll");
+
         public static readonly string LoaderFilePath = Path.Combine(
             CurrentDirectory,
             Process.GetCurrentProcess().ProcessName);

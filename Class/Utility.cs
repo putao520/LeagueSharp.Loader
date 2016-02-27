@@ -322,8 +322,18 @@ namespace LeagueSharp.Loader.Class
 
         public static string Md5Checksum(string filePath)
         {
+            if (filePath == null)
+            {
+                throw new ArgumentNullException(nameof(filePath));
+            }
+
             try
             {
+                if (!File.Exists(filePath))
+                {
+                    return "-1";
+                }
+
                 using (var md5 = MD5.Create())
                 {
                     using (var stream = File.OpenRead(filePath))

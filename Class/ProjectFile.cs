@@ -73,6 +73,7 @@ namespace LeagueSharp.Loader.Class
 
                 this.Project.SetGlobalProperty("PreBuildEvent", string.Empty);
                 this.Project.SetGlobalProperty("PostBuildEvent", string.Empty);
+                this.Project.SetGlobalProperty("PreLinkEvent", string.Empty);
 
                 this.Project.SetGlobalProperty("DebugSymbols", this.Configuration == "Release" ? "false" : "true");
                 this.Project.SetGlobalProperty("DebugType", this.Configuration == "Release" ? "None" : "full");
